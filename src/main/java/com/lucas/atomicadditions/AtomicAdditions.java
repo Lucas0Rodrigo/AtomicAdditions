@@ -68,7 +68,7 @@ public class AtomicAdditions
     // Casing de entrada
     public static final RegistryObject<Block> CASING_ENTRADA =
             BLOCKS.register("casing_entrada", () ->
-                    new AtomicCasingBlock(BlockBehaviour.Properties.of()
+                    new Block(BlockBehaviour.Properties.of()
                             .mapColor(MapColor.METAL)));
 
     // Casing de saída
