@@ -1,0 +1,7 @@
+{
+  "block.atomicadditions.casing": "Casing",
+  "block.atomicadditions.casing_entrada": "Casing de Entrada",
+  "block.atomicadditions.casing_saida": "Casing de Saída",
+  "item.atomicadditions.example_item": "Item de Exemplo",
+  "itemGroup.atomicadditions.example_tab": "Atomic Additions"
+}

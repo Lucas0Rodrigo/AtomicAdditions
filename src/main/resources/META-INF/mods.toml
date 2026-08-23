@@ -1,0 +1,42 @@
+# Configuração do carregador de mods.
+modLoader="javafml"
+
+# Versão do Forge compatível com o mod.
+loaderVersion="${loader_version_range}"
+
+# Licença do mod.
+license="${mod_license}"
+
+# Informações principais do mod.
+[[mods]]
+
+# ID único do mod.
+modId="${mod_id}"
+
+# Versão do mod.
+version="${mod_version}"
+
+# Nome exibido no Minecraft.
+displayName="${mod_name}"
+
+# Autores do mod.
+authors="${mod_authors}"
+
+# Descrição exibida na tela de mods.
+description='''${mod_description}'''
+
+# Dependência obrigatória: Forge.
+[[dependencies.${mod_id}]]
+modId="forge"
+mandatory=true
+versionRange="${forge_version_range}"
+ordering="NONE"
+side="BOTH"
+
+# Dependência obrigatória: Minecraft.
+[[dependencies.${mod_id}]]
+modId="minecraft"
+mandatory=true
+versionRange="${minecraft_version_range}"
+ordering="NONE"
+side="BOTH"
