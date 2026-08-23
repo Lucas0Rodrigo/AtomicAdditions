@@ -121,6 +121,7 @@ public class AtomicAdditions
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
+        BLOCK_ENTITIES.register(modEventBus);
 
         // Registra os eventos do Forge
         MinecraftForge.EVENT_BUS.register(this);
