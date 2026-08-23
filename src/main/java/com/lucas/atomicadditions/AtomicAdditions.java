@@ -24,6 +24,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.slf4j.Logger;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 
 // O valor aqui deve corresponder ao modId definido no arquivo mods.toml
 @Mod(AtomicAdditions.MODID)
@@ -39,6 +40,9 @@ public class AtomicAdditions
     public static final DeferredRegister<Block> BLOCKS =
             DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
 
+    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =
+            DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MODID);
+
     // Registro dos itens
     public static final DeferredRegister<Item> ITEMS =
             DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
@@ -52,6 +56,13 @@ public class AtomicAdditions
             BLOCKS.register("casing", () ->
                     new Block(BlockBehaviour.Properties.of()
                             .mapColor(MapColor.METAL)));
+
+    public static final RegistryObject<BlockEntityType<AtomicCasingBlockEntity>> ATOMIC_CASING_BLOCK_ENTITY =
+            BLOCK_ENTITIES.register("atomic_casing",
+                    () -> BlockEntityType.Builder.of(
+                            AtomicCasingBlockEntity::new,
+                            CASING.get()
+                    ).build(null));
 
     // Casing de entrada
     public static final RegistryObject<Block> CASING_ENTRADA =
