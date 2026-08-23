@@ -26,6 +26,7 @@ import net.minecraftforge.registries.RegistryObject;
 import org.slf4j.Logger;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
+//teste de commit, foi chat?
 // O valor aqui deve corresponder ao modId definido no arquivo mods.toml
 @Mod(AtomicAdditions.MODID)
 public class AtomicAdditions
