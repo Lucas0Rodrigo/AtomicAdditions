@@ -55,7 +55,7 @@ public class AtomicAdditions
     // Casing principal
     public static final RegistryObject<Block> CASING =
             BLOCKS.register("casing", () ->
-                    new Block(BlockBehaviour.Properties.of()
+                    new AtomicCasingBlock(BlockBehaviour.Properties.of()
                             .mapColor(MapColor.METAL)));
 
     public static final RegistryObject<BlockEntityType<AtomicCasingBlockEntity>> ATOMIC_CASING_BLOCK_ENTITY =
@@ -68,7 +68,7 @@ public class AtomicAdditions
     // Casing de entrada
     public static final RegistryObject<Block> CASING_ENTRADA =
             BLOCKS.register("casing_entrada", () ->
-                    new AtomicCasingBlock(BlockBehaviour.Properties.of()
+                    new Block(BlockBehaviour.Properties.of()
                             .mapColor(MapColor.METAL)));
 
     // Casing de saída
