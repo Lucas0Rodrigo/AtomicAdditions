@@ -25,6 +25,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.slf4j.Logger;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 
 //teste de commit, foi chat?
 // O valor aqui deve corresponder ao modId definido no arquivo mods.toml
