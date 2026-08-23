@@ -71,12 +71,16 @@ sourceSets.main.resources {
 }
 
 repositories {
-    // O ForgeGradle já adiciona os repositórios necessários do Forge e Maven Central.
+    maven {
+        name = "CurseForge"
+        url = "https://www.cursemaven.com"
+    }
 }
 
 dependencies {
-    // Versão do Minecraft e Forge definidas no gradle.properties.
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+    implementation fg.deobf("curse.maven:mekanism-268560:6552911")
 }
 
 // Substitui automaticamente as propriedades do mod nos arquivos de recursos.
