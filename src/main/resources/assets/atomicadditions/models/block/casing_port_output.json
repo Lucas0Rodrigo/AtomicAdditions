@@ -1,7 +1,3 @@
 {
-  "parent": "block/cube_all",
-  "render_type": "minecraft:cutout",
-  "textures": {
-    "all": "atomicadditions:block/casing"
-  }
+  "parent": "mekanism:block/sps_port_output"
 }
