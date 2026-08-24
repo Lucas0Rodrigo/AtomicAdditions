@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "mode=input": {
+      "model": "atomicadditions:block/casing_entrada"
+    },
+    "mode=output": {
+      "model": "atomicadditions:block/casing_saida"
+    }
+  }
+}
