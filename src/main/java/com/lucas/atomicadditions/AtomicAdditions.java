@@ -121,26 +121,6 @@ public class AtomicAdditions {
             ITEMS.register("example_item", () ->
                     new Item(new Item.Properties()));
 
-
-    // =========================================================
-    // ABA CRIATIVA
-    // =========================================================
-
-    public static final RegistryObject<CreativeModeTab> EXAMPLE_TAB =
-            CREATIVE_MODE_TABS.register("example_tab", () ->
-                    CreativeModeTab.builder()
-                            .withTabsBefore(CreativeModeTabs.COMBAT)
-                            .icon(() ->
-                                    EXAMPLE_ITEM.get().getDefaultInstance())
-                            .displayItems((parameters, output) -> {
-
-                                output.accept(CASING_ITEM.get());
-                                output.accept(CASING_PORT_ITEM.get());
-
-                            })
-                            .build());
-
-
     // =========================================================
     // CONSTRUTOR
     // =========================================================

@@ -1,8 +1,6 @@
 package com.lucas.atomicadditions;
 
-import mekanism.api.providers.IBlockProvider;
 import mekanism.common.lib.multiblock.MultiblockManager;
-import mekanism.common.lib.multiblock.MultiblockData;
 import mekanism.common.tile.prefab.TileEntityMultiblock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -14,7 +12,7 @@ public class AtomicCasingBlockEntity
         extends TileEntityMultiblock<AtomicMultiblockData> {
 
     public AtomicCasingBlockEntity(BlockPos pos, BlockState state) {
-        super((IBlockProvider) state.getBlock(), pos, state);
+        super(AtomicAdditions.CASING.get(), pos, state);
     }
 
     @Override
@@ -38,17 +36,20 @@ public class AtomicCasingBlockEntity
             return InteractionResult.PASS;
         }
 
-        AtomicPortBlock port = (AtomicPortBlock) getBlockState().getBlock();
+        PortMode current =
+                getBlockState().getValue(AtomicPortBlock.MODE);
 
-        PortMode current = getBlockState().getValue(AtomicPortBlock.MODE);
-
-        PortMode next = current == PortMode.INPUT
-                ? PortMode.OUTPUT
-                : PortMode.INPUT;
+        PortMode next =
+                current == PortMode.INPUT
+                        ? PortMode.OUTPUT
+                        : PortMode.INPUT;
 
         level.setBlock(
                 worldPosition,
-                getBlockState().setValue(AtomicPortBlock.MODE, next),
+                getBlockState().setValue(
+                        AtomicPortBlock.MODE,
+                        next
+                ),
                 3
         );
 
@@ -56,7 +57,8 @@ public class AtomicCasingBlockEntity
 
         player.displayClientMessage(
                 Component.literal(
-                        "Port: " + next.getSerializedName().toUpperCase()
+                        "Port: " +
+                                next.getSerializedName().toUpperCase()
                 ),
                 true
         );
