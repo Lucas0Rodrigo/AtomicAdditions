@@ -1,5 +1,6 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "block/cube_all",
+  "render_type": "minecraft:cutout",
   "textures": {
     "all": "atomicadditions:block/casing"
   }
