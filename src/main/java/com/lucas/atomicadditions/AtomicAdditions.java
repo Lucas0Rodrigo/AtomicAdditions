@@ -1,6 +1,8 @@
 package com.lucas.atomicadditions;
 
 import com.mojang.logging.LogUtils;
+import mekanism.common.lib.multiblock.MultiblockCache;
+import mekanism.common.lib.multiblock.MultiblockManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.BlockItem;
@@ -33,7 +35,10 @@ public class AtomicAdditions {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    // Registros
+    // =========================================================
+    // REGISTROS
+    // =========================================================
+
     public static final DeferredRegister<Block> BLOCKS =
             DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
 
@@ -45,6 +50,18 @@ public class AtomicAdditions {
 
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
+
+
+    // =========================================================
+    // MULTIBLOCK
+    // =========================================================
+
+    public static final MultiblockManager<AtomicMultiblockData> ATOMIC_MANAGER =
+            new MultiblockManager<>(
+                    "atomic",
+                    MultiblockCache::new,
+                    AtomicValidator::new
+            );
 
 
     // =========================================================
@@ -72,11 +89,14 @@ public class AtomicAdditions {
 
     public static final RegistryObject<BlockEntityType<AtomicCasingBlockEntity>>
             ATOMIC_CASING_BLOCK_ENTITY =
-            BLOCK_ENTITIES.register("atomic_casing",
+            BLOCK_ENTITIES.register(
+                    "atomic_casing",
                     () -> BlockEntityType.Builder.of(
                             AtomicCasingBlockEntity::new,
-                            CASING.get()
-                    ).build(null));
+                            CASING.get(),
+                            CASING_PORT.get()
+                    ).build(null)
+            );
 
 
     // =========================================================
