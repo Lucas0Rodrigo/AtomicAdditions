@@ -1,5 +1,4 @@
 {
-  "block.atomicadditions.casing": "Reactor Casing",
-  "block.atomicadditions.casing_port": "Casing Port",
-  "item.atomicadditions.example_item": "Item de Exemplo"
+  "block.atomicadditions.casing": "Revestimento do Reator",
+  "block.atomicadditions.casing_port": "Porta do Revestimento"
 }
