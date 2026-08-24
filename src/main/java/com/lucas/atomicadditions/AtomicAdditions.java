@@ -3,10 +3,8 @@ package com.lucas.atomicadditions;
 import com.mojang.logging.LogUtils;
 import mekanism.common.lib.multiblock.MultiblockCache;
 import mekanism.common.lib.multiblock.MultiblockManager;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -20,9 +18,8 @@ import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -35,10 +32,6 @@ public class AtomicAdditions {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    // =========================================================
-    // REGISTROS
-    // =========================================================
-
     public static final DeferredRegister<Block> BLOCKS =
             DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
 
@@ -48,48 +41,22 @@ public class AtomicAdditions {
     public static final DeferredRegister<Item> ITEMS =
             DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
 
-    public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS =
+    public static final DeferredRegister<net.minecraft.world.item.CreativeModeTab> CREATIVE_MODE_TABS =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
-
-    // =========================================================
-    // MULTIBLOCK
-    // =========================================================
-
     public static final MultiblockManager<AtomicMultiblockData> ATOMIC_MANAGER =
-            new MultiblockManager<>(
-                    "atomic",
-                    MultiblockCache::new,
-                    AtomicValidator::new
-            );
-
-
-    // =========================================================
-    // BLOCOS
-    // =========================================================
+            new MultiblockManager<>("atomic", MultiblockCache::new, AtomicValidator::new);
 
     public static final RegistryObject<Block> CASING =
-            BLOCKS.register("casing", () ->
-                    new AtomicCasingBlock(
-                            BlockBehaviour.Properties.of()
-                                    .mapColor(MapColor.METAL)
-                    ));
+            BLOCKS.register("casing", () -> new AtomicCasingBlock(
+                    BlockBehaviour.Properties.of().mapColor(MapColor.METAL)));
 
     public static final RegistryObject<Block> CASING_PORT =
-            BLOCKS.register("casing_port", () ->
-                    new AtomicPortBlock(
-                            BlockBehaviour.Properties.of()
-                                    .mapColor(MapColor.METAL)
-                    ));
-
-
-    // =========================================================
-    // BLOCK ENTITY
-    // =========================================================
+            BLOCKS.register("casing_port", () -> new AtomicPortBlock(
+                    BlockBehaviour.Properties.of().mapColor(MapColor.METAL)));
 
     public static final RegistryObject<BlockEntityType<AtomicCasingBlockEntity>>
-            ATOMIC_CASING_BLOCK_ENTITY =
-            BLOCK_ENTITIES.register(
+            ATOMIC_CASING_BLOCK_ENTITY = BLOCK_ENTITIES.register(
                     "atomic_casing",
                     () -> BlockEntityType.Builder.of(
                             AtomicCasingBlockEntity::new,
@@ -98,35 +65,13 @@ public class AtomicAdditions {
                     ).build(null)
             );
 
-
-    // =========================================================
-    // ITENS
-    // =========================================================
-
     public static final RegistryObject<Item> CASING_ITEM =
-            ITEMS.register("casing", () ->
-                    new BlockItem(
-                            CASING.get(),
-                            new Item.Properties()
-                    ));
+            ITEMS.register("casing", () -> new BlockItem(CASING.get(), new Item.Properties()));
 
     public static final RegistryObject<Item> CASING_PORT_ITEM =
-            ITEMS.register("casing_port", () ->
-                    new BlockItem(
-                            CASING_PORT.get(),
-                            new Item.Properties()
-                    ));
-
-    public static final RegistryObject<Item> EXAMPLE_ITEM =
-            ITEMS.register("example_item", () ->
-                    new Item(new Item.Properties()));
-
-    // =========================================================
-    // CONSTRUTOR
-    // =========================================================
+            ITEMS.register("casing_port", () -> new BlockItem(CASING_PORT.get(), new Item.Properties()));
 
     public AtomicAdditions(FMLJavaModLoadingContext context) {
-
         IEventBus modEventBus = context.getModEventBus();
 
         modEventBus.addListener(this::commonSetup);
@@ -137,60 +82,26 @@ public class AtomicAdditions {
         CREATIVE_MODE_TABS.register(modEventBus);
 
         MinecraftForge.EVENT_BUS.register(this);
-
         modEventBus.addListener(this::addCreative);
     }
-
 
     private void commonSetup(final FMLCommonSetupEvent event) {
         LOGGER.info("Atomic Additions carregado com sucesso!");
     }
 
-
-    // =========================================================
-    // BUILDING BLOCKS
-    // =========================================================
-
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
-
         if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
-
             event.accept(CASING_ITEM.get());
             event.accept(CASING_PORT_ITEM.get());
         }
     }
-
-
-    // =========================================================
-    // SERVIDOR
-    // =========================================================
 
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
         LOGGER.info("Atomic Additions: servidor iniciado!");
     }
 
-
-    // =========================================================
-    // CLIENTE
-    // =========================================================
-
-    @Mod.EventBusSubscriber(
-            modid = MODID,
-            bus = Mod.EventBusSubscriber.Bus.MOD,
-            value = Dist.CLIENT
-    )
+    @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientModEvents {
-
-        @SubscribeEvent
-        public static void onClientSetup(FMLClientSetupEvent event) {
-
-            LOGGER.info("Atomic Additions: cliente iniciado!");
-
-            LOGGER.info(
-                    "Jogador: {}",
-                    Minecraft.getInstance().getUser().getName()
-            );
-        }
     }
 }
