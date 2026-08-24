@@ -1,5 +1,4 @@
 {
   "block.atomicadditions.casing": "Reactor Casing",
-  "block.atomicadditions.casing_port": "Casing Port",
-  "item.atomicadditions.example_item": "Example Item"
+  "block.atomicadditions.casing_port": "Casing Port"
 }
