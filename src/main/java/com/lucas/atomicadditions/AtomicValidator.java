@@ -2,6 +2,8 @@ package com.lucas.atomicadditions;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import java.util.EnumSet;
+import java.util.Set;
 import mekanism.common.lib.math.voxel.VoxelCuboid;
 import mekanism.common.lib.math.voxel.VoxelCuboid.CuboidSide;
 import mekanism.common.lib.math.voxel.VoxelCuboid.WallRelative;
@@ -19,14 +21,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.EnumSet;
-import java.util.Set;
+public class AtomicValidator extends CuboidStructureValidator<AtomicMultiblockData> {
 
-public class AtomicValidator
-        extends CuboidStructureValidator<AtomicMultiblockData> {
-
-    private static final VoxelCuboid BOUNDS =
-            new VoxelCuboid(7, 7, 7);
+    private static final VoxelCuboid BOUNDS = new VoxelCuboid(7, 7, 7);
 
     private static final byte[][] ALLOWED_GRID = {
             {0, 0, 1, 1, 1, 0, 0},
@@ -40,52 +37,33 @@ public class AtomicValidator
 
     private static final Block SUPERCHARGED_COIL =
             ForgeRegistries.BLOCKS.getValue(
-                    new ResourceLocation(
-                            "mekanism",
-                            "supercharged_coil"
-                    )
+                    ResourceLocation.fromNamespaceAndPath("mekanism", "supercharged_coil")
             );
 
     @Override
     protected StructureRequirement getStructureRequirement(BlockPos pos) {
-
-        WallRelative relative =
-                cuboid.getWallRelative(pos);
-
+        WallRelative relative = cuboid.getWallRelative(pos);
         if (relative.isWall()) {
-
-            Axis axis =
-                    Axis.get(cuboid.getSide(pos));
-
+            Axis axis = Axis.get(cuboid.getSide(pos));
             Axis horizontal = axis.horizontal();
             Axis vertical = axis.vertical();
-
             pos = pos.subtract(cuboid.getMinPos());
-
             return StructureRequirement.REQUIREMENTS[
-                    ALLOWED_GRID[
-                            horizontal.getCoord(pos)][
-                            vertical.getCoord(pos)
-                            ]
-                    ];
+                    ALLOWED_GRID[horizontal.getCoord(pos)][vertical.getCoord(pos)]
+            ];
         }
-
         return super.getStructureRequirement(pos);
     }
 
     @Override
     protected CasingType getCasingType(BlockState state) {
-
         Block block = state.getBlock();
-
         if (block == AtomicAdditions.CASING.get()) {
             return CasingType.FRAME;
         }
-
         if (block == AtomicAdditions.CASING_PORT.get()) {
             return CasingType.VALVE;
         }
-
         return CasingType.INVALID;
     }
 
@@ -95,16 +73,12 @@ public class AtomicValidator
             Long2ObjectMap<ChunkAccess> chunkMap,
             BlockPos pos
     ) {
-        if (super.validateInner(state, chunkMap, pos)) {
-            return true;
-        }
-
-        return state.getBlock() == SUPERCHARGED_COIL;
+        return super.validateInner(state, chunkMap, pos)
+                || state.getBlock() == SUPERCHARGED_COIL;
     }
 
     @Override
     public boolean precheck() {
-
         cuboid = StructureHelper.fetchCuboid(
                 structure,
                 BOUNDS,
@@ -112,7 +86,6 @@ public class AtomicValidator
                 EnumSet.allOf(CuboidSide.class),
                 72
         );
-
         return cuboid != null;
     }
 
@@ -121,28 +94,17 @@ public class AtomicValidator
             AtomicMultiblockData structure,
             Long2ObjectMap<ChunkAccess> chunkMap
     ) {
-
-        Set<BlockPos> validCoils =
-                new ObjectOpenHashSet<>();
+        Set<BlockPos> validCoils = new ObjectOpenHashSet<>();
 
         for (ValveData valve : structure.valves) {
-
-            BlockPos coilPos =
-                    valve.location.relative(
-                            valve.side.getOpposite()
-                    );
-
+            BlockPos coilPos = valve.location.relative(valve.side.getOpposite());
             if (structure.internalLocations.contains(coilPos)) {
-
                 structure.addCoil(coilPos);
-
                 validCoils.add(coilPos);
             }
         }
 
-        if (structure.internalLocations.size()
-                != validCoils.size()) {
-
+        if (structure.internalLocations.size() != validCoils.size()) {
             return FormationResult.fail(
                     net.minecraft.network.chat.Component.literal(
                             "Atomic Additions: Supercharged Coil desconectada de uma Port."
