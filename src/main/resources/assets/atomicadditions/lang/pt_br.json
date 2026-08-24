@@ -1,7 +1,5 @@
 {
-  "block.atomicadditions.casing": "Casing",
-  "block.atomicadditions.casing_entrada": "Casing de Entrada",
-  "block.atomicadditions.casing_saida": "Casing de Saída",
-  "item.atomicadditions.example_item": "Item de Exemplo",
-  "itemGroup.atomicadditions.example_tab": "Atomic Additions"
+  "block.atomicadditions.casing": "Reactor Casing",
+  "block.atomicadditions.casing_port": "Casing Port",
+  "item.atomicadditions.example_item": "Item de Exemplo"
 }

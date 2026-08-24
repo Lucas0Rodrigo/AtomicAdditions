@@ -57,15 +57,15 @@ public class AtomicValidator
             Axis axis =
                     Axis.get(cuboid.getSide(pos));
 
-            Axis h = axis.horizontal();
-            Axis v = axis.vertical();
+            Axis horizontal = axis.horizontal();
+            Axis vertical = axis.vertical();
 
             pos = pos.subtract(cuboid.getMinPos());
 
             return StructureRequirement.REQUIREMENTS[
                     ALLOWED_GRID[
-                            h.getCoord(pos)][
-                            v.getCoord(pos)
+                            horizontal.getCoord(pos)][
+                            vertical.getCoord(pos)
                             ]
                     ];
         }
@@ -93,8 +93,8 @@ public class AtomicValidator
     protected boolean validateInner(
             BlockState state,
             Long2ObjectMap<ChunkAccess> chunkMap,
-            BlockPos pos) {
-
+            BlockPos pos
+    ) {
         if (super.validateInner(state, chunkMap, pos)) {
             return true;
         }
@@ -119,7 +119,8 @@ public class AtomicValidator
     @Override
     public FormationResult postcheck(
             AtomicMultiblockData structure,
-            Long2ObjectMap<ChunkAccess> chunkMap) {
+            Long2ObjectMap<ChunkAccess> chunkMap
+    ) {
 
         Set<BlockPos> validCoils =
                 new ObjectOpenHashSet<>();
@@ -133,10 +134,7 @@ public class AtomicValidator
 
             if (structure.internalLocations.contains(coilPos)) {
 
-                structure.addCoil(
-                        valve.location,
-                        valve.side.getOpposite()
-                );
+                structure.addCoil(coilPos);
 
                 validCoils.add(coilPos);
             }

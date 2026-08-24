@@ -2,7 +2,6 @@ package com.lucas.atomicadditions;
 
 import mekanism.common.lib.multiblock.MultiblockData;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.HashSet;
@@ -16,7 +15,7 @@ public class AtomicMultiblockData extends MultiblockData {
         super(tile);
     }
 
-    public void addCoil(BlockPos pos, Direction side) {
-        coils.add(pos.relative(side));
+    public void addCoil(BlockPos pos) {
+        coils.add(pos);
     }
 }

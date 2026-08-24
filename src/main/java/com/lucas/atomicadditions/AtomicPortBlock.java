@@ -21,7 +21,8 @@ public class AtomicPortBlock extends AtomicCasingBlock {
 
     @Override
     protected void createBlockStateDefinition(
-            StateDefinition.Builder<Block, BlockState> builder) {
+            StateDefinition.Builder<Block, BlockState> builder
+    ) {
         builder.add(MODE);
     }
 }
