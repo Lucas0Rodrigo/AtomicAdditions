@@ -75,12 +75,21 @@ repositories {
         name = "CurseForge"
         url = "https://www.cursemaven.com"
     }
+    maven{
+        name = "JEI"
+        url = "https://maven.blamejared.com/"
+    }
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     implementation fg.deobf("curse.maven:mekanism-268560:6552911")
+
+    compileOnly fg.deobf("mezz.jei:jei-1.20.1-common-api:15.20.0.126")
+    compileOnly fg.deobf("mezz.jei:jei-1.20.1-forge-api:15.20.0.126")
+
+    runtimeOnly fg.deobf("mezz.jei:jei-1.20.1-forge:15.20.0.126")
 }
 
 // Substitui automaticamente as propriedades do mod nos arquivos de recursos.

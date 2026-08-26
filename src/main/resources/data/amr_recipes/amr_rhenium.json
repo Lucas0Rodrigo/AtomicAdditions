@@ -1,0 +1,13 @@
+{
+  "input1": "atomicadditions:palladium",
+  "input1_amount": 2000,
+
+  "input2": "atomicadditions:copper",
+  "input2_amount": 2000,
+
+  "output": "atomicadditions:rhenium",
+  "output_amount": 1000,
+
+  "energy_per_tick": 250000,
+  "duration": 400
+}

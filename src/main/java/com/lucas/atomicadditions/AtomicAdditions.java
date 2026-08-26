@@ -2,6 +2,7 @@ package com.lucas.atomicadditions;
 
 import com.lucas.atomicadditions.multiblock.*;
 import com.lucas.atomicadditions.chemical.*;
+import com.lucas.atomicadditions.recipes.AtomicRecipes;
 import com.mojang.logging.LogUtils;
 import mekanism.common.lib.multiblock.MultiblockCache;
 import mekanism.common.lib.multiblock.MultiblockManager;
@@ -160,6 +161,10 @@ public class AtomicAdditions {
         AtomicContainerTypes.CONTAINER_TYPES.register(modEventBus);
 
         AtomicGases.GASES.register(modEventBus);
+
+        MinecraftForge.EVENT_BUS.addListener(
+                AtomicRecipes::addReloadListener
+        );
 
         MinecraftForge.EVENT_BUS.register(this);
 

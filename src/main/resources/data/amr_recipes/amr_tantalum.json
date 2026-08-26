@@ -1,0 +1,13 @@
+{
+  "input1": "atomicadditions:niobium",
+  "input1_amount": 1000,
+
+  "input2": "atomicadditions:germanium",
+  "input2_amount": 1000,
+
+  "output": "atomicadditions:tantalum",
+  "output_amount": 1000,
+
+  "energy_per_tick": 100000,
+  "duration": 200
+}
