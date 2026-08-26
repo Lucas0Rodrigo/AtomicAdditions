@@ -1,6 +1,5 @@
-package com.lucas.atomicadditions;
+package com.lucas.atomicadditions.multiblock;
 
-import mekanism.api.providers.IBlockProvider;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;

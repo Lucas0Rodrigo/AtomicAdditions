@@ -1,5 +1,6 @@
-package com.lucas.atomicadditions;
+package com.lucas.atomicadditions.multiblock;
 
+import com.lucas.atomicadditions.AtomicAdditions;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.util.EnumSet;

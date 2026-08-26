@@ -1,4 +1,4 @@
-package com.lucas.atomicadditions;
+package com.lucas.atomicadditions.multiblock;
 
 import mekanism.common.block.attribute.AttributeGui;
 import mekanism.common.block.interfaces.IHasTileEntity;

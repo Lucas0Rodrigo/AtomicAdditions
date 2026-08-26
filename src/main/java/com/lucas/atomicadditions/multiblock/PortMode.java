@@ -1,4 +1,4 @@
-package com.lucas.atomicadditions;
+package com.lucas.atomicadditions.multiblock;
 
 import net.minecraft.util.StringRepresentable;
 

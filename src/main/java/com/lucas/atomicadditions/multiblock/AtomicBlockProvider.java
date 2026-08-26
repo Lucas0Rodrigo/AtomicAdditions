@@ -1,4 +1,4 @@
-package com.lucas.atomicadditions;
+package com.lucas.atomicadditions.multiblock;
 
 import mekanism.api.providers.IBlockProvider;
 import net.minecraft.world.item.Item;

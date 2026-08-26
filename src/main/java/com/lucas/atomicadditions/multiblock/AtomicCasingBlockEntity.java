@@ -1,5 +1,6 @@
-package com.lucas.atomicadditions;
+package com.lucas.atomicadditions.multiblock;
 
+import com.lucas.atomicadditions.AtomicAdditions;
 import mekanism.api.providers.IBlockProvider;
 import mekanism.common.lib.multiblock.MultiblockManager;
 import mekanism.common.tile.prefab.TileEntityMultiblock;

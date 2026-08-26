@@ -1,5 +1,6 @@
 package com.lucas.atomicadditions;
 
+import com.lucas.atomicadditions.multiblock.*;
 import com.mojang.logging.LogUtils;
 import mekanism.common.lib.multiblock.MultiblockCache;
 import mekanism.common.lib.multiblock.MultiblockManager;

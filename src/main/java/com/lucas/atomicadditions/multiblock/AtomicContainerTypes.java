@@ -1,5 +1,6 @@
-package com.lucas.atomicadditions;
+package com.lucas.atomicadditions.multiblock;
 
+import com.lucas.atomicadditions.AtomicAdditions;
 import mekanism.common.inventory.container.tile.EmptyTileContainer;
 import mekanism.common.registration.impl.ContainerTypeDeferredRegister;
 import mekanism.common.registration.impl.ContainerTypeRegistryObject;

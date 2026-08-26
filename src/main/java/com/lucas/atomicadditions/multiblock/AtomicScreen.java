@@ -1,4 +1,4 @@
-package com.lucas.atomicadditions;
+package com.lucas.atomicadditions.multiblock;
 
 import java.util.ArrayList;
 import java.util.List;

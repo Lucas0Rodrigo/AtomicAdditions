@@ -1,4 +1,4 @@
-package com.lucas.atomicadditions;
+package com.lucas.atomicadditions.multiblock;
 
 import mekanism.common.registration.impl.TileEntityTypeRegistryObject;
 import net.minecraft.world.level.block.Block;
