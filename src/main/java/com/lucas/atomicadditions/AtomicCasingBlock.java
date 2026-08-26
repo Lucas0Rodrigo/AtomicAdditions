@@ -1,6 +1,9 @@
 package com.lucas.atomicadditions;
 
+import mekanism.common.block.attribute.AttributeGui;
 import mekanism.common.block.interfaces.IHasTileEntity;
+import mekanism.common.block.interfaces.ITypeBlock;
+import mekanism.common.content.blocktype.BlockType;
 import mekanism.common.registration.impl.TileEntityTypeRegistryObject;
 import mekanism.common.tile.base.TileEntityMekanism;
 import net.minecraft.world.level.Level;
@@ -14,9 +17,10 @@ import org.jetbrains.annotations.Nullable;
 
 public class AtomicCasingBlock<BE extends AtomicCasingBlockEntity>
         extends BaseEntityBlock
-        implements IHasTileEntity<BE> {
+        implements IHasTileEntity<BE>, ITypeBlock {
 
     private final TileEntityTypeRegistryObject<BE> tileType;
+    private final BlockType type;
 
     public AtomicCasingBlock(
             Properties properties,
@@ -24,6 +28,19 @@ public class AtomicCasingBlock<BE extends AtomicCasingBlockEntity>
     ) {
         super(properties);
         this.tileType = tileType;
+
+        this.type = new BlockType(null);
+        this.type.add(
+                new AttributeGui(
+                        () -> AtomicContainerTypes.ATOMIC,
+                        null
+                )
+        );
+    }
+
+    @Override
+    public BlockType getType() {
+        return type;
     }
 
     @Override
