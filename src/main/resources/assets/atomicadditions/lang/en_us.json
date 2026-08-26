@@ -6,5 +6,5 @@
   "message.atomicadditions.port_input": "Input",
   "message.atomicadditions.port_output": "Output",
 
-  "container.atomicadditions.atomic": "AMR Reactor"
+  "container.atomicadditions.atomic": "Atomic Material Reprocessor"
 }

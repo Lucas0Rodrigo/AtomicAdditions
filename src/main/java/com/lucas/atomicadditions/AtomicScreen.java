@@ -34,15 +34,18 @@ public class AtomicScreen extends GuiMekanismTile<
                 Component.translatable("container.atomicadditions.atomic")
         );
 
-        dynamicSlots = true;
+        dynamicSlots = false;
         imageWidth += 18;
-        imageHeight += 16;
-        inventoryLabelY = imageHeight - 92;
+    }
+
+    @Override
+    protected void init() {
+        imageHeight = 96;
+        super.init();
     }
 
     @Override
     protected void addGuiElements() {
-        super.addGuiElements();
 
         // Gás de entrada 1
         addRenderableWidget(
@@ -122,7 +125,7 @@ public class AtomicScreen extends GuiMekanismTile<
                         },
                         7,
                         79,
-                        194,
+                        176,
                         ColorFunction.scale(
                                 Color.rgbi(60, 45, 74),
                                 Color.rgbi(100, 30, 170)
@@ -138,19 +141,5 @@ public class AtomicScreen extends GuiMekanismTile<
             int mouseY
     ) {
         renderTitleText(guiGraphics);
-
-        drawString(
-                guiGraphics,
-                playerInventoryTitle,
-                inventoryLabelX,
-                inventoryLabelY,
-                titleTextColor()
-        );
-
-        super.drawForegroundText(
-                guiGraphics,
-                mouseX,
-                mouseY
-        );
     }
 }

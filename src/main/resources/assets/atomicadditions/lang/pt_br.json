@@ -6,5 +6,5 @@
   "message.atomicadditions.port_input": "Entrada",
   "message.atomicadditions.port_output": "Saída",
 
-  "container.atomicadditions.atomic": "Reator AMR"
+  "container.atomicadditions.atomic": "Reprocessador de Materiais Atômico"
 }
