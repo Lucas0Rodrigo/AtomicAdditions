@@ -125,7 +125,7 @@ public class AtomicScreen extends GuiMekanismTile<
                         },
                         7,
                         79,
-                        176,
+                        178,
                         ColorFunction.scale(
                                 Color.rgbi(60, 45, 74),
                                 Color.rgbi(100, 30, 170)

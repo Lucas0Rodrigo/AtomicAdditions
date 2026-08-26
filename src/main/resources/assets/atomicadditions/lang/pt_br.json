@@ -5,6 +5,12 @@
   "message.atomicadditions.port_changed": "Porta RMA alterada para: ",
   "message.atomicadditions.port_input": "Entrada",
   "message.atomicadditions.port_output": "Saída",
+  "container.atomicadditions.atomic": "Reprocessador de Materiais Atômico",
 
-  "container.atomicadditions.atomic": "Reprocessador de Materiais Atômico"
+  "gas.atomicadditions.niobium": "Nióbio",
+  "gas.atomicadditions.germanium": "Germânio",
+  "gas.atomicadditions.tantalum": "Tântalo",
+  "gas.atomicadditions.palladium": "Paládio",
+  "gas.atomicadditions.copper": "Cobre",
+  "gas.atomicadditions.rhenium": "Rênio"
 }
