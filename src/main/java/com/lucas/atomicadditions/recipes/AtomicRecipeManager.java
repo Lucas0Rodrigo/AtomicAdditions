@@ -9,14 +9,16 @@ import com.lucas.atomicadditions.AtomicAdditions;
 import com.lucas.atomicadditions.chemical.AtomicGases;
 import mekanism.api.chemical.gas.Gas;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -26,6 +28,11 @@ public class AtomicRecipeManager extends SimpleJsonResourceReloadListener {
 
     private static final Gson GSON =
             new GsonBuilder().setPrettyPrinting().create();
+
+    private static final String[] JEI_RECIPE_FILES = {
+            "amr_tantalum.json",
+            "amr_rhenium.json"
+    };
 
     private final List<AtomicAMRRecipe> recipes =
             new ArrayList<>();
@@ -42,11 +49,14 @@ public class AtomicRecipeManager extends SimpleJsonResourceReloadListener {
     ) {
         recipes.clear();
 
-        for (Map.Entry<ResourceLocation, JsonElement> entry : jsonFiles.entrySet()) {
+        for (Map.Entry<ResourceLocation, JsonElement> entry :
+                jsonFiles.entrySet()) {
 
             ResourceLocation id = entry.getKey();
 
-            if (!id.getNamespace().equals(AtomicAdditions.MODID)) {
+            if (!id.getNamespace().equals(
+                    AtomicAdditions.MODID
+            )) {
                 continue;
             }
 
@@ -83,54 +93,74 @@ public class AtomicRecipeManager extends SimpleJsonResourceReloadListener {
     }
 
     /**
-     * Carrega as recipes diretamente dos recursos para o JEI.
+     * Carrega as mesmas recipes JSON utilizadas pelo AMR
+     * diretamente dos recursos do mod para o JEI.
      *
-     * O JEI registra suas recipes antes do SimpleJsonResourceReloadListener
-     * terminar o carregamento normal dos datapacks. Por isso o JEI utiliza
-     * este método para ler os mesmos JSON diretamente dos recursos.
+     * O JEI inicializa antes do carregamento normal dos
+     * datapacks, portanto não utilizamos o ResourceManager
+     * do cliente aqui.
      */
-    public List<AtomicAMRRecipe> getRecipesForJEI(
-            ResourceManager resourceManager
-    ) {
+    public List<AtomicAMRRecipe> getRecipesForJEI() {
+
         List<AtomicAMRRecipe> jeiRecipes =
                 new ArrayList<>();
 
-        Map<ResourceLocation, Resource> resources =
-                resourceManager.listResources(
-                        "amr_recipes",
-                        location ->
-                                location.getNamespace().equals(
-                                        AtomicAdditions.MODID
-                                )
-                                        && location.getPath().endsWith(".json")
-                );
+        for (String fileName : JEI_RECIPE_FILES) {
 
-        for (Map.Entry<ResourceLocation, Resource> entry :
-                resources.entrySet()) {
-
-            ResourceLocation id = entry.getKey();
+            String path =
+                    "/data/"
+                            + AtomicAdditions.MODID
+                            + "/amr_recipes/"
+                            + fileName;
 
             try (
-                    Reader reader =
-                            entry.getValue().openAsReader()
+                    InputStream stream =
+                            AtomicAdditions.class
+                                    .getResourceAsStream(path)
             ) {
-                JsonElement json =
-                        GsonHelper.parse(
-                                reader
-                        );
 
-                jeiRecipes.add(
-                        parseRecipe(
-                                json,
-                                id
-                        )
-                );
+                if (stream == null) {
+                    System.err.println(
+                            "[Atomic Additions] Recipe não encontrada para JEI: "
+                                    + path
+                    );
+                    continue;
+                }
+
+                try (
+                        Reader reader =
+                                new InputStreamReader(
+                                        stream,
+                                        StandardCharsets.UTF_8
+                                )
+                ) {
+
+                    JsonElement json =
+                            GsonHelper.parse(reader);
+
+                    ResourceLocation id =
+                            ResourceLocation.fromNamespaceAndPath(
+                                    AtomicAdditions.MODID,
+                                    "amr_recipes/"
+                                            + fileName.substring(
+                                            0,
+                                            fileName.length() - 5
+                                    )
+                            );
+
+                    jeiRecipes.add(
+                            parseRecipe(
+                                    json,
+                                    id
+                            )
+                    );
+                }
 
             } catch (IOException | JsonSyntaxException exception) {
 
                 System.err.println(
                         "[Atomic Additions] Erro ao carregar recipe AMR para JEI: "
-                                + id
+                                + path
                 );
 
                 exception.printStackTrace();
@@ -274,10 +304,7 @@ public class AtomicRecipeManager extends SimpleJsonResourceReloadListener {
             );
         }
 
-        String path =
-                location.getPath();
-
-        return switch (path) {
+        return switch (location.getPath()) {
 
             case "niobium" ->
                     AtomicGases.NIOBIUM.get();

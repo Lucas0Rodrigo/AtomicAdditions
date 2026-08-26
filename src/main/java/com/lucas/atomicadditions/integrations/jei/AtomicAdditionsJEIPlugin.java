@@ -42,11 +42,7 @@ public class AtomicAdditionsJEIPlugin
     ) {
         registration.addRecipes(
                 AtomicAMRRecipeCategory.TYPE,
-                AtomicRecipes.AMR_RECIPES.getRecipesForJEI(
-                        net.minecraft.client.Minecraft
-                                .getInstance()
-                                .getResourceManager()
-                )
+                AtomicRecipes.AMR_RECIPES.getRecipesForJEI()
         );
     }
 }
