@@ -1,6 +1,6 @@
 {
   "parent": "block/cube_all",
   "textures": {
-    "all": "atomicadditions:block/Casing"
+    "all": "atomicadditions:block/casing"
   }
 }
