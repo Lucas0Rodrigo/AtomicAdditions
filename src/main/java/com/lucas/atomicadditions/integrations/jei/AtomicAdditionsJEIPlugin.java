@@ -6,12 +6,11 @@ import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
-import mekanism.api.chemical.gas.GasStack;
-import mekanism.client.jei.MekanismJEI;
 import net.minecraft.resources.ResourceLocation;
 
 @JeiPlugin
-public class AtomicAdditionsJEIPlugin implements IModPlugin {
+public class AtomicAdditionsJEIPlugin
+        implements IModPlugin {
 
     private static final ResourceLocation UID =
             ResourceLocation.fromNamespaceAndPath(
@@ -43,7 +42,11 @@ public class AtomicAdditionsJEIPlugin implements IModPlugin {
     ) {
         registration.addRecipes(
                 AtomicAMRRecipeCategory.TYPE,
-                AtomicRecipes.AMR_RECIPES.getRecipes()
+                AtomicRecipes.AMR_RECIPES.getRecipesForJEI(
+                        net.minecraft.client.Minecraft
+                                .getInstance()
+                                .getResourceManager()
+                )
         );
     }
 }
