@@ -3,14 +3,15 @@ package com.lucas.atomicadditions;
 import com.mojang.logging.LogUtils;
 import mekanism.common.lib.multiblock.MultiblockCache;
 import mekanism.common.lib.multiblock.MultiblockManager;
+import mekanism.common.registration.impl.TileEntityTypeRegistryObject;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
@@ -66,9 +67,12 @@ public class AtomicAdditions {
     public static final RegistryObject<Block> CASING =
             BLOCKS.register(
                     "casing",
-                    () -> new AtomicCasingBlock(
+                    () -> new AtomicCasingBlock<>(
                             BlockBehaviour.Properties.of()
-                                    .mapColor(MapColor.METAL)
+                                    .mapColor(MapColor.METAL),
+                            new TileEntityTypeRegistryObject<>(
+                                    ATOMIC_CASING_BLOCK_ENTITY
+                            )
                     )
             );
 
@@ -77,7 +81,10 @@ public class AtomicAdditions {
                     "casing_port",
                     () -> new AtomicPortBlock(
                             BlockBehaviour.Properties.of()
-                                    .mapColor(MapColor.METAL)
+                                    .mapColor(MapColor.METAL),
+                            new TileEntityTypeRegistryObject<>(
+                                    ATOMIC_PORT_BLOCK_ENTITY
+                            )
                     )
             );
 
