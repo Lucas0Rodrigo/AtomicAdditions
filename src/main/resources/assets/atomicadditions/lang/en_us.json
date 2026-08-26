@@ -4,5 +4,7 @@
 
   "message.atomicadditions.port_changed": "RMA Port changed to: ",
   "message.atomicadditions.port_input": "Input",
-  "message.atomicadditions.port_output": "Output"
+  "message.atomicadditions.port_output": "Output",
+
+  "container.atomicadditions.atomic": "AMR Reactor"
 }

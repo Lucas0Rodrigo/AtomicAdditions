@@ -20,10 +20,12 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
+import net.minecraft.client.gui.screens.MenuScreens;
 import org.slf4j.Logger;
 
 @Mod(AtomicAdditions.MODID)
@@ -144,10 +146,16 @@ public class AtomicAdditions {
                 this::commonSetup
         );
 
+        modEventBus.addListener(
+                this::clientSetup
+        );
+
         BLOCKS.register(modEventBus);
         BLOCK_ENTITIES.register(modEventBus);
         ITEMS.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
+
+        AtomicContainerTypes.CONTAINER_TYPES.register(modEventBus);
 
         MinecraftForge.EVENT_BUS.register(this);
 
@@ -161,6 +169,17 @@ public class AtomicAdditions {
     ) {
         LOGGER.info(
                 "Atomic Additions carregado com sucesso!"
+        );
+    }
+
+    private void clientSetup(
+            final FMLClientSetupEvent event
+    ) {
+        event.enqueueWork(() ->
+                MenuScreens.register(
+                        AtomicContainerTypes.ATOMIC.get(),
+                        AtomicScreen::new
+                )
         );
     }
 
