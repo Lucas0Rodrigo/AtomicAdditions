@@ -1,4 +1,8 @@
 {
-  "block.atomicadditions.casing": "Reactor Casing",
-  "block.atomicadditions.casing_port": "Casing Port"
+  "block.atomicadditions.casing": "AMR Casing",
+  "block.atomicadditions.casing_port": "AMR Port",
+
+  "message.atomicadditions.port_changed": "RMA Port changed to: ",
+  "message.atomicadditions.port_input": "Input",
+  "message.atomicadditions.port_output": "Output"
 }

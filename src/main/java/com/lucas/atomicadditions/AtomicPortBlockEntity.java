@@ -1,7 +1,10 @@
 package com.lucas.atomicadditions;
 
 import mekanism.api.providers.IBlockProvider;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
@@ -46,11 +49,28 @@ public class AtomicPortBlockEntity extends AtomicCasingBlockEntity {
 
         setChanged();
 
+        MutableComponent modeComponent =
+                Component.translatable(
+                        next == PortMode.INPUT
+                                ? "message.atomicadditions.port_input"
+                                : "message.atomicadditions.port_output"
+                );
+
+        modeComponent.withStyle(
+                next == PortMode.INPUT
+                        ? net.minecraft.ChatFormatting.GREEN
+                        : ChatFormatting.RED
+        );
+
+        MutableComponent message =
+                Component.translatable(
+                        "message.atomicadditions.port_changed"
+                );
+
+        message.append(modeComponent);
+
         player.displayClientMessage(
-                net.minecraft.network.chat.Component.literal(
-                        "Port: "
-                                + next.getSerializedName().toUpperCase()
-                ),
+                message,
                 true
         );
 
