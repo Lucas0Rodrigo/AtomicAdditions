@@ -1,6 +1,6 @@
 package com.lucas.atomicadditions;
 
-import mekanism.common.inventory.container.tile.MekanismTileContainer;
+import mekanism.common.inventory.container.tile.EmptyTileContainer;
 import mekanism.common.registration.impl.ContainerTypeDeferredRegister;
 import mekanism.common.registration.impl.ContainerTypeRegistryObject;
 
@@ -13,10 +13,10 @@ public class AtomicContainerTypes {
             new ContainerTypeDeferredRegister(AtomicAdditions.MODID);
 
     public static final ContainerTypeRegistryObject<
-            MekanismTileContainer<AtomicCasingBlockEntity>
+            EmptyTileContainer<AtomicCasingBlockEntity>
             > ATOMIC =
-            CONTAINER_TYPES.custom(
+            CONTAINER_TYPES.registerEmpty(
                     "atomic",
                     AtomicCasingBlockEntity.class
-            ).offset(0, 16).build();
+            );
 }

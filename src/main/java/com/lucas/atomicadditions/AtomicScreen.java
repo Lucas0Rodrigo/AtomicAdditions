@@ -9,7 +9,7 @@ import mekanism.client.gui.element.bar.GuiDynamicHorizontalRateBar;
 import mekanism.client.gui.element.gauge.GaugeType;
 import mekanism.client.gui.element.gauge.GuiGasGauge;
 import mekanism.common.MekanismLang;
-import mekanism.common.inventory.container.tile.MekanismTileContainer;
+import mekanism.common.inventory.container.tile.EmptyTileContainer;
 import mekanism.common.lib.Color;
 import mekanism.common.lib.Color.ColorFunction;
 import mekanism.common.util.text.TextUtils;
@@ -20,11 +20,11 @@ import org.jetbrains.annotations.NotNull;
 
 public class AtomicScreen extends GuiMekanismTile<
         AtomicCasingBlockEntity,
-        MekanismTileContainer<AtomicCasingBlockEntity>
+        EmptyTileContainer<AtomicCasingBlockEntity>
         > {
 
     public AtomicScreen(
-            MekanismTileContainer<AtomicCasingBlockEntity> container,
+            EmptyTileContainer<AtomicCasingBlockEntity> container,
             Inventory inv,
             Component title
     ) {
