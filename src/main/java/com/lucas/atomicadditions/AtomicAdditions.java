@@ -67,25 +67,13 @@ public class AtomicAdditions {
     public static final RegistryObject<Block> CASING =
             BLOCKS.register(
                     "casing",
-                    () -> new AtomicCasingBlock<>(
-                            BlockBehaviour.Properties.of()
-                                    .mapColor(MapColor.METAL),
-                            new TileEntityTypeRegistryObject<>(
-                                    ATOMIC_CASING_BLOCK_ENTITY
-                            )
-                    )
+                    AtomicAdditions::createCasing
             );
 
     public static final RegistryObject<Block> CASING_PORT =
             BLOCKS.register(
                     "casing_port",
-                    () -> new AtomicPortBlock(
-                            BlockBehaviour.Properties.of()
-                                    .mapColor(MapColor.METAL),
-                            new TileEntityTypeRegistryObject<>(
-                                    ATOMIC_PORT_BLOCK_ENTITY
-                            )
-                    )
+                    AtomicAdditions::createCasingPort
             );
 
     public static final RegistryObject<BlockEntityType<AtomicCasingBlockEntity>>
@@ -125,6 +113,26 @@ public class AtomicAdditions {
                             new Item.Properties()
                     )
             );
+
+    private static AtomicCasingBlock<AtomicCasingBlockEntity> createCasing() {
+        return new AtomicCasingBlock<>(
+                BlockBehaviour.Properties.of()
+                        .mapColor(MapColor.METAL),
+                new TileEntityTypeRegistryObject<>(
+                        ATOMIC_CASING_BLOCK_ENTITY
+                )
+        );
+    }
+
+    private static AtomicPortBlock createCasingPort() {
+        return new AtomicPortBlock(
+                BlockBehaviour.Properties.of()
+                        .mapColor(MapColor.METAL),
+                new TileEntityTypeRegistryObject<>(
+                        ATOMIC_PORT_BLOCK_ENTITY
+                )
+        );
+    }
 
     public AtomicAdditions(
             FMLJavaModLoadingContext context
