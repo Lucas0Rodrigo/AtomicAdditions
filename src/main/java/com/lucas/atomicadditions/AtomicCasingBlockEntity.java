@@ -1,22 +1,29 @@
 package com.lucas.atomicadditions;
 
+import mekanism.api.providers.IBlockProvider;
 import mekanism.common.lib.multiblock.MultiblockManager;
 import mekanism.common.tile.prefab.TileEntityMultiblock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class AtomicCasingBlockEntity
         extends TileEntityMultiblock<AtomicMultiblockData> {
 
     public AtomicCasingBlockEntity(BlockPos pos, BlockState state) {
-        super(
+        this(
                 new AtomicBlockProvider(state.getBlock()),
                 pos,
                 state
         );
+    }
+
+    protected AtomicCasingBlockEntity(
+            IBlockProvider provider,
+            BlockPos pos,
+            BlockState state
+    ) {
+        super(provider, pos, state);
     }
 
     @Override
@@ -30,7 +37,9 @@ public class AtomicCasingBlockEntity
     }
 
     @Override
-    protected void structureChanged(AtomicMultiblockData multiblock) {
+    protected void structureChanged(
+            AtomicMultiblockData multiblock
+    ) {
         super.structureChanged(multiblock);
 
         if (level == null || level.isClientSide) {
@@ -72,44 +81,5 @@ public class AtomicCasingBlockEntity
                             )
                     );
         }
-    }
-
-    @Override
-    public InteractionResult onSneakRightClick(Player player) {
-
-        if (!(getBlockState().getBlock() instanceof AtomicPortBlock)) {
-            return InteractionResult.PASS;
-        }
-
-        PortMode current =
-                getBlockState().getValue(
-                        AtomicPortBlock.MODE
-                );
-
-        PortMode next =
-                current == PortMode.INPUT
-                        ? PortMode.OUTPUT
-                        : PortMode.INPUT;
-
-        level.setBlock(
-                worldPosition,
-                getBlockState().setValue(
-                        AtomicPortBlock.MODE,
-                        next
-                ),
-                3
-        );
-
-        setChanged();
-
-        player.displayClientMessage(
-                Component.literal(
-                        "Port: " +
-                                next.getSerializedName().toUpperCase()
-                ),
-                true
-        );
-
-        return InteractionResult.SUCCESS;
     }
 }

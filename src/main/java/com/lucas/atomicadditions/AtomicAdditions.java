@@ -33,48 +33,101 @@ public class AtomicAdditions {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public static final DeferredRegister<Block> BLOCKS =
-            DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
+            DeferredRegister.create(
+                    ForgeRegistries.BLOCKS,
+                    MODID
+            );
 
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =
-            DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MODID);
+            DeferredRegister.create(
+                    ForgeRegistries.BLOCK_ENTITY_TYPES,
+                    MODID
+            );
 
     public static final DeferredRegister<Item> ITEMS =
-            DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
+            DeferredRegister.create(
+                    ForgeRegistries.ITEMS,
+                    MODID
+            );
 
     public static final DeferredRegister<net.minecraft.world.item.CreativeModeTab> CREATIVE_MODE_TABS =
-            DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
+            DeferredRegister.create(
+                    Registries.CREATIVE_MODE_TAB,
+                    MODID
+            );
 
     public static final MultiblockManager<AtomicMultiblockData> ATOMIC_MANAGER =
-            new MultiblockManager<>("atomic", MultiblockCache::new, AtomicValidator::new);
+            new MultiblockManager<>(
+                    "atomic",
+                    MultiblockCache::new,
+                    AtomicValidator::new
+            );
 
     public static final RegistryObject<Block> CASING =
-            BLOCKS.register("casing", () -> new AtomicCasingBlock(
-                    BlockBehaviour.Properties.of().mapColor(MapColor.METAL)));
+            BLOCKS.register(
+                    "casing",
+                    () -> new AtomicCasingBlock(
+                            BlockBehaviour.Properties.of()
+                                    .mapColor(MapColor.METAL)
+                    )
+            );
 
     public static final RegistryObject<Block> CASING_PORT =
-            BLOCKS.register("casing_port", () -> new AtomicPortBlock(
-                    BlockBehaviour.Properties.of().mapColor(MapColor.METAL)));
+            BLOCKS.register(
+                    "casing_port",
+                    () -> new AtomicPortBlock(
+                            BlockBehaviour.Properties.of()
+                                    .mapColor(MapColor.METAL)
+                    )
+            );
 
     public static final RegistryObject<BlockEntityType<AtomicCasingBlockEntity>>
-            ATOMIC_CASING_BLOCK_ENTITY = BLOCK_ENTITIES.register(
+            ATOMIC_CASING_BLOCK_ENTITY =
+            BLOCK_ENTITIES.register(
                     "atomic_casing",
                     () -> BlockEntityType.Builder.of(
                             AtomicCasingBlockEntity::new,
-                            CASING.get(),
+                            CASING.get()
+                    ).build(null)
+            );
+
+    public static final RegistryObject<BlockEntityType<AtomicPortBlockEntity>>
+            ATOMIC_PORT_BLOCK_ENTITY =
+            BLOCK_ENTITIES.register(
+                    "atomic_port",
+                    () -> BlockEntityType.Builder.of(
+                            AtomicPortBlockEntity::new,
                             CASING_PORT.get()
                     ).build(null)
             );
 
     public static final RegistryObject<Item> CASING_ITEM =
-            ITEMS.register("casing", () -> new BlockItem(CASING.get(), new Item.Properties()));
+            ITEMS.register(
+                    "casing",
+                    () -> new BlockItem(
+                            CASING.get(),
+                            new Item.Properties()
+                    )
+            );
 
     public static final RegistryObject<Item> CASING_PORT_ITEM =
-            ITEMS.register("casing_port", () -> new BlockItem(CASING_PORT.get(), new Item.Properties()));
+            ITEMS.register(
+                    "casing_port",
+                    () -> new BlockItem(
+                            CASING_PORT.get(),
+                            new Item.Properties()
+                    )
+            );
 
-    public AtomicAdditions(FMLJavaModLoadingContext context) {
-        IEventBus modEventBus = context.getModEventBus();
+    public AtomicAdditions(
+            FMLJavaModLoadingContext context
+    ) {
+        IEventBus modEventBus =
+                context.getModEventBus();
 
-        modEventBus.addListener(this::commonSetup);
+        modEventBus.addListener(
+                this::commonSetup
+        );
 
         BLOCKS.register(modEventBus);
         BLOCK_ENTITIES.register(modEventBus);
@@ -82,26 +135,50 @@ public class AtomicAdditions {
         CREATIVE_MODE_TABS.register(modEventBus);
 
         MinecraftForge.EVENT_BUS.register(this);
-        modEventBus.addListener(this::addCreative);
+
+        modEventBus.addListener(
+                this::addCreative
+        );
     }
 
-    private void commonSetup(final FMLCommonSetupEvent event) {
-        LOGGER.info("Atomic Additions carregado com sucesso!");
+    private void commonSetup(
+            final FMLCommonSetupEvent event
+    ) {
+        LOGGER.info(
+                "Atomic Additions carregado com sucesso!"
+        );
     }
 
-    private void addCreative(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
-            event.accept(CASING_ITEM.get());
-            event.accept(CASING_PORT_ITEM.get());
+    private void addCreative(
+            BuildCreativeModeTabContentsEvent event
+    ) {
+        if (event.getTabKey() ==
+                CreativeModeTabs.BUILDING_BLOCKS) {
+
+            event.accept(
+                    CASING_ITEM.get()
+            );
+
+            event.accept(
+                    CASING_PORT_ITEM.get()
+            );
         }
     }
 
     @SubscribeEvent
-    public void onServerStarting(ServerStartingEvent event) {
-        LOGGER.info("Atomic Additions: servidor iniciado!");
+    public void onServerStarting(
+            ServerStartingEvent event
+    ) {
+        LOGGER.info(
+                "Atomic Additions: servidor iniciado!"
+        );
     }
 
-    @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    @Mod.EventBusSubscriber(
+            modid = MODID,
+            bus = Mod.EventBusSubscriber.Bus.MOD,
+            value = Dist.CLIENT
+    )
     public static class ClientModEvents {
     }
 }

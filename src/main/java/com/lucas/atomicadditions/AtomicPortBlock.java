@@ -1,5 +1,6 @@
 package com.lucas.atomicadditions;
 
+import mekanism.common.registration.impl.TileEntityTypeRegistryObject;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -10,6 +11,11 @@ public class AtomicPortBlock extends AtomicCasingBlock {
     public static final EnumProperty<PortMode> MODE =
             EnumProperty.create("mode", PortMode.class);
 
+    private static final TileEntityTypeRegistryObject<AtomicPortBlockEntity> TILE_TYPE =
+            new TileEntityTypeRegistryObject<>(
+                    AtomicAdditions.ATOMIC_PORT_BLOCK_ENTITY
+            );
+
     public AtomicPortBlock(Properties properties) {
         super(properties);
 
@@ -17,6 +23,11 @@ public class AtomicPortBlock extends AtomicCasingBlock {
                 stateDefinition.any()
                         .setValue(MODE, PortMode.INPUT)
         );
+    }
+
+    @Override
+    public TileEntityTypeRegistryObject<AtomicPortBlockEntity> getTileType() {
+        return TILE_TYPE;
     }
 
     @Override
