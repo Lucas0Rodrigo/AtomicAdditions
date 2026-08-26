@@ -9,8 +9,7 @@ import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.resources.ResourceLocation;
 
 @JeiPlugin
-public class AtomicAdditionsJEIPlugin
-        implements IModPlugin {
+public class AtomicAdditionsJEIPlugin implements IModPlugin {
 
     private static final ResourceLocation UID =
             ResourceLocation.fromNamespaceAndPath(
@@ -28,11 +27,7 @@ public class AtomicAdditionsJEIPlugin
             IRecipeCategoryRegistration registration
     ) {
         registration.addRecipeCategories(
-                new AtomicAMRRecipeCategory(
-                        registration
-                                .getJeiHelpers()
-                                .getGuiHelper()
-                )
+                new AtomicAMRRecipeCategory()
         );
     }
 

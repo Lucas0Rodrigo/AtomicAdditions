@@ -2,10 +2,15 @@
   "block.atomicadditions.casing": "§dAMR Casing",
   "block.atomicadditions.casing_port": "§dAMR Port",
 
-  "message.atomicadditions.port_changed": "RMA Port changed to: ",
+  "message.atomicadditions.port_changed": "AMR Port changed to: ",
   "message.atomicadditions.port_input": "Input",
   "message.atomicadditions.port_output": "Output",
+
   "container.atomicadditions.atomic": "Atomic Material Reprocessor",
+
+  "jei.atomicadditions.amr": "Atomic Multiblock Reactor",
+  "jei.atomicadditions.energy": "Energy: %s FE/t",
+  "jei.atomicadditions.duration": "Duration: %s ticks",
 
   "gas.atomicadditions.niobium": "Niobium",
   "gas.atomicadditions.germanium": "Germanium",
