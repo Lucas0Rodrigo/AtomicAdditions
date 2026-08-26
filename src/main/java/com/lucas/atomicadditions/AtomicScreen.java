@@ -17,7 +17,7 @@ public class AtomicScreen extends GuiMekanismTile<
             Inventory inv,
             Component title
     ) {
-        super(container, inv, title);
+        super(container, inv, Component.translatable("container.atomicadditions.atomic"));
 
         dynamicSlots = true;
 
