@@ -35,6 +35,7 @@ public class AtomicScreen extends GuiMekanismTile<
         );
 
         dynamicSlots = true;
+        imageWidth += 18;
         imageHeight += 16;
         inventoryLabelY = imageHeight - 92;
     }
@@ -50,7 +51,7 @@ public class AtomicScreen extends GuiMekanismTile<
                         () -> tile.getMultiblock().getGasTanks(null),
                         GaugeType.STANDARD,
                         this,
-                        -11,
+                        7,
                         17
                 )
         );
@@ -62,7 +63,7 @@ public class AtomicScreen extends GuiMekanismTile<
                         () -> tile.getMultiblock().getGasTanks(null),
                         GaugeType.STANDARD,
                         this,
-                        7,
+                        25,
                         17
                 )
         );
@@ -74,7 +75,7 @@ public class AtomicScreen extends GuiMekanismTile<
                         () -> tile.getMultiblock().getGasTanks(null),
                         GaugeType.STANDARD,
                         this,
-                        151,
+                        169,
                         17
                 )
         );
@@ -83,7 +84,7 @@ public class AtomicScreen extends GuiMekanismTile<
         addRenderableWidget(
                 new GuiInnerScreen(
                         this,
-                        27,
+                        45,
                         17,
                         122,
                         60,
@@ -119,7 +120,7 @@ public class AtomicScreen extends GuiMekanismTile<
                                 return 0;
                             }
                         },
-                        7,
+                        25,
                         79,
                         160,
                         ColorFunction.scale(
