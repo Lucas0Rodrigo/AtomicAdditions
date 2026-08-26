@@ -8,9 +8,10 @@
 
   "container.atomicadditions.atomic": "Atomic Material Reprocessor",
 
-  "jei.atomicadditions.amr": "Atomic Multiblock Reactor",
+  "jei.atomicadditions.amr": "Atomic Material Reprocessor",
   "jei.atomicadditions.energy": "Energy: %s FE/t",
   "jei.atomicadditions.duration": "Duration: %s ticks",
+  "jei.atomicadditions.rate": "Production: %s mB/t",
 
   "gas.atomicadditions.niobium": "Niobium",
   "gas.atomicadditions.germanium": "Germanium",

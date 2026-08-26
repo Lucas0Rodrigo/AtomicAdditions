@@ -2,8 +2,10 @@ package com.lucas.atomicadditions.integrations.jei;
 
 import com.lucas.atomicadditions.AtomicAdditions;
 import com.lucas.atomicadditions.recipes.AtomicRecipes;
+import mekanism.client.jei.MekanismJEI;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
+import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.resources.ResourceLocation;
@@ -26,8 +28,16 @@ public class AtomicAdditionsJEIPlugin implements IModPlugin {
     public void registerCategories(
             IRecipeCategoryRegistration registration
     ) {
+
+        IGuiHelper guiHelper =
+                registration
+                        .getJeiHelpers()
+                        .getGuiHelper();
+
         registration.addRecipeCategories(
-                new AtomicAMRRecipeCategory()
+                new AtomicAMRRecipeCategory(
+                        guiHelper
+                )
         );
     }
 
@@ -35,9 +45,13 @@ public class AtomicAdditionsJEIPlugin implements IModPlugin {
     public void registerRecipes(
             IRecipeRegistration registration
     ) {
+
         registration.addRecipes(
-                AtomicAMRRecipeCategory.TYPE,
-                AtomicRecipes.AMR_RECIPES.getRecipesForJEI()
+                MekanismJEI.recipeType(
+                        AtomicAMRRecipeCategory.TYPE
+                ),
+                AtomicRecipes.AMR_RECIPES
+                        .getRecipesForJEI()
         );
     }
 }

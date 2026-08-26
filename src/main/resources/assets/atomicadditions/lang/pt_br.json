@@ -6,11 +6,12 @@
   "message.atomicadditions.port_input": "Entrada",
   "message.atomicadditions.port_output": "Saída",
 
-  "container.atomicadditions.atomic": "Reprocessador de Materiais Atômico",
+  "container.atomicadditions.atomic": "Reprocessador Material Atômico",
 
-  "jei.atomicadditions.amr": "Reator Multibloco Atômico",
+  "jei.atomicadditions.amr": "Reprocessador Material Atômico",
   "jei.atomicadditions.energy": "Energia: %s FE/t",
   "jei.atomicadditions.duration": "Duração: %s ticks",
+  "jei.atomicadditions.rate": "Produção: %s mB/t",
 
   "gas.atomicadditions.niobium": "Nióbio",
   "gas.atomicadditions.germanium": "Germânio",
