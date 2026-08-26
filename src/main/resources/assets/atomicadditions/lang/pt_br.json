@@ -1,6 +1,6 @@
 {
-  "block.atomicadditions.casing": "Revestimento do RMA",
-  "block.atomicadditions.casing_port": "Porta do RMA",
+  "block.atomicadditions.casing": "§5Revestimento do RMA",
+  "block.atomicadditions.casing_port": "§5Porta do RMA",
 
   "message.atomicadditions.port_changed": "Porta RMA alterada para: ",
   "message.atomicadditions.port_input": "Entrada",
