@@ -31,7 +31,9 @@ public class AtomicScreen extends GuiMekanismTile<
         super(
                 container,
                 inv,
-                Component.translatable("container.atomicadditions.atomic")
+                Component.translatable(
+                        "container.atomicadditions.atomic"
+                )
         );
 
         dynamicSlots = false;
@@ -47,11 +49,15 @@ public class AtomicScreen extends GuiMekanismTile<
     @Override
     protected void addGuiElements() {
 
-        // Gás de entrada 1
+        /*
+         * Tanque de entrada 1
+         */
         addRenderableWidget(
                 new GuiGasGauge(
-                        () -> tile.getMultiblock().inputTank1,
-                        () -> tile.getMultiblock().getGasTanks(null),
+                        () ->
+                                tile.getMultiblock().inputTank1,
+                        () ->
+                                tile.getMultiblock().getGasTanks(null),
                         GaugeType.STANDARD,
                         this,
                         7,
@@ -59,11 +65,15 @@ public class AtomicScreen extends GuiMekanismTile<
                 )
         );
 
-        // Gás de entrada 2
+        /*
+         * Tanque de entrada 2
+         */
         addRenderableWidget(
                 new GuiGasGauge(
-                        () -> tile.getMultiblock().inputTank2,
-                        () -> tile.getMultiblock().getGasTanks(null),
+                        () ->
+                                tile.getMultiblock().inputTank2,
+                        () ->
+                                tile.getMultiblock().getGasTanks(null),
                         GaugeType.STANDARD,
                         this,
                         25,
@@ -71,11 +81,15 @@ public class AtomicScreen extends GuiMekanismTile<
                 )
         );
 
-        // Gás de saída
+        /*
+         * Tanque de saída
+         */
         addRenderableWidget(
                 new GuiGasGauge(
-                        () -> tile.getMultiblock().outputTank,
-                        () -> tile.getMultiblock().getGasTanks(null),
+                        () ->
+                                tile.getMultiblock().outputTank,
+                        () ->
+                                tile.getMultiblock().getGasTanks(null),
                         GaugeType.STANDARD,
                         this,
                         169,
@@ -83,7 +97,12 @@ public class AtomicScreen extends GuiMekanismTile<
                 )
         );
 
-        // Painel de status
+        /*
+         * Painel de status.
+         *
+         * Assim como no SPS, o estado é determinado
+         * pelo processamento ocorrido no último tick.
+         */
         addRenderableWidget(
                 new GuiInnerScreen(
                         this,
@@ -92,11 +111,21 @@ public class AtomicScreen extends GuiMekanismTile<
                         122,
                         60,
                         () -> {
-                            List<Component> list = new ArrayList<>();
+
+                            List<Component> list =
+                                    new ArrayList<>();
+
+                            AtomicMultiblockData multiblock =
+                                    tile.getMultiblock();
+
+                            boolean active =
+                                    multiblock.lastProcessed > 0;
 
                             list.add(
                                     MekanismLang.STATUS.translate(
-                                            MekanismLang.IDLE
+                                            active
+                                                    ? MekanismLang.ACTIVE
+                                                    : MekanismLang.IDLE
                                     )
                             );
 
@@ -105,7 +134,9 @@ public class AtomicScreen extends GuiMekanismTile<
                 )
         );
 
-        // Barra de progresso
+        /*
+         * Barra de progresso.
+         */
         addRenderableWidget(
                 new GuiDynamicHorizontalRateBar(
                         this,
@@ -113,22 +144,39 @@ public class AtomicScreen extends GuiMekanismTile<
 
                             @Override
                             public Component getTooltip() {
+
                                 return MekanismLang.PROGRESS.translate(
-                                        TextUtils.getPercent(0)
+                                        TextUtils.getPercent(
+                                                tile.getMultiblock()
+                                                        .getScaledProgress()
+                                        )
                                 );
                             }
 
                             @Override
                             public double getLevel() {
-                                return 0;
+
+                                return Math.min(
+                                        1,
+                                        tile.getMultiblock()
+                                                .getScaledProgress()
+                                );
                             }
                         },
                         7,
                         79,
                         178,
                         ColorFunction.scale(
-                                Color.rgbi(60, 45, 74),
-                                Color.rgbi(100, 30, 170)
+                                Color.rgbi(
+                                        60,
+                                        45,
+                                        74
+                                ),
+                                Color.rgbi(
+                                        100,
+                                        30,
+                                        170
+                                )
                         )
                 )
         );

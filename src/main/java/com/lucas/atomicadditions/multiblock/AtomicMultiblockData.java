@@ -46,6 +46,9 @@ public class AtomicMultiblockData
     @ContainerSync
     public double processProgress = 0;
 
+    @ContainerSync
+    public double lastProcessed = 0;
+
     public AtomicMultiblockData(
             BlockEntity tile
     ) {
@@ -119,6 +122,16 @@ public class AtomicMultiblockData
     ) {
         boolean needsPacket =
                 super.tick(world);
+
+        /*
+         * Guarda quanto foi realmente processado
+         * neste tick.
+         *
+         * O SPS usa um valor semelhante para que a
+         * interface consiga determinar se a máquina
+         * esteve ativa no último tick.
+         */
+        lastProcessed = 0;
 
         if (!isFormed()) {
             processProgress = 0;
@@ -210,9 +223,15 @@ public class AtomicMultiblockData
             return needsPacket;
         }
 
-        processProgress +=
+        double progressAdded =
                 extracted.doubleValue()
                         / recipe.getEnergyPerTick();
+
+        processProgress +=
+                progressAdded;
+
+        lastProcessed =
+                progressAdded;
 
         while (
                 processProgress
@@ -291,6 +310,16 @@ public class AtomicMultiblockData
             processProgress -=
                     recipe.getDuration();
 
+            /*
+             * A conclusão da receita também conta como
+             * processamento neste tick.
+             */
+            lastProcessed =
+                    Math.max(
+                            lastProcessed,
+                            recipe.getDuration()
+                    );
+
             needsPacket = true;
         }
 
@@ -299,5 +328,47 @@ public class AtomicMultiblockData
         }
 
         return needsPacket;
+    }
+
+    /**
+     * Retorna o progresso normalizado da receita atual.
+     *
+     * Exemplo:
+     *
+     * 50 / 100 ticks = 0.5
+     *
+     * A GUI usa esse valor para desenhar a barra.
+     */
+    public double getScaledProgress() {
+
+        GasStack stack1 =
+                inputTank1.getStack();
+
+        GasStack stack2 =
+                inputTank2.getStack();
+
+        if (stack1.isEmpty()
+                || stack2.isEmpty()) {
+            return 0;
+        }
+
+        AtomicAMRRecipe recipe =
+                AtomicRecipes.AMR_RECIPES.findRecipe(
+                        stack1.getType(),
+                        stack1.getAmount(),
+                        stack2.getType(),
+                        stack2.getAmount()
+                );
+
+        if (recipe == null
+                || recipe.getDuration() <= 0) {
+            return 0;
+        }
+
+        return Math.min(
+                1,
+                processProgress
+                        / recipe.getDuration()
+        );
     }
 }
