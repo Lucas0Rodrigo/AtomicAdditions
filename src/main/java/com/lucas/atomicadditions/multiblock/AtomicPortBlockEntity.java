@@ -1,7 +1,6 @@
 package com.lucas.atomicadditions.multiblock;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 import mekanism.api.Action;
 import mekanism.api.AutomationType;
@@ -9,14 +8,15 @@ import mekanism.api.IContentsListener;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.gas.IGasTank;
+import mekanism.common.capabilities.energy.MachineEnergyContainer;
 import mekanism.common.capabilities.holder.chemical.IChemicalTankHolder;
+import mekanism.common.capabilities.holder.energy.EnergyContainerHelper;
+import mekanism.common.capabilities.holder.energy.IEnergyContainerHolder;
 import mekanism.common.lib.multiblock.IMultiblockEjector;
 import mekanism.common.tile.base.SubstanceType;
 import mekanism.common.util.ChemicalUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
@@ -24,6 +24,8 @@ import net.minecraft.world.level.block.state.BlockState;
 public class AtomicPortBlockEntity
         extends AtomicCasingBlockEntity
         implements IMultiblockEjector {
+
+    private MachineEnergyContainer<AtomicPortBlockEntity> energyContainer;
 
     private Set<Direction> outputDirections =
             Collections.emptySet();
@@ -39,55 +41,71 @@ public class AtomicPortBlockEntity
         );
     }
 
-    /**
-     * Expõe os tanques do AMR para o sistema químico
-     * do Mekanism.
+    /*
+     * =========================================================
+     * ENERGIA
+     * =========================================================
      *
-     * INPUT:
-     *   inputTank1 + inputTank2
+     * Exatamente a arquitetura usada pelo SPS 10.4.16.80:
      *
-     * OUTPUT:
-     *   outputTank
+     * EnergyContainerHelper.forSide(this::getDirection)
+     * +
+     * MachineEnergyContainer.input(...)
      *
-     * A assinatura e o IChemicalTankHolder são exatamente
-     * os utilizados pelo TileEntitySPSPort do Mekanism
-     * 10.4.16.80.
+     * Isso permite que Universal Cable reconheça o Port.
      */
     @Override
-    public IChemicalTankHolder<Gas, GasStack, IGasTank> getInitialGasTanks(
+    protected IEnergyContainerHolder getInitialEnergyContainers(
             IContentsListener listener
     ) {
-        return side -> {
-
-            if (!getMultiblock().isFormed()) {
-                return Collections.emptyList();
-            }
-
-            PortMode mode =
-                    getBlockState().getValue(
-                            AtomicPortBlock.MODE
-                    );
-
-            if (mode == PortMode.INPUT) {
-                return List.of(
-                        getMultiblock().inputTank1,
-                        getMultiblock().inputTank2
+        EnergyContainerHelper builder =
+                EnergyContainerHelper.forSide(
+                        this::getDirection
                 );
-            }
 
-            return List.of(
-                    getMultiblock().outputTank
-            );
-        };
+        builder.addContainer(
+                energyContainer =
+                        MachineEnergyContainer.input(
+                                this,
+                                listener
+                        )
+        );
+
+        return builder.build();
     }
 
-    /**
-     * O gás pertence ao multiblock.
+    /*
+     * =========================================================
+     * GAS
+     * =========================================================
      *
-     * O Port apenas expõe o capability.
+     * O SPS faz exatamente isso:
+     *
+     * return side -> getMultiblock().getGasTanks(side);
+     *
+     * Não devemos escolher manualmente inputTank1,
+     * inputTank2 ou outputTank aqui.
+     *
+     * As próprias propriedades dos tanques determinam
+     * se eles aceitam inserção/extração externa.
      */
     @Override
-    public boolean persists(SubstanceType type) {
+    public IChemicalTankHolder<Gas, GasStack, IGasTank>
+    getInitialGasTanks(
+            IContentsListener listener
+    ) {
+        return side ->
+                getMultiblock().getGasTanks(side);
+    }
+
+    /*
+     * O gás pertence ao multiblock.
+     * O Port somente expõe os tanques.
+     */
+    @Override
+    public boolean persists(
+            SubstanceType type
+    ) {
         if (type == SubstanceType.GAS) {
             return false;
         }
@@ -95,11 +113,10 @@ public class AtomicPortBlockEntity
         return super.persists(type);
     }
 
-    /**
-     * Ejeção ativa de gás.
-     *
-     * Exatamente o mesmo mecanismo utilizado pelo
-     * TileEntitySPSPort do Mekanism 10.4.16.80.
+    /*
+     * =========================================================
+     * SERVER UPDATE
+     * =========================================================
      */
     @Override
     protected boolean onUpdateServer(
@@ -108,30 +125,85 @@ public class AtomicPortBlockEntity
         boolean needsPacket =
                 super.onUpdateServer(multiblock);
 
-        if (multiblock.isFormed()) {
+        if (!multiblock.isFormed()) {
+            return needsPacket;
+        }
 
-            PortMode mode =
-                    getBlockState().getValue(
-                            AtomicPortBlock.MODE
-                    );
+        /*
+         * -----------------------------------------------------
+         * ENERGIA
+         * -----------------------------------------------------
+         *
+         * A energia recebida pelo Port é transferida para
+         * o armazenamento interno do AMR.
+         */
+        if (!energyContainer.isEmpty()) {
 
-            if (mode == PortMode.OUTPUT
-                    && !multiblock.outputTank.isEmpty()) {
+            if (!energyContainer.isEmpty()) {
 
-                ChemicalUtil.emit(
-                        outputDirections,
-                        multiblock.outputTank,
-                        this
-                );
+                var available =
+                        energyContainer.getEnergy();
+
+                var needed =
+                        multiblock.energyContainer.getNeeded();
+
+                if (!needed.isZero()) {
+
+                    var toTransfer =
+                            available.min(needed);
+
+                    if (!toTransfer.isZero()) {
+
+                        var extracted =
+                                energyContainer.extract(
+                                        toTransfer,
+                                        Action.EXECUTE,
+                                        AutomationType.INTERNAL
+                                );
+
+                        if (!extracted.isZero()) {
+
+                            multiblock.energyContainer.insert(
+                                    extracted,
+                                    Action.EXECUTE,
+                                    AutomationType.INTERNAL
+                            );
+
+                            needsPacket = true;
+                        }
+                    }
+                }
             }
+        }
+
+        /*
+         * -----------------------------------------------------
+         * GAS DE SAÍDA
+         * -----------------------------------------------------
+         *
+         * Somente Port OUTPUT ejeta gás.
+         */
+        PortMode mode =
+                getBlockState().getValue(
+                        AtomicPortBlock.MODE
+                );
+
+        if (mode == PortMode.OUTPUT
+                && !multiblock.outputTank.isEmpty()) {
+
+            ChemicalUtil.emit(
+                    outputDirections,
+                    multiblock.outputTank,
+                    this
+            );
         }
 
         return needsPacket;
     }
 
-    /**
-     * Recebe os lados externos determinados pelo
-     * sistema de multiblock do Mekanism.
+    /*
+     * O sistema de ejector do Mekanism informa quais lados
+     * devem ser utilizados para a saída.
      */
     @Override
     public void setEjectSides(
@@ -140,11 +212,10 @@ public class AtomicPortBlockEntity
         outputDirections = sides;
     }
 
-    /**
-     * Alterna:
-     *
-     * INPUT -> OUTPUT
-     * OUTPUT -> INPUT
+    /*
+     * =========================================================
+     * ALTERAÇÃO INPUT / OUTPUT
+     * =========================================================
      */
     @Override
     public InteractionResult onSneakRightClick(
@@ -173,38 +244,7 @@ public class AtomicPortBlockEntity
                 3
         );
 
-        /*
-         * O TileEntityMultiblock já invalida capabilities
-         * quando a estrutura muda. Aqui o holder consulta
-         * o BlockState atual quando o capability é usado,
-         * então não precisamos criar um sistema paralelo.
-         */
         setChanged();
-
-        MutableComponent modeComponent =
-                Component.translatable(
-                        next == PortMode.INPUT
-                                ? "message.atomicadditions.port_input"
-                                : "message.atomicadditions.port_output"
-                );
-
-        modeComponent.withStyle(
-                next == PortMode.INPUT
-                        ? net.minecraft.ChatFormatting.GREEN
-                        : net.minecraft.ChatFormatting.RED
-        );
-
-        MutableComponent message =
-                Component.translatable(
-                        "message.atomicadditions.port_changed"
-                );
-
-        message.append(modeComponent);
-
-        player.displayClientMessage(
-                message,
-                true
-        );
 
         return InteractionResult.SUCCESS;
     }
