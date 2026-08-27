@@ -1,7 +1,6 @@
 package com.lucas.atomicadditions.multiblock;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 import mekanism.api.Action;
@@ -42,6 +41,8 @@ public class AtomicPortBlockEntity
                 pos,
                 state
         );
+
+        delaySupplier = NO_DELAY;
     }
 
     @Override
@@ -66,34 +67,10 @@ public class AtomicPortBlockEntity
 
     @Override
     @NotNull
-    public IChemicalTankHolder<Gas, GasStack, IGasTank>
-    getInitialGasTanks(
+    public IChemicalTankHolder<Gas, GasStack, IGasTank> getInitialGasTanks(
             IContentsListener listener
     ) {
-        return side -> {
-
-            AtomicMultiblockData multiblock =
-                    getMultiblock();
-
-            if (multiblock == null
-                    || !multiblock.isFormed()) {
-                return Collections.emptyList();
-            }
-
-            if (getBlockState().getValue(
-                    AtomicPortBlock.MODE
-            ) == PortMode.OUTPUT) {
-
-                return List.of(
-                        multiblock.outputTank
-                );
-            }
-
-            return List.of(
-                    multiblock.inputTank1,
-                    multiblock.inputTank2
-            );
-        };
+        return side -> getMultiblock().getGasTanks(side);
     }
 
     @Override
@@ -118,17 +95,12 @@ public class AtomicPortBlockEntity
             return needsPacket;
         }
 
-        if (getBlockState().getValue(
-                AtomicPortBlock.MODE
-        ) == PortMode.OUTPUT) {
-
-            if (getActive()) {
-                ChemicalUtil.emit(
-                        outputDirections,
-                        multiblock.outputTank,
-                        this
-                );
-            }
+        if (getActive()) {
+            ChemicalUtil.emit(
+                    outputDirections,
+                    multiblock.outputTank,
+                    this
+            );
         }
 
         if (!energyContainer.isEmpty()) {
@@ -174,30 +146,12 @@ public class AtomicPortBlockEntity
     ) {
         if (!isRemote()) {
 
-            PortMode current =
-                    getBlockState().getValue(
-                            AtomicPortBlock.MODE
-                    );
+            boolean oldMode =
+                    getActive();
 
-            PortMode next =
-                    current == PortMode.INPUT
-                            ? PortMode.OUTPUT
-                            : PortMode.INPUT;
-
-            level.setBlock(
-                    worldPosition,
-                    getBlockState().setValue(
-                            AtomicPortBlock.MODE,
-                            next
-                    ),
-                    3
-            );
+            setActive(!oldMode);
 
             invalidateCachedCapabilities();
-
-            setActive(
-                    next == PortMode.OUTPUT
-            );
         }
 
         return InteractionResult.SUCCESS;
