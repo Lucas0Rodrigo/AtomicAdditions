@@ -2,6 +2,7 @@ package com.lucas.atomicadditions.multiblock;
 
 import java.util.Collections;
 import java.util.Set;
+
 import mekanism.api.Action;
 import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
@@ -45,15 +46,8 @@ public class AtomicPortBlockEntity
      * =========================================================
      * ENERGIA
      * =========================================================
-     *
-     * Exatamente a arquitetura usada pelo SPS 10.4.16.80:
-     *
-     * EnergyContainerHelper.forSide(this::getDirection)
-     * +
-     * MachineEnergyContainer.input(...)
-     *
-     * Isso permite que Universal Cable reconheça o Port.
      */
+
     @Override
     protected IEnergyContainerHolder getInitialEnergyContainers(
             IContentsListener listener
@@ -79,16 +73,14 @@ public class AtomicPortBlockEntity
      * GAS
      * =========================================================
      *
-     * O SPS faz exatamente isso:
+     * EXATAMENTE como o SPS do Mekanism 10.4.16:
      *
-     * return side -> getMultiblock().getGasTanks(side);
+     * o Port apenas expõe os tanques do Multiblock.
      *
-     * Não devemos escolher manualmente inputTank1,
-     * inputTank2 ou outputTank aqui.
-     *
-     * As próprias propriedades dos tanques determinam
-     * se eles aceitam inserção/extração externa.
+     * As permissões INPUT/OUTPUT são determinadas pelos
+     * próprios tanques criados no AtomicMultiblockData.
      */
+
     @Override
     public IChemicalTankHolder<Gas, GasStack, IGasTank>
     getInitialGasTanks(
@@ -98,10 +90,6 @@ public class AtomicPortBlockEntity
                 getMultiblock().getGasTanks(side);
     }
 
-    /*
-     * O gás pertence ao multiblock.
-     * O Port somente expõe os tanques.
-     */
     @Override
     public boolean persists(
             SubstanceType type
@@ -118,6 +106,7 @@ public class AtomicPortBlockEntity
      * SERVER UPDATE
      * =========================================================
      */
+
     @Override
     protected boolean onUpdateServer(
             AtomicMultiblockData multiblock
@@ -133,44 +122,39 @@ public class AtomicPortBlockEntity
          * -----------------------------------------------------
          * ENERGIA
          * -----------------------------------------------------
-         *
-         * A energia recebida pelo Port é transferida para
-         * o armazenamento interno do AMR.
          */
+
         if (!energyContainer.isEmpty()) {
 
-            if (!energyContainer.isEmpty()) {
+            var available =
+                    energyContainer.getEnergy();
 
-                var available =
-                        energyContainer.getEnergy();
+            var needed =
+                    multiblock.energyContainer.getNeeded();
 
-                var needed =
-                        multiblock.energyContainer.getNeeded();
+            if (!needed.isZero()) {
 
-                if (!needed.isZero()) {
+                var toTransfer =
+                        available.min(needed);
 
-                    var toTransfer =
-                            available.min(needed);
+                if (!toTransfer.isZero()) {
 
-                    if (!toTransfer.isZero()) {
-
-                        var extracted =
-                                energyContainer.extract(
-                                        toTransfer,
-                                        Action.EXECUTE,
-                                        AutomationType.INTERNAL
-                                );
-
-                        if (!extracted.isZero()) {
-
-                            multiblock.energyContainer.insert(
-                                    extracted,
+                    var extracted =
+                            energyContainer.extract(
+                                    toTransfer,
                                     Action.EXECUTE,
                                     AutomationType.INTERNAL
                             );
 
-                            needsPacket = true;
-                        }
+                    if (!extracted.isZero()) {
+
+                        multiblock.energyContainer.insert(
+                                extracted,
+                                Action.EXECUTE,
+                                AutomationType.INTERNAL
+                        );
+
+                        needsPacket = true;
                     }
                 }
             }
@@ -181,15 +165,12 @@ public class AtomicPortBlockEntity
          * GAS DE SAÍDA
          * -----------------------------------------------------
          *
-         * Somente Port OUTPUT ejeta gás.
+         * Igual ao SPS:
+         *
+         * somente Port em modo OUTPUT ejeta.
          */
-        PortMode mode =
-                getBlockState().getValue(
-                        AtomicPortBlock.MODE
-                );
 
-        if (mode == PortMode.OUTPUT
-                && !multiblock.outputTank.isEmpty()) {
+        if (getActive()) {
 
             ChemicalUtil.emit(
                     outputDirections,
@@ -202,9 +183,11 @@ public class AtomicPortBlockEntity
     }
 
     /*
-     * O sistema de ejector do Mekanism informa quais lados
-     * devem ser utilizados para a saída.
+     * =========================================================
+     * EJECTOR
+     * =========================================================
      */
+
     @Override
     public void setEjectSides(
             Set<Direction> sides
@@ -214,9 +197,15 @@ public class AtomicPortBlockEntity
 
     /*
      * =========================================================
-     * ALTERAÇÃO INPUT / OUTPUT
+     * INPUT / OUTPUT
      * =========================================================
+     *
+     * Igual ao SPS:
+     *
+     * false = INPUT
+     * true  = OUTPUT
      */
+
     @Override
     public InteractionResult onSneakRightClick(
             Player player
@@ -225,26 +214,9 @@ public class AtomicPortBlockEntity
             return InteractionResult.PASS;
         }
 
-        PortMode current =
-                getBlockState().getValue(
-                        AtomicPortBlock.MODE
-                );
-
-        PortMode next =
-                current == PortMode.INPUT
-                        ? PortMode.OUTPUT
-                        : PortMode.INPUT;
-
-        level.setBlock(
-                worldPosition,
-                getBlockState().setValue(
-                        AtomicPortBlock.MODE,
-                        next
-                ),
-                3
-        );
-
-        setChanged();
+        if (!level.isClientSide) {
+            setActive(!getActive());
+        }
 
         return InteractionResult.SUCCESS;
     }

@@ -1,5 +1,7 @@
 package com.lucas.atomicadditions.multiblock;
 
+import mekanism.api.math.FloatingLong;
+import mekanism.common.block.attribute.AttributeEnergy;
 import mekanism.common.registration.impl.TileEntityTypeRegistryObject;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -17,6 +19,13 @@ public class AtomicPortBlock
             TileEntityTypeRegistryObject<AtomicPortBlockEntity> tileType
     ) {
         super(properties, tileType);
+
+        getType().add(
+                new AttributeEnergy(
+                        () -> FloatingLong.ZERO,
+                        () -> FloatingLong.create(1_000_000_000L)
+                )
+        );
 
         registerDefaultState(
                 stateDefinition.any()
