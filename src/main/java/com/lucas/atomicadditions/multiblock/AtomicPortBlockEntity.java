@@ -1,6 +1,7 @@
 package com.lucas.atomicadditions.multiblock;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import mekanism.api.Action;
@@ -21,6 +22,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
 
 public class AtomicPortBlockEntity
         extends AtomicCasingBlockEntity
@@ -42,12 +44,6 @@ public class AtomicPortBlockEntity
         );
     }
 
-    /*
-     * =========================================================
-     * ENERGIA
-     * =========================================================
-     */
-
     @Override
     protected IEnergyContainerHolder getInitialEnergyContainers(
             IContentsListener listener
@@ -68,26 +64,41 @@ public class AtomicPortBlockEntity
         return builder.build();
     }
 
-    /*
-     * =========================================================
-     * GAS
-     * =========================================================
-     *
-     * EXATAMENTE como o SPS do Mekanism 10.4.16:
-     *
-     * o Port apenas expõe os tanques do Multiblock.
-     *
-     * As permissões INPUT/OUTPUT são determinadas pelos
-     * próprios tanques criados no AtomicMultiblockData.
-     */
-
+    @NotNull
     @Override
     public IChemicalTankHolder<Gas, GasStack, IGasTank>
     getInitialGasTanks(
             IContentsListener listener
     ) {
-        return side ->
-                getMultiblock().getGasTanks(side);
+        return side -> {
+            AtomicMultiblockData multiblock =
+                    getMultiblock();
+
+            if (!multiblock.isFormed()) {
+                return Collections.emptyList();
+            }
+
+            /*
+             * INPUT PORT
+             *
+             * Expõe SOMENTE os dois tanques de entrada.
+             */
+            if (!getActive()) {
+                return List.of(
+                        multiblock.inputTank1,
+                        multiblock.inputTank2
+                );
+            }
+
+            /*
+             * OUTPUT PORT
+             *
+             * Expõe SOMENTE o tanque de saída.
+             */
+            return List.of(
+                    multiblock.outputTank
+            );
+        };
     }
 
     @Override
@@ -101,12 +112,6 @@ public class AtomicPortBlockEntity
         return super.persists(type);
     }
 
-    /*
-     * =========================================================
-     * SERVER UPDATE
-     * =========================================================
-     */
-
     @Override
     protected boolean onUpdateServer(
             AtomicMultiblockData multiblock
@@ -119,11 +124,8 @@ public class AtomicPortBlockEntity
         }
 
         /*
-         * -----------------------------------------------------
-         * ENERGIA
-         * -----------------------------------------------------
+         * Energia recebida pelo Port.
          */
-
         if (!energyContainer.isEmpty()) {
 
             var available =
@@ -134,14 +136,14 @@ public class AtomicPortBlockEntity
 
             if (!needed.isZero()) {
 
-                var toTransfer =
+                var transfer =
                         available.min(needed);
 
-                if (!toTransfer.isZero()) {
+                if (!transfer.isZero()) {
 
                     var extracted =
                             energyContainer.extract(
-                                    toTransfer,
+                                    transfer,
                                     Action.EXECUTE,
                                     AutomationType.INTERNAL
                             );
@@ -161,15 +163,10 @@ public class AtomicPortBlockEntity
         }
 
         /*
-         * -----------------------------------------------------
-         * GAS DE SAÍDA
-         * -----------------------------------------------------
+         * OUTPUT
          *
-         * Igual ao SPS:
-         *
-         * somente Port em modo OUTPUT ejeta.
+         * Somente Port em modo OUTPUT.
          */
-
         if (getActive()) {
 
             ChemicalUtil.emit(
@@ -182,12 +179,6 @@ public class AtomicPortBlockEntity
         return needsPacket;
     }
 
-    /*
-     * =========================================================
-     * EJECTOR
-     * =========================================================
-     */
-
     @Override
     public void setEjectSides(
             Set<Direction> sides
@@ -195,27 +186,16 @@ public class AtomicPortBlockEntity
         outputDirections = sides;
     }
 
-    /*
-     * =========================================================
-     * INPUT / OUTPUT
-     * =========================================================
-     *
-     * Igual ao SPS:
-     *
-     * false = INPUT
-     * true  = OUTPUT
-     */
-
     @Override
     public InteractionResult onSneakRightClick(
             Player player
     ) {
-        if (level == null) {
-            return InteractionResult.PASS;
-        }
+        if (!isRemote()) {
 
-        if (!level.isClientSide) {
-            setActive(!getActive());
+            boolean oldMode =
+                    getActive();
+
+            setActive(!oldMode);
         }
 
         return InteractionResult.SUCCESS;
