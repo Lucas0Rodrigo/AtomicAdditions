@@ -70,8 +70,8 @@ public class AtomicPortBlockEntity
     getInitialGasTanks(
             IContentsListener listener
     ) {
-
         return side -> {
+
             AtomicMultiblockData multiblock =
                     getMultiblock();
 
@@ -80,10 +80,18 @@ public class AtomicPortBlockEntity
                 return Collections.emptyList();
             }
 
+            if (getBlockState().getValue(
+                    AtomicPortBlock.MODE
+            ) == PortMode.OUTPUT) {
+
+                return List.of(
+                        multiblock.outputTank
+                );
+            }
+
             return List.of(
                     multiblock.inputTank1,
-                    multiblock.inputTank2,
-                    multiblock.outputTank
+                    multiblock.inputTank2
             );
         };
     }
@@ -110,12 +118,17 @@ public class AtomicPortBlockEntity
             return needsPacket;
         }
 
-        if (getActive()) {
-            ChemicalUtil.emit(
-                    outputDirections,
-                    multiblock.outputTank,
-                    this
-            );
+        if (getBlockState().getValue(
+                AtomicPortBlock.MODE
+        ) == PortMode.OUTPUT) {
+
+            if (getActive()) {
+                ChemicalUtil.emit(
+                        outputDirections,
+                        multiblock.outputTank,
+                        this
+                );
+            }
         }
 
         if (!energyContainer.isEmpty()) {
@@ -161,10 +174,30 @@ public class AtomicPortBlockEntity
     ) {
         if (!isRemote()) {
 
-            boolean oldMode =
-                    getActive();
+            PortMode current =
+                    getBlockState().getValue(
+                            AtomicPortBlock.MODE
+                    );
 
-            setActive(!oldMode);
+            PortMode next =
+                    current == PortMode.INPUT
+                            ? PortMode.OUTPUT
+                            : PortMode.INPUT;
+
+            level.setBlock(
+                    worldPosition,
+                    getBlockState().setValue(
+                            AtomicPortBlock.MODE,
+                            next
+                    ),
+                    3
+            );
+
+            invalidateCachedCapabilities();
+
+            setActive(
+                    next == PortMode.OUTPUT
+            );
         }
 
         return InteractionResult.SUCCESS;

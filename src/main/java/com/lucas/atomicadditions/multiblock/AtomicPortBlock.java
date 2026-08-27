@@ -38,5 +38,6 @@ public class AtomicPortBlock
             StateDefinition.Builder<Block, BlockState> builder
     ) {
         builder.add(MODE);
+
     }
 }
