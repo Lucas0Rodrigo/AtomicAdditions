@@ -1,6 +1,7 @@
 package com.lucas.atomicadditions.multiblock;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import mekanism.api.Action;
@@ -63,24 +64,28 @@ public class AtomicPortBlockEntity
         return builder.build();
     }
 
-    @NotNull
     @Override
+    @NotNull
     public IChemicalTankHolder<Gas, GasStack, IGasTank>
     getInitialGasTanks(
             IContentsListener listener
     ) {
-        /*
-         * EXATAMENTE a mesma estratégia utilizada
-         * pelo SPS do Mekanism 10.4.x.
-         *
-         * O Port simplesmente expõe os tanques do
-         * multiblock.
-         *
-         * As próprias Chemical Tanks determinam
-         * o que pode entrar ou sair.
-         */
-        return side ->
-                getMultiblock().getGasTanks(side);
+
+        return side -> {
+            AtomicMultiblockData multiblock =
+                    getMultiblock();
+
+            if (multiblock == null
+                    || !multiblock.isFormed()) {
+                return Collections.emptyList();
+            }
+
+            return List.of(
+                    multiblock.inputTank1,
+                    multiblock.inputTank2,
+                    multiblock.outputTank
+            );
+        };
     }
 
     @Override
@@ -105,12 +110,6 @@ public class AtomicPortBlockEntity
             return needsPacket;
         }
 
-        /*
-         * PORT DE SAÍDA
-         *
-         * Somente o Port configurado como OUTPUT
-         * ejeta o gás para os tubos conectados.
-         */
         if (getActive()) {
             ChemicalUtil.emit(
                     outputDirections,
@@ -119,13 +118,6 @@ public class AtomicPortBlockEntity
             );
         }
 
-        /*
-         * ENERGIA
-         *
-         * O Port recebe energia dos Universal Cables
-         * e transfere para o armazenamento interno
-         * do AMR.
-         */
         if (!energyContainer.isEmpty()) {
 
             var energy =
