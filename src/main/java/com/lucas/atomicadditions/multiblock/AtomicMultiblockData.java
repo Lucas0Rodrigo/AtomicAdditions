@@ -46,20 +46,6 @@ public class AtomicMultiblockData
     ) {
         super(tile);
 
-        /*
-         * INPUT 1
-         *
-         * Receita Tântalo:
-         * Nióbio + Germânio
-         *
-         * Receita Rênio:
-         * Paládio + Cobre
-         *
-         * Portanto o primeiro tanque aceita:
-         *
-         * Nióbio
-         * Paládio
-         */
         inputTank1 =
                 MultiblockChemicalTankBuilder.GAS.input(
                         this,
@@ -71,14 +57,6 @@ public class AtomicMultiblockData
                         createSaveAndComparator()
                 );
 
-        /*
-         * INPUT 2
-         *
-         * Aceita:
-         *
-         * Germânio
-         * Cobre
-         */
         inputTank2 =
                 MultiblockChemicalTankBuilder.GAS.input(
                         this,
@@ -90,14 +68,6 @@ public class AtomicMultiblockData
                         createSaveAndComparator()
                 );
 
-        /*
-         * OUTPUT
-         *
-         * Aceita somente:
-         *
-         * Tântalo
-         * Rênio
-         */
         outputTank =
                 MultiblockChemicalTankBuilder.GAS.output(
                         this,
@@ -113,9 +83,6 @@ public class AtomicMultiblockData
         gasTanks.add(inputTank2);
         gasTanks.add(outputTank);
 
-        /*
-         * Energia interna do AMR.
-         */
         energyContainer =
                 VariableCapacityEnergyContainer.create(
                         () -> FloatingLong.create(

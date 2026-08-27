@@ -72,17 +72,28 @@ public class AtomicPortBlockEntity
             IContentsListener listener
     ) {
         return side -> {
-            if (getBlockState().getValue(AtomicPortBlock.MODE)
-                    == PortMode.OUTPUT) {
+            AtomicMultiblockData mb = getMultiblock();
+
+            System.out.println(
+                    "[AMR-DEBUG] holder queried side=" + side
+                            + " mode=" + getBlockState().getValue(
+                            AtomicPortBlock.MODE
+                    )
+                            + " formed=" + mb.isFormed()
+            );
+
+            if (getBlockState().getValue(
+                    AtomicPortBlock.MODE
+            ) == PortMode.OUTPUT) {
 
                 return Collections.singletonList(
-                        getMultiblock().outputTank
+                        mb.outputTank
                 );
             }
 
             return List.of(
-                    getMultiblock().inputTank1,
-                    getMultiblock().inputTank2
+                    mb.inputTank1,
+                    mb.inputTank2
             );
         };
     }
@@ -91,6 +102,10 @@ public class AtomicPortBlockEntity
     public boolean persists(
             SubstanceType type
     ) {
+        /*
+         * O gás pertence ao MultiblockData, não ao
+         * BlockEntity individual do Port.
+         */
         if (type == SubstanceType.GAS) {
             return false;
         }
@@ -110,8 +125,16 @@ public class AtomicPortBlockEntity
         }
 
         /*
-         * Somente o Port em modo OUTPUT ejeta
-         * o gás pelo tubo conectado.
+         * INPUT:
+         * Não fazemos transferência manual.
+         *
+         * O Pressurized Tube acessa a capability
+         * química deste Port e o GasHandlerManager
+         * usa os tanques do MultiblockData.
+         *
+         * OUTPUT:
+         * O Port ejeta o conteúdo do outputTank
+         * para as conexões definidas pelo multiblock.
          */
         if (isOutputMode()) {
             ChemicalUtil.emit(
@@ -121,6 +144,13 @@ public class AtomicPortBlockEntity
             );
         }
 
+        /*
+         * Entrada de energia pelo Universal Cable.
+         *
+         * Mantemos o comportamento atual para não
+         * alterar a arquitetura de energia que já está
+         * funcionando.
+         */
         if (!energyContainer.isEmpty()) {
 
             var energy =
@@ -183,6 +213,9 @@ public class AtomicPortBlockEntity
                             ? PortMode.OUTPUT
                             : PortMode.INPUT;
 
+            /*
+             * O modo é uma propriedade do BlockState.
+             */
             level.setBlockAndUpdate(
                     worldPosition,
                     state.setValue(
@@ -191,6 +224,12 @@ public class AtomicPortBlockEntity
                     )
             );
 
+            /*
+             * Como getInitialGasTanks() depende do
+             * comportamento do Port, invalidamos os
+             * handlers em cache para que a capability
+             * seja reavaliada imediatamente.
+             */
             invalidateCachedCapabilities();
         }
 
