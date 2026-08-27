@@ -82,6 +82,15 @@ public class AtomicPortBlockEntity
                             + " formed=" + mb.isFormed()
             );
 
+            System.out.println(
+                    "[AMR-DEBUG] tank1="
+                            + mb.inputTank1.getStored()
+                            + " tank2="
+                            + mb.inputTank2.getStored()
+                            + " output="
+                            + mb.outputTank.getStored()
+            );
+
             if (getBlockState().getValue(
                     AtomicPortBlock.MODE
             ) == PortMode.OUTPUT) {
