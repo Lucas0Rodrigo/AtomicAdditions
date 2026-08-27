@@ -3,6 +3,7 @@ package com.lucas.atomicadditions.multiblock;
 import com.lucas.atomicadditions.chemical.AtomicGases;
 import com.lucas.atomicadditions.recipes.AtomicAMRRecipe;
 import com.lucas.atomicadditions.recipes.AtomicRecipes;
+import com.mojang.logging.LogUtils;
 import java.util.HashSet;
 import java.util.Set;
 import mekanism.api.Action;
@@ -19,9 +20,13 @@ import mekanism.common.lib.multiblock.MultiblockData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import org.slf4j.Logger;
 
 public class AtomicMultiblockData
         extends MultiblockData {
+
+    private static final Logger LOGGER =
+            LogUtils.getLogger();
 
     private static final long GAS_TANK_CAPACITY =
             1_000_000L;
@@ -122,6 +127,53 @@ public class AtomicMultiblockData
     ) {
         boolean needsPacket =
                 super.tick(world);
+
+        /*
+         * DEBUG:
+         * Mostra o estado atual do multiblock no servidor
+         * uma vez a cada 20 ticks (~1 segundo).
+         */
+        if (!world.isClientSide
+                && world.getGameTime() % 20 == 0) {
+
+            GasStack debugInput1 =
+                    inputTank1.getStack();
+
+            GasStack debugInput2 =
+                    inputTank2.getStack();
+
+            GasStack debugOutput =
+                    outputTank.getStack();
+
+            LOGGER.info(
+                    "[AMR-DEBUG] STATE | "
+                            + "formed={} | "
+                            + "input1={} mB ({}) | "
+                            + "input2={} mB ({}) | "
+                            + "output={} mB ({}) | "
+                            + "energy={} | "
+                            + "progress={} | "
+                            + "scaledProgress={} | "
+                            + "lastProcessed={}",
+                    isFormed(),
+                    inputTank1.getStored(),
+                    debugInput1.isEmpty()
+                            ? "EMPTY"
+                            : debugInput1.getType(),
+                    inputTank2.getStored(),
+                    debugInput2.isEmpty()
+                            ? "EMPTY"
+                            : debugInput2.getType(),
+                    outputTank.getStored(),
+                    debugOutput.isEmpty()
+                            ? "EMPTY"
+                            : debugOutput.getType(),
+                    energyContainer.getEnergy(),
+                    processProgress,
+                    getScaledProgress(),
+                    lastProcessed
+            );
+        }
 
         /*
          * Guarda quanto foi realmente processado
@@ -372,3 +424,4 @@ public class AtomicMultiblockData
         );
     }
 }
+

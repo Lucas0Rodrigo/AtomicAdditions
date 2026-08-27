@@ -74,23 +74,6 @@ public class AtomicPortBlockEntity
         return side -> {
             AtomicMultiblockData mb = getMultiblock();
 
-            System.out.println(
-                    "[AMR-DEBUG] holder queried side=" + side
-                            + " mode=" + getBlockState().getValue(
-                            AtomicPortBlock.MODE
-                    )
-                            + " formed=" + mb.isFormed()
-            );
-
-            System.out.println(
-                    "[AMR-DEBUG] tank1="
-                            + mb.inputTank1.getStored()
-                            + " tank2="
-                            + mb.inputTank2.getStored()
-                            + " output="
-                            + mb.outputTank.getStored()
-            );
-
             if (getBlockState().getValue(
                     AtomicPortBlock.MODE
             ) == PortMode.OUTPUT) {
