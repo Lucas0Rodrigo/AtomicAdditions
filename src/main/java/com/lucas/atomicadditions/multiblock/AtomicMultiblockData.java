@@ -179,6 +179,15 @@ public class AtomicMultiblockData
             return needsPacket;
         }
 
+        if (stack1.getAmount()
+                < recipe.getInput1Amount()
+                || stack2.getAmount()
+                < recipe.getInput2Amount()) {
+
+            processProgress = 0;
+            return needsPacket;
+        }
+
         GasStack outputStack =
                 outputTank.getStack();
 
@@ -229,12 +238,6 @@ public class AtomicMultiblockData
             return needsPacket;
         }
 
-        /*
-         * Energia disponível determina a velocidade.
-         *
-         * Se tiver menos energia que o consumo nominal,
-         * continua processando proporcionalmente.
-         */
         processProgress +=
                 extracted.doubleValue()
                         / recipe.getEnergyPerTick();
@@ -260,6 +263,15 @@ public class AtomicMultiblockData
                             : currentInput2.getType(),
                     currentInput2.getAmount()
             )) {
+
+                processProgress = 0;
+                break;
+            }
+
+            if (currentInput1.getAmount()
+                    < recipe.getInput1Amount()
+                    || currentInput2.getAmount()
+                    < recipe.getInput2Amount()) {
 
                 processProgress = 0;
                 break;

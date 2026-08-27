@@ -1,6 +1,7 @@
 package com.lucas.atomicadditions.multiblock;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import mekanism.api.Action;
@@ -70,7 +71,20 @@ public class AtomicPortBlockEntity
     public IChemicalTankHolder<Gas, GasStack, IGasTank> getInitialGasTanks(
             IContentsListener listener
     ) {
-        return side -> getMultiblock().getGasTanks(side);
+        return side -> {
+            if (getBlockState().getValue(AtomicPortBlock.MODE)
+                    == PortMode.OUTPUT) {
+
+                return Collections.singletonList(
+                        getMultiblock().outputTank
+                );
+            }
+
+            return List.of(
+                    getMultiblock().inputTank1,
+                    getMultiblock().inputTank2
+            );
+        };
     }
 
     @Override
@@ -95,7 +109,11 @@ public class AtomicPortBlockEntity
             return needsPacket;
         }
 
-        if (getActive()) {
+        /*
+         * Somente o Port em modo OUTPUT ejeta
+         * o gás pelo tubo conectado.
+         */
+        if (isOutputMode()) {
             ChemicalUtil.emit(
                     outputDirections,
                     multiblock.outputTank,
@@ -133,6 +151,12 @@ public class AtomicPortBlockEntity
         return needsPacket;
     }
 
+    private boolean isOutputMode() {
+        return getBlockState().getValue(
+                AtomicPortBlock.MODE
+        ) == PortMode.OUTPUT;
+    }
+
     @Override
     public void setEjectSides(
             Set<Direction> sides
@@ -146,10 +170,26 @@ public class AtomicPortBlockEntity
     ) {
         if (!isRemote()) {
 
-            boolean oldMode =
-                    getActive();
+            BlockState state =
+                    getBlockState();
 
-            setActive(!oldMode);
+            PortMode oldMode =
+                    state.getValue(
+                            AtomicPortBlock.MODE
+                    );
+
+            PortMode newMode =
+                    oldMode == PortMode.INPUT
+                            ? PortMode.OUTPUT
+                            : PortMode.INPUT;
+
+            level.setBlockAndUpdate(
+                    worldPosition,
+                    state.setValue(
+                            AtomicPortBlock.MODE,
+                            newMode
+                    )
+            );
 
             invalidateCachedCapabilities();
         }

@@ -12,24 +12,35 @@ public class AtomicPortBlock
         extends AtomicCasingBlock<AtomicPortBlockEntity> {
 
     public static final EnumProperty<PortMode> MODE =
-            EnumProperty.create("mode", PortMode.class);
+            EnumProperty.create(
+                    "mode",
+                    PortMode.class
+            );
 
     public AtomicPortBlock(
             Properties properties,
             TileEntityTypeRegistryObject<AtomicPortBlockEntity> tileType
     ) {
-        super(properties, tileType);
+        super(
+                properties,
+                tileType
+        );
 
         getType().add(
                 new AttributeEnergy(
                         () -> FloatingLong.ZERO,
-                        () -> FloatingLong.create(1_000_000_000L)
+                        () -> FloatingLong.create(
+                                1_000_000_000L
+                        )
                 )
         );
 
         registerDefaultState(
                 stateDefinition.any()
-                        .setValue(MODE, PortMode.INPUT)
+                        .setValue(
+                                MODE,
+                                PortMode.INPUT
+                        )
         );
     }
 
@@ -38,6 +49,5 @@ public class AtomicPortBlock
             StateDefinition.Builder<Block, BlockState> builder
     ) {
         builder.add(MODE);
-
     }
 }
