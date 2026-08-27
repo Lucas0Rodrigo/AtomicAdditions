@@ -14,6 +14,7 @@ import mekanism.api.energy.IEnergyContainer;
 import mekanism.api.math.FloatingLong;
 import mekanism.common.capabilities.chemical.multiblock.MultiblockChemicalTankBuilder;
 import mekanism.common.capabilities.energy.VariableCapacityEnergyContainer;
+import mekanism.common.inventory.container.sync.dynamic.ContainerSync;
 import mekanism.common.lib.multiblock.MultiblockData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -31,14 +32,18 @@ public class AtomicMultiblockData
     public final Set<BlockPos> coils =
             new HashSet<>();
 
+    @ContainerSync
     public final IGasTank inputTank1;
 
+    @ContainerSync
     public final IGasTank inputTank2;
 
+    @ContainerSync
     public final IGasTank outputTank;
 
     public final IEnergyContainer energyContainer;
 
+    @ContainerSync
     public double processProgress = 0;
 
     public AtomicMultiblockData(
