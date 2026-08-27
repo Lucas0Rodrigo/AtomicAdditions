@@ -1,7 +1,6 @@
 package com.lucas.atomicadditions.multiblock;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 import mekanism.api.Action;
@@ -70,35 +69,18 @@ public class AtomicPortBlockEntity
     getInitialGasTanks(
             IContentsListener listener
     ) {
-        return side -> {
-            AtomicMultiblockData multiblock =
-                    getMultiblock();
-
-            if (!multiblock.isFormed()) {
-                return Collections.emptyList();
-            }
-
-            /*
-             * INPUT PORT
-             *
-             * Expõe SOMENTE os dois tanques de entrada.
-             */
-            if (!getActive()) {
-                return List.of(
-                        multiblock.inputTank1,
-                        multiblock.inputTank2
-                );
-            }
-
-            /*
-             * OUTPUT PORT
-             *
-             * Expõe SOMENTE o tanque de saída.
-             */
-            return List.of(
-                    multiblock.outputTank
-            );
-        };
+        /*
+         * EXATAMENTE a mesma estratégia utilizada
+         * pelo SPS do Mekanism 10.4.x.
+         *
+         * O Port simplesmente expõe os tanques do
+         * multiblock.
+         *
+         * As próprias Chemical Tanks determinam
+         * o que pode entrar ou sair.
+         */
+        return side ->
+                getMultiblock().getGasTanks(side);
     }
 
     @Override
@@ -124,56 +106,51 @@ public class AtomicPortBlockEntity
         }
 
         /*
-         * Energia recebida pelo Port.
-         */
-        if (!energyContainer.isEmpty()) {
-
-            var available =
-                    energyContainer.getEnergy();
-
-            var needed =
-                    multiblock.energyContainer.getNeeded();
-
-            if (!needed.isZero()) {
-
-                var transfer =
-                        available.min(needed);
-
-                if (!transfer.isZero()) {
-
-                    var extracted =
-                            energyContainer.extract(
-                                    transfer,
-                                    Action.EXECUTE,
-                                    AutomationType.INTERNAL
-                            );
-
-                    if (!extracted.isZero()) {
-
-                        multiblock.energyContainer.insert(
-                                extracted,
-                                Action.EXECUTE,
-                                AutomationType.INTERNAL
-                        );
-
-                        needsPacket = true;
-                    }
-                }
-            }
-        }
-
-        /*
-         * OUTPUT
+         * PORT DE SAÍDA
          *
-         * Somente Port em modo OUTPUT.
+         * Somente o Port configurado como OUTPUT
+         * ejeta o gás para os tubos conectados.
          */
         if (getActive()) {
-
             ChemicalUtil.emit(
                     outputDirections,
                     multiblock.outputTank,
                     this
             );
+        }
+
+        /*
+         * ENERGIA
+         *
+         * O Port recebe energia dos Universal Cables
+         * e transfere para o armazenamento interno
+         * do AMR.
+         */
+        if (!energyContainer.isEmpty()) {
+
+            var energy =
+                    energyContainer.getEnergy();
+
+            if (!energy.isZero()) {
+
+                var extracted =
+                        energyContainer.extract(
+                                energy,
+                                Action.EXECUTE,
+                                AutomationType.INTERNAL
+                        );
+
+                if (!extracted.isZero()) {
+
+                    multiblock.energyContainer.insert(
+                            extracted,
+                            Action.EXECUTE,
+                            AutomationType.INTERNAL
+                    );
+
+                    needsPacket = true;
+                }
+            }
         }
 
         return needsPacket;
