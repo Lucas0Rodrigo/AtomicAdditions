@@ -3,7 +3,6 @@ package com.lucas.atomicadditions.multiblock;
 import com.lucas.atomicadditions.chemical.AtomicGases;
 import com.lucas.atomicadditions.recipes.AtomicAMRRecipe;
 import com.lucas.atomicadditions.recipes.AtomicRecipes;
-import com.mojang.logging.LogUtils;
 import java.util.HashSet;
 import java.util.Set;
 import mekanism.api.Action;
@@ -20,13 +19,9 @@ import mekanism.common.lib.multiblock.MultiblockData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import org.slf4j.Logger;
 
 public class AtomicMultiblockData
         extends MultiblockData {
-
-    private static final Logger LOGGER =
-            LogUtils.getLogger();
 
     private static final long GAS_TANK_CAPACITY =
             4_000L;
@@ -149,13 +144,16 @@ public class AtomicMultiblockData
         boolean needsPacket =
                 super.tick(world);
 
+        /*
+         * Assim como no SPS, representa quanto realmente
+         * foi processado durante o tick atual.
+         */
         lastProcessed = 0;
         lastReceivedEnergy =
                 FloatingLong.ZERO;
 
         if (!isFormed()) {
             processProgress = 0;
-            logDebugState(world);
             return needsPacket;
         }
 
@@ -169,7 +167,6 @@ public class AtomicMultiblockData
                 || stack2.isEmpty()) {
 
             processProgress = 0;
-            logDebugState(world);
             return needsPacket;
         }
 
@@ -183,7 +180,6 @@ public class AtomicMultiblockData
 
         if (recipe == null) {
             processProgress = 0;
-            logDebugState(world);
             return needsPacket;
         }
 
@@ -195,7 +191,6 @@ public class AtomicMultiblockData
                 != recipe.getOutput()) {
 
             processProgress = 0;
-            logDebugState(world);
             return needsPacket;
         }
 
@@ -215,7 +210,6 @@ public class AtomicMultiblockData
 
         if (totalEnergyPerRecipe <= 0) {
             processProgress = 0;
-            logDebugState(world);
             return needsPacket;
         }
 
@@ -263,7 +257,6 @@ public class AtomicMultiblockData
                 );
 
         if (processable <= 0) {
-            logDebugState(world);
             return needsPacket;
         }
 
@@ -286,7 +279,6 @@ public class AtomicMultiblockData
                 );
 
         if (energyToUse.isZero()) {
-            logDebugState(world);
             return needsPacket;
         }
 
@@ -298,7 +290,6 @@ public class AtomicMultiblockData
                 );
 
         if (extractedEnergy.isZero()) {
-            logDebugState(world);
             return needsPacket;
         }
 
@@ -318,7 +309,6 @@ public class AtomicMultiblockData
                         / totalEnergyPerRecipe;
 
         if (actualProcessable <= 0) {
-            logDebugState(world);
             return needsPacket;
         }
 
@@ -362,6 +352,7 @@ public class AtomicMultiblockData
                             : currentInput2.getType(),
                     currentInput2.getAmount()
             )) {
+
                 break;
             }
 
@@ -369,6 +360,7 @@ public class AtomicMultiblockData
                     < recipe.getInput1Amount()
                     || currentInput2.getAmount()
                     < recipe.getInput2Amount()) {
+
                 break;
             }
 
@@ -378,11 +370,13 @@ public class AtomicMultiblockData
             if (!currentOutput.isEmpty()
                     && currentOutput.getType()
                     != recipe.getOutput()) {
+
                 break;
             }
 
             if (outputTank.getNeeded()
                     < recipe.getOutputAmount()) {
+
                 break;
             }
 
@@ -426,8 +420,6 @@ public class AtomicMultiblockData
             needsPacket = true;
         }
 
-        logDebugState(world);
-
         return needsPacket;
     }
 
@@ -438,7 +430,7 @@ public class AtomicMultiblockData
      * lastProcessed representa quantas receitas
      * fracionárias foram processadas neste tick.
      *
-     * Multiplicamos pela quantidade de saída da receita.
+     * Multiplicamos pela quantidade de saída.
      */
     public double getProcessRate() {
 
@@ -474,57 +466,6 @@ public class AtomicMultiblockData
                         * recipe.getOutputAmount()
                         * 1_000
         ) / 1_000D;
-    }
-
-    private void logDebugState(
-            Level world
-    ) {
-        if (world.isClientSide
-                || world.getGameTime() % 20 != 0) {
-            return;
-        }
-
-        GasStack debugInput1 =
-                inputTank1.getStack();
-
-        GasStack debugInput2 =
-                inputTank2.getStack();
-
-        GasStack debugOutput =
-                outputTank.getStack();
-
-        LOGGER.info(
-                "[AMR-DEBUG] STATE | "
-                        + "formed={} | "
-                        + "input1={} mB ({}) | "
-                        + "input2={} mB ({}) | "
-                        + "output={} mB ({}) | "
-                        + "energy={} | "
-                        + "progress={} | "
-                        + "scaledProgress={} | "
-                        + "lastProcessed={} | "
-                        + "lastReceivedEnergy={} | "
-                        + "processRate={} mB/t",
-                isFormed(),
-                inputTank1.getStored(),
-                debugInput1.isEmpty()
-                        ? "EMPTY"
-                        : debugInput1.getType(),
-                inputTank2.getStored(),
-                debugInput2.isEmpty()
-                        ? "EMPTY"
-                        : debugInput2.getType(),
-                outputTank.getStored(),
-                debugOutput.isEmpty()
-                        ? "EMPTY"
-                        : debugOutput.getType(),
-                energyContainer.getEnergy(),
-                processProgress,
-                getScaledProgress(),
-                lastProcessed,
-                lastReceivedEnergy,
-                getProcessRate()
-        );
     }
 
     /*
