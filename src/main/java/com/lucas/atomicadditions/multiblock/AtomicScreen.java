@@ -12,6 +12,7 @@ import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.tile.EmptyTileContainer;
 import mekanism.common.lib.Color;
 import mekanism.common.lib.Color.ColorFunction;
+import mekanism.common.util.text.EnergyDisplay;
 import mekanism.common.util.text.TextUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -36,13 +37,16 @@ public class AtomicScreen extends GuiMekanismTile<
                 )
         );
 
-        dynamicSlots = false;
+        dynamicSlots = true;
         imageWidth += 18;
     }
 
     @Override
     protected void init() {
-        imageHeight = 96;
+        imageHeight = 112;
+        inventoryLabelY =
+                imageHeight - 92;
+
         super.init();
     }
 
@@ -98,10 +102,11 @@ public class AtomicScreen extends GuiMekanismTile<
         );
 
         /*
-         * Painel de status.
+         * Painel central seguindo o padrão do SPS:
          *
-         * Assim como no SPS, o estado é determinado
-         * pelo processamento ocorrido no último tick.
+         * STATUS
+         * ENTRADA DE ENERGIA
+         * TAXA DE PROCESSAMENTO
          */
         addRenderableWidget(
                 new GuiInnerScreen(
@@ -128,6 +133,23 @@ public class AtomicScreen extends GuiMekanismTile<
                                                     : MekanismLang.IDLE
                                     )
                             );
+
+                            if (active) {
+
+                                list.add(
+                                        MekanismLang.SPS_ENERGY_INPUT.translate(
+                                                EnergyDisplay.of(
+                                                        multiblock.lastReceivedEnergy
+                                                )
+                                        )
+                                );
+
+                                list.add(
+                                        MekanismLang.PROCESS_RATE_MB.translate(
+                                                multiblock.getProcessRate()
+                                        )
+                                );
+                            }
 
                             return list;
                         }
@@ -189,5 +211,17 @@ public class AtomicScreen extends GuiMekanismTile<
             int mouseY
     ) {
         renderTitleText(guiGraphics);
+        drawString(
+                guiGraphics,
+                playerInventoryTitle,
+                inventoryLabelX,
+                inventoryLabelY,
+                titleTextColor()
+        );
+        super.drawForegroundText(
+                guiGraphics,
+                mouseX,
+                mouseY
+        );
     }
 }
