@@ -72,7 +72,8 @@ public class AtomicPortBlockEntity
             IContentsListener listener
     ) {
         return side -> {
-            AtomicMultiblockData mb = getMultiblock();
+            AtomicMultiblockData mb =
+                    getMultiblock();
 
             if (getBlockState().getValue(
                     AtomicPortBlock.MODE
@@ -139,9 +140,13 @@ public class AtomicPortBlockEntity
         /*
          * Entrada de energia pelo Universal Cable.
          *
-         * Mantemos o comportamento atual para não
-         * alterar a arquitetura de energia que já está
-         * funcionando.
+         * A energia é extraída do container do Port
+         * usando AutomationType.INTERNAL e entregue ao
+         * container do multiblock como energia externa.
+         *
+         * O AtomicMultiblockData aceita EXTERNAL para
+         * inserção e rejeita INTERNAL, então usar
+         * INTERNAL aqui faria a energia ser recusada.
          */
         if (!energyContainer.isEmpty()) {
 
@@ -162,7 +167,7 @@ public class AtomicPortBlockEntity
                     multiblock.energyContainer.insert(
                             extracted,
                             Action.EXECUTE,
-                            AutomationType.INTERNAL
+                            AutomationType.EXTERNAL
                     );
 
                     needsPacket = true;

@@ -29,7 +29,7 @@ public class AtomicMultiblockData
             LogUtils.getLogger();
 
     private static final long GAS_TANK_CAPACITY =
-            1_000_000L;
+            360_000_000L;
 
     private static final long ENERGY_CAPACITY =
             1_000_000_000L;
