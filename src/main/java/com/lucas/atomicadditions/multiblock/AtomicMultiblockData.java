@@ -48,26 +48,32 @@ public class AtomicMultiblockData
 
     public final IEnergyContainer energyContainer;
 
-    /**
+    /*
      * Progresso fracionário da receita atual.
      *
      * 0.0 = início
-     * 1.0 = receita completa
-     *
-     * Assim como no SPS, esse valor pode avançar
-     * muito rápido dependendo da quantidade de energia
-     * disponível.
+     * 1.0 = uma receita completa
      */
     @ContainerSync
     public double processProgress = 0;
 
-    /**
+    /*
      * Quanto foi processado neste tick.
      *
      * É usado pela GUI para determinar se o AMR está ativo.
      */
     @ContainerSync
     public double lastProcessed = 0;
+
+    /*
+     * Energia efetivamente consumida pelo AMR
+     * no último tick de processamento.
+     *
+     * Equivalente ao lastReceivedEnergy do SPS.
+     */
+    @ContainerSync
+    public FloatingLong lastReceivedEnergy =
+            FloatingLong.ZERO;
 
     public AtomicMultiblockData(
             BlockEntity tile
@@ -143,11 +149,9 @@ public class AtomicMultiblockData
         boolean needsPacket =
                 super.tick(world);
 
-        /*
-         * Assim como no SPS, representa quanto realmente
-         * foi processado durante o tick atual.
-         */
         lastProcessed = 0;
+        lastReceivedEnergy =
+                FloatingLong.ZERO;
 
         if (!isFormed()) {
             processProgress = 0;
@@ -218,12 +222,6 @@ public class AtomicMultiblockData
         /*
          * Quantas receitas completas a energia armazenada
          * permite avançar neste tick.
-         *
-         * Exemplo:
-         *
-         * 50.000.000 FE
-         * / 100.000.000 FE
-         * = 0,5 receita
          */
         double processableByEnergy =
                 energyContainer.getEnergy().doubleValue()
@@ -249,7 +247,7 @@ public class AtomicMultiblockData
                         / recipe.getOutputAmount();
 
         /*
-         * Assim como o SPS, o processamento é limitado pelo
+         * Assim como no SPS, o processamento é limitado pelo
          * recurso mais escasso.
          */
         double processable =
@@ -305,6 +303,13 @@ public class AtomicMultiblockData
         }
 
         /*
+         * Guarda a energia realmente usada no último tick
+         * para a interface, igual ao SPS.
+         */
+        lastReceivedEnergy =
+                extractedEnergy;
+
+        /*
          * Recalcula a fração real caso a extração efetiva
          * tenha sido ligeiramente menor que a solicitada.
          */
@@ -319,20 +324,12 @@ public class AtomicMultiblockData
 
         /*
          * Acumula progresso da receita.
-         *
-         * 0.25 → 25%
-         * 0.50 → 50%
-         * 0.75 → 75%
-         * 1.00 → receita completa
          */
         processProgress +=
                 actualProcessable;
 
         /*
-         * A máquina esteve trabalhando neste tick,
-         * mesmo que ainda não tenha completado a receita.
-         *
-         * Isso reproduz o princípio do lastProcessed do SPS.
+         * A máquina esteve trabalhando neste tick.
          */
         lastProcessed =
                 actualProcessable;
@@ -340,9 +337,10 @@ public class AtomicMultiblockData
         /*
          * Quando a barra chega a 100%, produzimos a saída.
          *
-         * Se houver energia e recursos suficientes para
-         * várias receitas no mesmo tick, o loop pode completar
-         * várias delas, exatamente como o SPS.
+         * Caso o processamento esteja muito rápido e
+         * atravesse vários ciclos em um único tick, o loop
+         * completa todas as receitas possíveis e conserva
+         * o restante do progresso fracionário.
          */
         while (
                 processProgress >= 1.0
@@ -364,7 +362,6 @@ public class AtomicMultiblockData
                             : currentInput2.getType(),
                     currentInput2.getAmount()
             )) {
-
                 break;
             }
 
@@ -372,7 +369,6 @@ public class AtomicMultiblockData
                     < recipe.getInput1Amount()
                     || currentInput2.getAmount()
                     < recipe.getInput2Amount()) {
-
                 break;
             }
 
@@ -382,19 +378,16 @@ public class AtomicMultiblockData
             if (!currentOutput.isEmpty()
                     && currentOutput.getType()
                     != recipe.getOutput()) {
-
                 break;
             }
 
             if (outputTank.getNeeded()
                     < recipe.getOutputAmount()) {
-
                 break;
             }
 
             /*
-             * Agora sim, com 100% da barra concluída,
-             * consumimos os dois reagentes.
+             * Consome os dois reagentes.
              */
             inputTank1.extract(
                     recipe.getInput1Amount(),
@@ -409,8 +402,8 @@ public class AtomicMultiblockData
             );
 
             /*
-             * E somente neste ponto colocamos a produção
-             * no tanque de saída.
+             * Produz somente quando a receita chegou
+             * a 100% do progresso.
              */
             outputTank.insert(
                     new GasStack(
@@ -422,15 +415,7 @@ public class AtomicMultiblockData
             );
 
             /*
-             * Retira uma receita completa do progresso.
-             *
-             * Se processProgress estava em:
-             *
-             * 1.37
-             *
-             * depois da receita fica:
-             *
-             * 0.37
+             * Remove uma receita completa do progresso.
              */
             processProgress -= 1.0;
 
@@ -444,6 +429,51 @@ public class AtomicMultiblockData
         logDebugState(world);
 
         return needsPacket;
+    }
+
+    /*
+     * Retorna a taxa efetiva de produção em mB/t
+     * durante o último tick.
+     *
+     * lastProcessed representa quantas receitas
+     * fracionárias foram processadas neste tick.
+     *
+     * Multiplicamos pela quantidade de saída da receita.
+     */
+    public double getProcessRate() {
+
+        if (lastProcessed <= 0) {
+            return 0;
+        }
+
+        GasStack stack1 =
+                inputTank1.getStack();
+
+        GasStack stack2 =
+                inputTank2.getStack();
+
+        if (stack1.isEmpty()
+                || stack2.isEmpty()) {
+            return 0;
+        }
+
+        AtomicAMRRecipe recipe =
+                AtomicRecipes.AMR_RECIPES.findRecipe(
+                        stack1.getType(),
+                        stack1.getAmount(),
+                        stack2.getType(),
+                        stack2.getAmount()
+                );
+
+        if (recipe == null) {
+            return 0;
+        }
+
+        return Math.round(
+                lastProcessed
+                        * recipe.getOutputAmount()
+                        * 1_000
+        ) / 1_000D;
     }
 
     private void logDebugState(
@@ -472,7 +502,9 @@ public class AtomicMultiblockData
                         + "energy={} | "
                         + "progress={} | "
                         + "scaledProgress={} | "
-                        + "lastProcessed={}",
+                        + "lastProcessed={} | "
+                        + "lastReceivedEnergy={} | "
+                        + "processRate={} mB/t",
                 isFormed(),
                 inputTank1.getStored(),
                 debugInput1.isEmpty()
@@ -489,14 +521,14 @@ public class AtomicMultiblockData
                 energyContainer.getEnergy(),
                 processProgress,
                 getScaledProgress(),
-                lastProcessed
+                lastProcessed,
+                lastReceivedEnergy,
+                getProcessRate()
         );
     }
 
-    /**
+    /*
      * Retorna o progresso normalizado da receita atual.
-     *
-     * O valor representa diretamente a barra:
      *
      * 0.0 = 0%
      * 0.5 = 50%
