@@ -9,7 +9,7 @@ import mekanism.client.gui.element.bar.GuiDynamicHorizontalRateBar;
 import mekanism.client.gui.element.gauge.GaugeType;
 import mekanism.client.gui.element.gauge.GuiGasGauge;
 import mekanism.common.MekanismLang;
-import mekanism.common.inventory.container.tile.EmptyTileContainer;
+import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.lib.Color;
 import mekanism.common.lib.Color.ColorFunction;
 import mekanism.common.util.text.EnergyDisplay;
@@ -21,11 +21,11 @@ import org.jetbrains.annotations.NotNull;
 
 public class AtomicScreen extends GuiMekanismTile<
         AtomicCasingBlockEntity,
-        EmptyTileContainer<AtomicCasingBlockEntity>
+        MekanismTileContainer<AtomicCasingBlockEntity>
         > {
 
     public AtomicScreen(
-            EmptyTileContainer<AtomicCasingBlockEntity> container,
+            MekanismTileContainer<AtomicCasingBlockEntity> container,
             Inventory inv,
             Component title
     ) {
@@ -37,13 +37,22 @@ public class AtomicScreen extends GuiMekanismTile<
                 )
         );
 
+        /*
+         * Igual ao SPS:
+         * habilita os slots dinâmicos e aumenta a altura
+         * da janela para acomodar o inventário do jogador.
+         */
         dynamicSlots = true;
         imageWidth += 18;
+        imageHeight += 16;
     }
 
     @Override
     protected void init() {
-        imageHeight = 112;
+        /*
+         * Mesmo cálculo utilizado pelo SPS para o
+         * posicionamento do texto "Inventário".
+         */
         inventoryLabelY =
                 imageHeight - 92;
 
@@ -54,7 +63,12 @@ public class AtomicScreen extends GuiMekanismTile<
     protected void addGuiElements() {
 
         /*
-         * Tanque de entrada 1
+         * Adiciona os slots do inventário do jogador.
+         */
+        super.addGuiElements();
+
+        /*
+         * Tanque de entrada 1.
          */
         addRenderableWidget(
                 new GuiGasGauge(
@@ -70,7 +84,7 @@ public class AtomicScreen extends GuiMekanismTile<
         );
 
         /*
-         * Tanque de entrada 2
+         * Tanque de entrada 2.
          */
         addRenderableWidget(
                 new GuiGasGauge(
@@ -86,7 +100,7 @@ public class AtomicScreen extends GuiMekanismTile<
         );
 
         /*
-         * Tanque de saída
+         * Tanque de saída.
          */
         addRenderableWidget(
                 new GuiGasGauge(
@@ -102,7 +116,9 @@ public class AtomicScreen extends GuiMekanismTile<
         );
 
         /*
-         * Painel central seguindo o padrão do SPS:
+         * Painel central.
+         *
+         * Mantém a estrutura que já existia:
          *
          * STATUS
          * ENTRADA DE ENERGIA
@@ -158,6 +174,9 @@ public class AtomicScreen extends GuiMekanismTile<
 
         /*
          * Barra de progresso.
+         *
+         * Continua na parte principal da máquina,
+         * acima do inventário.
          */
         addRenderableWidget(
                 new GuiDynamicHorizontalRateBar(
@@ -211,6 +230,7 @@ public class AtomicScreen extends GuiMekanismTile<
             int mouseY
     ) {
         renderTitleText(guiGraphics);
+
         drawString(
                 guiGraphics,
                 playerInventoryTitle,
@@ -218,6 +238,7 @@ public class AtomicScreen extends GuiMekanismTile<
                 inventoryLabelY,
                 titleTextColor()
         );
+
         super.drawForegroundText(
                 guiGraphics,
                 mouseX,
