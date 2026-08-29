@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CTC",
+    "BPB",
+    "CTC"
+  ],
+  "key": {
+    "C": {
+      "item": "mekanism:ingot_lead"
+    },
+    "B": {
+      "item": "mekanism:ingot_bronze"
+    },
+    "T": {
+      "item": "mekanism:ultimate_control_circuit"
+    },
+    "P": {
+      "item": "mekanism:ultimate_pressurized_tube"
+    }
+  },
+  "result": {
+    "item": "atomicadditions:casing_port",
+    "count": 1
+  }
+}

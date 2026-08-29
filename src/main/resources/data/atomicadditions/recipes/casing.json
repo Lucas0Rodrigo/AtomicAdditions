@@ -1,0 +1,20 @@
+{
+"type": "minecraft:crafting_shaped",
+"pattern": [
+"CBC",
+"B B",
+"CBC"
+],
+"key": {
+"B": {
+"item": "mekanism:ingot_bronze"
+},
+"C": {
+"item": "mekanism:ingot_lead"
+}
+},
+"result": {
+"item": "atomicadditions:casing",
+"count": 1
+}
+}

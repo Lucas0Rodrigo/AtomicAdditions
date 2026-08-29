@@ -77,7 +77,7 @@ public class AtomicAdditions {
 
     public static final RegistryObject<Block> CASING_PORT =
             BLOCKS.register(
-                    "casing_port",
+                    "casing_port.json",
                     AtomicAdditions::createCasingPort
             );
 
@@ -112,7 +112,7 @@ public class AtomicAdditions {
 
     public static final RegistryObject<Item> CASING_PORT_ITEM =
             ITEMS.register(
-                    "casing_port",
+                    "casing_port.json",
                     () -> new BlockItem(
                             CASING_PORT.get(),
                             new Item.Properties()
