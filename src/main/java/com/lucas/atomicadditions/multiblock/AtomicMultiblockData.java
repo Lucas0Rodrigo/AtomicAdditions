@@ -24,7 +24,7 @@ public class AtomicMultiblockData
         extends MultiblockData {
 
     private static final long GAS_TANK_CAPACITY =
-            4_000L;
+            8_000L;
 
     private static final long ENERGY_CAPACITY =
             40_000_000L;

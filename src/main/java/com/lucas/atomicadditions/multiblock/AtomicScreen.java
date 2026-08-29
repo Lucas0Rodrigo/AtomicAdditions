@@ -38,20 +38,16 @@ public class AtomicScreen extends GuiMekanismTile<
         );
 
         /*
-         * Igual ao SPS:
-         * habilita os slots dinâmicos e aumenta a altura
-         * da janela para acomodar o inventário do jogador.
+         * Igual ao SPS.
          */
         dynamicSlots = true;
-        imageWidth += 18;
         imageHeight += 16;
     }
 
     @Override
     protected void init() {
         /*
-         * Mesmo cálculo utilizado pelo SPS para o
-         * posicionamento do texto "Inventário".
+         * Igual ao SPS.
          */
         inventoryLabelY =
                 imageHeight - 92;
@@ -63,12 +59,12 @@ public class AtomicScreen extends GuiMekanismTile<
     protected void addGuiElements() {
 
         /*
-         * Adiciona os slots do inventário do jogador.
+         * Adiciona os slots do inventário.
          */
         super.addGuiElements();
 
         /*
-         * Tanque de entrada 1.
+         * Primeiro tanque de entrada.
          */
         addRenderableWidget(
                 new GuiGasGauge(
@@ -84,7 +80,7 @@ public class AtomicScreen extends GuiMekanismTile<
         );
 
         /*
-         * Tanque de entrada 2.
+         * Segundo tanque de entrada.
          */
         addRenderableWidget(
                 new GuiGasGauge(
@@ -101,6 +97,8 @@ public class AtomicScreen extends GuiMekanismTile<
 
         /*
          * Tanque de saída.
+         *
+         * Mesma posição do SPS.
          */
         addRenderableWidget(
                 new GuiGasGauge(
@@ -110,7 +108,7 @@ public class AtomicScreen extends GuiMekanismTile<
                                 tile.getMultiblock().getGasTanks(null),
                         GaugeType.STANDARD,
                         this,
-                        169,
+                        151,
                         17
                 )
         );
@@ -118,18 +116,16 @@ public class AtomicScreen extends GuiMekanismTile<
         /*
          * Painel central.
          *
-         * Mantém a estrutura que já existia:
-         *
-         * STATUS
-         * ENTRADA DE ENERGIA
-         * TAXA DE PROCESSAMENTO
+         * O SPS usa 122 px.
+         * Como o AMR possui um tanque adicional de 18 px
+         * à esquerda, o painel fica com 104 px.
          */
         addRenderableWidget(
                 new GuiInnerScreen(
                         this,
                         45,
                         17,
-                        122,
+                        104,
                         60,
                         () -> {
 
@@ -175,8 +171,7 @@ public class AtomicScreen extends GuiMekanismTile<
         /*
          * Barra de progresso.
          *
-         * Continua na parte principal da máquina,
-         * acima do inventário.
+         * Mesma largura do SPS.
          */
         addRenderableWidget(
                 new GuiDynamicHorizontalRateBar(
@@ -206,7 +201,7 @@ public class AtomicScreen extends GuiMekanismTile<
                         },
                         7,
                         79,
-                        178,
+                        160,
                         ColorFunction.scale(
                                 Color.rgbi(
                                         60,

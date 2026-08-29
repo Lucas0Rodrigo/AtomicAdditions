@@ -80,19 +80,11 @@ public class AtomicRecipeManager extends SimpleJsonResourceReloadListener {
                         "[Atomic Additions] Erro ao carregar recipe AMR: "
                                 + id
                 );
-
-                exception.printStackTrace();
             }
         }
-
-        System.out.println(
-                "[Atomic Additions] "
-                        + recipes.size()
-                        + " recipes do AMR carregadas."
-        );
     }
 
-    /**
+    /*
      * Carrega as mesmas recipes JSON utilizadas pelo AMR
      * diretamente dos recursos do mod para o JEI.
      *
@@ -163,15 +155,8 @@ public class AtomicRecipeManager extends SimpleJsonResourceReloadListener {
                                 + path
                 );
 
-                exception.printStackTrace();
             }
         }
-
-        System.out.println(
-                "[Atomic Additions] "
-                        + jeiRecipes.size()
-                        + " recipes do AMR carregadas para o JEI."
-        );
 
         return Collections.unmodifiableList(
                 jeiRecipes

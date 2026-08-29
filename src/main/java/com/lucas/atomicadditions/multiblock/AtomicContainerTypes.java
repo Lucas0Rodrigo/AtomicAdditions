@@ -18,8 +18,11 @@ public class AtomicContainerTypes {
     public static final ContainerTypeRegistryObject<
             MekanismTileContainer<AtomicCasingBlockEntity>
             > ATOMIC =
-            CONTAINER_TYPES.register(
-                    "atomic",
-                    AtomicCasingBlockEntity.class
-            );
+            CONTAINER_TYPES
+                    .custom(
+                            "atomic",
+                            AtomicCasingBlockEntity.class
+                    )
+                    .offset(0, 16)
+                    .build();
 }
