@@ -7,6 +7,7 @@ import com.mojang.logging.LogUtils;
 import mekanism.common.lib.multiblock.MultiblockCache;
 import mekanism.common.lib.multiblock.MultiblockManager;
 import mekanism.common.registration.impl.TileEntityTypeRegistryObject;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -184,12 +185,22 @@ public class AtomicAdditions {
     private void clientSetup(
             final FMLClientSetupEvent event
     ) {
-        event.enqueueWork(() ->
-                MenuScreens.register(
-                        AtomicContainerTypes.ATOMIC.get(),
-                        AtomicScreen::new
-                )
-        );
+        event.enqueueWork(() -> {
+            MenuScreens.register(
+                    AtomicContainerTypes.ATOMIC.get(),
+                    AtomicScreen::new
+            );
+
+            BlockEntityRenderers.register(
+                    ATOMIC_CASING_BLOCK_ENTITY.get(),
+                    AtomicCasingRenderer::new
+            );
+
+            BlockEntityRenderers.register(
+                    ATOMIC_PORT_BLOCK_ENTITY.get(),
+                    AtomicCasingRenderer::new
+            );
+        });
     }
 
     private void addCreative(
