@@ -15,23 +15,23 @@ public class AtomicGases {
 
     // Entradas da Receita 1
     public static final GasRegistryObject<Gas> NIOBIUM =
-            GASES.register("niobium", 0x8A8A8A);
+            GASES.register("niobium", 0xFFD700);
 
     public static final GasRegistryObject<Gas> GERMANIUM =
-            GASES.register("germanium", 0xA6A6A6);
+            GASES.register("germanium", 0x9B111E);
 
     // Saída da Receita 1
     public static final GasRegistryObject<Gas> TANTALUM =
-            GASES.register("tantalum", 0x6F8FAF);
+            GASES.register("tantalum", 0x00A86B);
 
     // Entradas da Receita 2
     public static final GasRegistryObject<Gas> PALLADIUM =
-            GASES.register("palladium", 0xB8B8B8);
+            GASES.register("palladium", 0x0047AB);
 
     public static final GasRegistryObject<Gas> COPPER =
             GASES.register("copper", 0xD47A4A);
 
     // Saída da Receita 2
     public static final GasRegistryObject<Gas> RHENIUM =
-            GASES.register("rhenium", 0x7F9AA8);
+            GASES.register("rhenium", 0xFF8C00);
 }
