@@ -112,7 +112,7 @@ public class AtomicAdditions {
 
     public static final RegistryObject<Item> CASING_PORT_ITEM =
             ITEMS.register(
-                    "casing_port.json",
+                    "casing_port",
                     () -> new BlockItem(
                             CASING_PORT.get(),
                             new Item.Properties()
