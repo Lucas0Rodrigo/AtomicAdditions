@@ -8,6 +8,6 @@
   "output": "atomicadditions:rhenium",
   "output_amount": 1000,
 
-  "energy_per_tick": 250000,
+  "energy_per_tick": 500000,
   "duration": 400
 }

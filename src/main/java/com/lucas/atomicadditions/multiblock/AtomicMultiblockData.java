@@ -27,7 +27,7 @@ public class AtomicMultiblockData
             8_000L;
 
     private static final long ENERGY_CAPACITY =
-            40_000_000L;
+            80_000_000L;
 
     public final Set<BlockPos> coils =
             new HashSet<>();

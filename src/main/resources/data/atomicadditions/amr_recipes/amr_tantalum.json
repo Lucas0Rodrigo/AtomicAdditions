@@ -8,6 +8,6 @@
   "output": "atomicadditions:tantalum",
   "output_amount": 1000,
 
-  "energy_per_tick": 100000,
+  "energy_per_tick": 500000,
   "duration": 200
 }
