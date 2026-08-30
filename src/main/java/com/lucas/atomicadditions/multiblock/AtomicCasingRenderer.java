@@ -1,7 +1,5 @@
 package com.lucas.atomicadditions.multiblock;
 
-import com.lucas.atomicadditions.shaders.AtomicFogRenderType;
-import com.lucas.atomicadditions.shaders.AtomicShaders;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -308,17 +306,6 @@ public class AtomicCasingRenderer
                         colors.size()
                 );
 
-        if (active
-                && energyFactor > 0F) {
-
-            renderCentralFog(
-                    poseStack,
-                    buffer,
-                    energyFactor,
-                    gameTime
-            );
-        }
-
         /*
          * ========================================================
          * ESFERAS
@@ -556,38 +543,6 @@ public class AtomicCasingRenderer
             double gameTime
     ) {
         /*
-         * Névoa somente quando o AMR estiver trabalhando.
-         */
-        if (energyFactor <= 0F) {
-            return;
-        }
-
-        VertexConsumer consumer =
-                buffer.getBuffer(
-                        AtomicFogRenderType.FOG
-                );
-
-        /*
-         * Atualiza o tempo do shader.
-         */
-        if (AtomicShaders.FOG.get() != null) {
-
-            var gameTimeUniform =
-                    AtomicShaders.FOG
-                            .get()
-                            .getUniform(
-                                    "GameTime"
-                            );
-
-            if (gameTimeUniform != null) {
-
-                gameTimeUniform.set(
-                        (float) gameTime
-                );
-            }
-        }
-
-        /*
          * Quanto mais energia,
          * maior e mais presente fica a névoa.
          */
@@ -643,14 +598,6 @@ public class AtomicCasingRenderer
              *
              * A cor aqui é apenas base para o shader.
              */
-            renderFogSphere(
-                    poseStack,
-                    consumer,
-                    0xFFFFFF,
-                    0.20F
-                            + energyFactor
-                            * 0.18F
-            );
 
             poseStack.popPose();
         }
