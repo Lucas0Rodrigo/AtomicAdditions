@@ -61,7 +61,7 @@ public class AtomicCasingRenderer
      * Esse valor é multiplicado pelo percentual de energia.
      */
     private static final float MAX_ORBIT_SPEED =
-            0.82F;
+            1.22F;
 
     /*
      * Pequena rotação própria somente para deixar
@@ -1122,13 +1122,15 @@ public class AtomicCasingRenderer
                     );
 
             /*
-             * Distribuição das bobinas entre as esferas.
+             * Distribui as bobinas entre as esferas.
+             *
+             * Com apenas uma esfera:
+             * todas apontam para ela.
              */
             int sphereIndex =
                     spherePositions.size() <= 1
                             ? 0
-                            : index
-                            % spherePositions.size();
+                            : index % spherePositions.size();
 
             Vec3 sphere =
                     spherePositions.get(
@@ -1136,142 +1138,265 @@ public class AtomicCasingRenderer
                     );
 
             /*
-             * INÍCIO:
-             * bobina
-             *
-             * FIM:
-             * esfera
-             *
-             * Portanto o raio sai fisicamente da bobina
-             * e vai para o núcleo.
+             * Ponto inicial:
+             * centro da bobina.
              */
-            float startX =
-                    (float) coilX;
-
-            float startY =
-                    (float) coilY;
-
-            float startZ =
-                    (float) coilZ;
-
-            /*
-             * Fazemos o raio terminar um pouco antes
-             * do centro da esfera para não ficar escondido
-             * dentro dela.
-             */
-            Vec3 direction =
+            Vec3 start =
                     new Vec3(
-                            sphere.x - coilX,
-                            sphere.y - coilY,
-                            sphere.z - coilZ
+                            coilX,
+                            coilY,
+                            coilZ
                     );
 
-            float distance =
-                    (float) direction.length();
+            /*
+             * Ponto final:
+             * superfície da esfera.
+             */
+            Vec3 target =
+                    sphere;
 
-            if (distance > 0.001F) {
+            Vec3 direction =
+                    target.subtract(start);
 
-                direction =
-                        direction.normalize();
+            double distance =
+                    direction.length();
 
-                float endDistance =
-                        Math.max(
-                                0.0F,
-                                distance
-                                        - SPHERE_RADIUS
+            if (distance < 0.001D) {
+                index++;
+                continue;
+            }
+
+            direction =
+                    direction.normalize();
+
+            /*
+             * Retira o trecho que ficaria dentro da esfera.
+             */
+            double endDistance =
+                    Math.max(
+                            0.0D,
+                            distance
+                                    - SPHERE_RADIUS
+                    );
+
+            Vec3 end =
+                    start.add(
+                            direction.scale(
+                                    endDistance
+                            )
+                    );
+
+            /*
+             * Número de segmentos do raio.
+             *
+             * Mais energia = raio mais detalhado.
+             */
+            int segments =
+                    5
+                            + Math.round(
+                            energyFactor * 4
+                    );
+
+            /*
+             * Vetor perpendicular principal.
+             */
+            Vec3 perpendicular =
+                    new Vec3(
+                            -direction.z,
+                            0,
+                            direction.x
+                    );
+
+            if (perpendicular.lengthSqr()
+                    < 0.000001D) {
+
+                perpendicular =
+                        new Vec3(
+                                1,
+                                0,
+                                0
                         );
 
-                float endX =
-                        startX
-                                + (float) direction.x
-                                * endDistance;
+            } else {
 
-                float endY =
-                        startY
-                                + (float) direction.y
-                                * endDistance;
+                perpendicular =
+                        perpendicular.normalize();
+            }
 
-                float endZ =
-                        startZ
-                                + (float) direction.z
-                                * endDistance;
+            /*
+             * Segundo eixo perpendicular.
+             */
+            Vec3 perpendicular2 =
+                    direction.cross(
+                            perpendicular
+                    ).normalize();
 
+            /*
+             * Ponto anterior começa na bobina.
+             */
+            Vec3 previous =
+                    start;
+
+            /*
+             * Raio principal.
+             */
+            for (int segment = 1;
+                 segment <= segments;
+                 segment++) {
+
+                float fraction =
+                        segment
+                                / (float) segments;
+
+                Vec3 point =
+                        start.lerp(
+                                end,
+                                fraction
+                        );
+
+                /*
+                 * Não fazemos desvio no final para
+                 * conectar suavemente à esfera.
+                 */
+                if (segment < segments) {
+
+                    /*
+                     * Padrão pseudoaleatório determinístico.
+                     *
+                     * Cada raio tem sua própria sequência,
+                     * mas ela não muda de forma caótica
+                     * a cada frame.
+                     */
+                    double seed =
+                            index * 17.37
+                                    + segment * 7.91;
+
+                    double waveA =
+                            Math.sin(
+                                    gameTime * 0.45
+                                            + seed
+                            );
+
+                    double waveB =
+                            Math.cos(
+                                    gameTime * 0.31
+                                            + seed * 1.73
+                            );
+
+                    /*
+                     * Quanto maior a energia,
+                     * maior a irregularidade.
+                     */
+                    double jitter =
+                            (
+                                    0.035D
+                                            + energyFactor
+                                            * 0.075D
+                            )
+                                    * (
+                                    0.35D
+                                            + fraction * 0.65D
+                            );
+
+                    point =
+                            point.add(
+                                    perpendicular.scale(
+                                            waveA * jitter
+                                    )
+                            );
+
+                    point =
+                            point.add(
+                                    perpendicular2.scale(
+                                            waveB * jitter
+                                    )
+                            );
+                }
+
+                /*
+                 * Pulsação do raio.
+                 */
                 float pulse =
-                        0.70F
-                                + 0.30F
+                        0.65F
+                                + 0.35F
                                 * Mth.sin(
                                 (float) (
                                         gameTime
-                                                * 0.30
+                                                * 0.55
                                                 + index
-                                                * 1.7
+                                                * 2.7
+                                                + segment
+                                                * 1.9
                                 )
                         );
 
                 /*
-                 * Raio principal.
+                 * Intensidade.
                  */
-                drawSegment(
-                        matrix,
-                        consumer,
-                        startX,
-                        startY,
-                        startZ,
-                        endX,
-                        endY,
-                        endZ,
-                        1F,
-                        1F,
-                        1F,
+                float alpha =
                         (
-                                0.30F
+                                0.35F
                                         + energyFactor
-                                        * 0.70F
-                        ) * pulse,
-                        0.022F
-                                + energyFactor * 0.045F
-                );
+                                        * 0.65F
+                        )
+                                * pulse;
 
                 /*
-                 * Pequeno brilho na saída da bobina.
+                 * Espessura.
                  */
-                float flashLength =
-                        0.16F
-                                + energyFactor * 0.08F;
-
-                float flashEndX =
-                        startX
-                                + (float) direction.x
-                                * flashLength;
-
-                float flashEndY =
-                        startY
-                                + (float) direction.y
-                                * flashLength;
-
-                float flashEndZ =
-                        startZ
-                                + (float) direction.z
-                                * flashLength;
+                float thickness =
+                        0.018F
+                                + energyFactor * 0.030F;
 
                 drawSegment(
                         matrix,
                         consumer,
-                        startX,
-                        startY,
-                        startZ,
-                        flashEndX,
-                        flashEndY,
-                        flashEndZ,
+                        (float) previous.x,
+                        (float) previous.y,
+                        (float) previous.z,
+                        (float) point.x,
+                        (float) point.y,
+                        (float) point.z,
                         1F,
                         1F,
                         1F,
-                        0.75F
-                                + energyFactor * 0.25F,
-                        0.035F
-                                + energyFactor * 0.035F
+                        alpha,
+                        thickness
                 );
+
+                previous =
+                        point;
             }
+
+            /*
+             * Pequeno clarão exatamente na saída da bobina.
+             */
+            Vec3 coilFlashEnd =
+                    start.add(
+                            direction.scale(
+                                    0.20D
+                                            + energyFactor
+                                            * 0.10D
+                            )
+                    );
+
+            drawSegment(
+                    matrix,
+                    consumer,
+                    (float) start.x,
+                    (float) start.y,
+                    (float) start.z,
+                    (float) coilFlashEnd.x,
+                    (float) coilFlashEnd.y,
+                    (float) coilFlashEnd.z,
+                    1F,
+                    1F,
+                    1F,
+                    0.80F
+                            + energyFactor * 0.20F,
+                    0.035F
+                            + energyFactor * 0.030F
+            );
 
             index++;
         }
