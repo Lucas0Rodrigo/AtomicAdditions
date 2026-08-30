@@ -124,9 +124,6 @@ public class AtomicCasingRenderer
     private long lastOrbitTick =
             -1;
 
-    private long lastLogTick =
-            -1;
-
     public AtomicCasingRenderer(
             BlockEntityRendererProvider.Context context
     ) {
@@ -158,11 +155,6 @@ public class AtomicCasingRenderer
         if (!multiblock.isFormed()) {
             return;
         }
-
-        logState(
-                blockEntity,
-                multiblock
-        );
 
         /*
          * Os dados visuais vêm do snapshot sincronizado.
@@ -230,6 +222,12 @@ public class AtomicCasingRenderer
 
         boolean active =
                 multiblock.renderProcessed > 0;
+
+        logRayState(
+                blockEntity,
+                multiblock,
+                active
+        );
 
         float orbitFactor =
                 active
@@ -544,40 +542,55 @@ public class AtomicCasingRenderer
                 currentTick;
     }
 
-    private void logState(
+    private long lastRayLogTick =
+            -1;
+
+    private void logRayState(
             AtomicCasingBlockEntity blockEntity,
-            AtomicMultiblockData multiblock
+            AtomicMultiblockData multiblock,
+            boolean active
     ) {
         long gameTime =
                 blockEntity.getLevel()
                         .getGameTime();
 
-        if (gameTime == lastLogTick
+        if (gameTime == lastRayLogTick
                 || gameTime % 20 != 0) {
             return;
         }
 
-        lastLogTick =
+        lastRayLogTick =
                 gameTime;
 
         LOGGER.info(
-                "[AMR-RENDER] master={} | formed={} | renderLocation={} | gases={} | input1={} | input2={} | energy={} | processed={} | progress={}",
-                blockEntity.getBlockPos(),
-                multiblock.isFormed(),
-                multiblock.renderLocation,
-                getActiveInputColors(
-                        multiblock
-                ).size(),
-                getDisplayName(
-                        multiblock.renderInput1Name
-                ),
-                getDisplayName(
-                        multiblock.renderInput2Name
-                ),
+                "[AMR-RAYS] active={} | energy={} | processed={} | coils={} | spheres={}",
+                active,
                 multiblock.renderEnergy,
                 multiblock.renderProcessed,
-                multiblock.renderProgress
+                multiblock.coils.size(),
+                getActiveInputColors(multiblock).size()
         );
+
+        int index = 0;
+
+        for (BlockPos coil :
+                multiblock.coils) {
+
+            LOGGER.info(
+                    "[AMR-RAYS] coil[{}]={}",
+                    index,
+                    coil
+            );
+
+            index++;
+
+            if (index >= 8) {
+                LOGGER.info(
+                        "[AMR-RAYS] ... demais bobinas omitidas"
+                );
+                break;
+            }
+        }
     }
 
     private String getDisplayName(
