@@ -18,6 +18,9 @@ import mekanism.common.capabilities.energy.VariableCapacityEnergyContainer;
 import mekanism.common.inventory.container.sync.dynamic.ContainerSync;
 import mekanism.common.lib.multiblock.MultiblockData;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -479,11 +482,11 @@ public class AtomicMultiblockData
         return needsPacket;
     }
 
-    /**
-     * Prepara o snapshot utilizado pelo renderer.
-     *
-     * Este método roda no servidor.
-     */
+
+     // Prepara o snapshot utilizado pelo renderer.
+
+     // Este metodo roda no servidor.
+
     private void updateRenderData() {
 
         GasStack stack1 =
@@ -538,7 +541,7 @@ public class AtomicMultiblockData
                 getScaledProgress();
     }
 
-    /**
+    /*
      * Envia para o cliente somente os dados necessários
      * para a animação.
      */
@@ -548,6 +551,9 @@ public class AtomicMultiblockData
     ) {
         super.writeUpdateTag(tag);
 
+        /*
+         * Dados visuais das esferas.
+         */
         tag.putInt(
                 "amr_render_input1_color",
                 renderInput1Color
@@ -582,9 +588,35 @@ public class AtomicMultiblockData
                 "amr_render_progress",
                 renderProgress
         );
+
+        /*
+         * Posições das Supercharged Coils.
+         *
+         * O renderer do cliente precisa disso para
+         * desenhar os raios saindo das bobinas.
+         *
+         * Mesmo princípio usado pelo SPS.
+         */
+        ListTag coilList =
+                new ListTag();
+
+        for (BlockPos coil :
+                coils) {
+
+            coilList.add(
+                    NbtUtils.writeBlockPos(
+                            coil
+                    )
+            );
+        }
+
+        tag.put(
+                "amr_coils",
+                coilList
+        );
     }
 
-    /**
+    /*
      * Recebe no cliente os dados necessários
      * para o renderer.
      */
@@ -594,6 +626,9 @@ public class AtomicMultiblockData
     ) {
         super.readUpdateTag(tag);
 
+        /*
+         * Dados visuais das esferas.
+         */
         renderInput1Color =
                 tag.getInt(
                         "amr_render_input1_color"
@@ -628,6 +663,28 @@ public class AtomicMultiblockData
                 tag.getDouble(
                         "amr_render_progress"
                 );
+
+        /*
+         * Reconstrói as coils no cliente.
+         */
+        coils.clear();
+
+        ListTag coilList =
+                tag.getList(
+                        "amr_coils",
+                        Tag.TAG_COMPOUND
+                );
+
+        for (int i = 0;
+             i < coilList.size();
+             i++) {
+
+            coils.add(
+                    NbtUtils.readBlockPos(
+                            coilList.getCompound(i)
+                    )
+            );
+        }
     }
 
     /*
