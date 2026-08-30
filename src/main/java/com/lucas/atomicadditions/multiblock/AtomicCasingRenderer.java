@@ -67,7 +67,7 @@ public class AtomicCasingRenderer
      */
 
     private static final float CORE_RADIUS =
-            SPHERE_RADIUS * 0.80F;
+            SPHERE_RADIUS * 0.285F;
 
     /*
      * 60% de opacidade.
@@ -97,7 +97,7 @@ public class AtomicCasingRenderer
      * Espessura base.
      */
     private static final float TRAIL_RADIUS =
-            0.026F;
+            SPHERE_RADIUS * 0.80F;
 
     /*
      * ============================================================
@@ -692,9 +692,9 @@ public class AtomicCasingRenderer
          * Comprimento cresce bastante com a energia.
          */
         float trailScale =
-                0.70F
+                0.90F
                         + energyFactor
-                        * 1.30F;
+                        * 1.10F;
 
         for (int i = 1;
              i <= TRAIL_SEGMENTS;
@@ -757,14 +757,14 @@ public class AtomicCasingRenderer
             float radius =
                     TRAIL_RADIUS
                             * (
-                            0.45F
+                            0.30F
                                     + energyFactor
-                                    * 1.20F
+                                    * 0.70F
                     )
                             * (
-                            0.55F
+                            0.25F
                                     + fade
-                                    * 0.45F
+                                    * 0.75F
                     );
 
             /*
@@ -772,9 +772,9 @@ public class AtomicCasingRenderer
              */
             float alpha =
                     (
-                            0.20F
+                            0.55F
                                     + energyFactor
-                                    * 0.80F
+                                    * 0.45F
                     )
                             * fade;
 
@@ -897,14 +897,14 @@ public class AtomicCasingRenderer
              * Cada raio possui comprimento diferente.
              */
             double arcLength =
-                    0.09
+                    0.16
                             + pseudoRandom(
                             seed,
                             2
                     ) * (
-                            0.10
+                            0.14
                                     + energyFactor
-                                    * 0.08
+                                    * 0.10
                     );
 
             /*
@@ -954,15 +954,15 @@ public class AtomicCasingRenderer
                     );
 
             float thickness =
-                    0.014F
-                            + energyFactor * 0.018F;
+                    0.028F
+                            + energyFactor * 0.022F;
 
             float alpha =
                     flicker
                             * (
-                            0.45F
+                            0.70F
                                     + energyFactor
-                                    * 0.50F
+                                    * 0.30F
                     );
 
             drawLightningTube(
@@ -1219,7 +1219,7 @@ public class AtomicCasingRenderer
                     );
 
             float thickness =
-                    0.024F
+                    0.048F
                             + energyFactor
                             * 0.038F;
 
