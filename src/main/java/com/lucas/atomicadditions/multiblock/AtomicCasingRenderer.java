@@ -1,14 +1,11 @@
 package com.lucas.atomicadditions.multiblock;
 
-import com.lucas.atomicadditions.chemical.AtomicGases;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.logging.LogUtils;
 import com.mojang.math.Axis;
 import java.util.ArrayList;
 import java.util.List;
-import mekanism.api.chemical.gas.Gas;
-import mekanism.api.chemical.gas.GasStack;
 import mekanism.client.render.MekanismRenderType;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -25,18 +22,35 @@ public class AtomicCasingRenderer
     private static final Logger LOGGER =
             LogUtils.getLogger();
 
-    private static final float SPHERE_RADIUS = 0.38F;
-    private static final float SPHERE_X_OFFSET = 0.95F;
-    private static final float SMOKE_RADIUS = 0.48F;
-    private static final float ATMOSPHERE_RADIUS = 0.52F;
+    private static final float SPHERE_RADIUS =
+            0.38F;
 
-    private static final int SPHERE_SEGMENTS = 14;
-    private static final int SPHERE_RINGS = 8;
-    private static final int SMOKE_PARTICLES = 16;
-    private static final int ATMOSPHERE_ARCS = 8;
+    private static final float SPHERE_X_OFFSET =
+            0.95F;
 
-    private static final float IDLE_BOB_AMPLITUDE = 0.06F;
-    private static final float IDLE_BOB_SPEED = 0.06F;
+    private static final float SMOKE_RADIUS =
+            0.48F;
+
+    private static final float ATMOSPHERE_RADIUS =
+            0.52F;
+
+    private static final int SPHERE_SEGMENTS =
+            14;
+
+    private static final int SPHERE_RINGS =
+            8;
+
+    private static final int SMOKE_PARTICLES =
+            16;
+
+    private static final int ATMOSPHERE_ARCS =
+            8;
+
+    private static final float IDLE_BOB_AMPLITUDE =
+            0.06F;
+
+    private static final float IDLE_BOB_SPEED =
+            0.06F;
 
     private static final double MAX_REFERENCE_ENERGY =
             80_000_000D;
@@ -65,10 +79,7 @@ public class AtomicCasingRenderer
         }
 
         /*
-         * Somente o Master renderiza a animação.
-         *
-         * É assim que evitamos desenhar o mesmo núcleo
-         * dezenas de vezes, uma vez por casing.
+         * Somente o Master renderiza o núcleo.
          */
         if (!blockEntity.isMaster()) {
             return;
@@ -78,31 +89,26 @@ public class AtomicCasingRenderer
             return;
         }
 
-        List<GasStack> gases =
-                getActiveInputGases(multiblock);
-
-        /*
-         * Debug periódico.
-         *
-         * Um log por segundo aproximadamente.
-         */
         logState(
                 blockEntity,
-                multiblock,
-                gases
+                multiblock
         );
 
-        if (gases.isEmpty()) {
+        /*
+         * Os dados visuais vêm do snapshot sincronizado
+         * pelo servidor.
+         */
+        List<Integer> colors =
+                getActiveInputColors(multiblock);
+
+        if (colors.isEmpty()) {
             return;
         }
 
         poseStack.pushPose();
 
         /*
-         * O renderer está preso ao BlockEntity Master.
-         *
-         * Usamos os limites reais do multiblock para colocar
-         * o núcleo exatamente no centro da estrutura.
+         * Centro geométrico do multiblock.
          */
         double centerX =
                 multiblock.getMinPos().getX()
@@ -129,30 +135,32 @@ public class AtomicCasingRenderer
                 blockEntity.getLevel().getGameTime()
                         + partialTick;
 
+        /*
+         * Leve oscilação vertical existente mesmo parado.
+         */
         float idleBob =
                 (float) Math.sin(
                         gameTime * IDLE_BOB_SPEED
                 ) * IDLE_BOB_AMPLITUDE;
 
         /*
-         * Energia efetivamente usada no último tick.
+         * Intensidade da energia utilizada.
          *
-         * 0      = sem energia
-         * 1      = 80 MFE/t
+         * 0     = sem energia
+         * 1     = 80 MFE
          */
         float energyFactor =
                 (float) Math.min(
                         1D,
-                        multiblock.lastReceivedEnergy
-                                .doubleValue()
+                        multiblock.renderEnergy
                                 / MAX_REFERENCE_ENERGY
                 );
 
         boolean active =
-                multiblock.lastProcessed > 0;
+                multiblock.renderProcessed > 0;
 
         /*
-         * Velocidade baseada na energia.
+         * Velocidade de rotação proporcional à energia.
          */
         float rotationSpeed =
                 active
@@ -172,17 +180,20 @@ public class AtomicCasingRenderer
                 );
 
         for (int index = 0;
-             index < gases.size();
+             index < colors.size();
              index++) {
 
-            GasStack gasStack =
-                    gases.get(index);
+            int color =
+                    colors.get(index);
 
             float x;
 
-            if (gases.size() == 1) {
+            if (colors.size() == 1) {
+
                 x = 0;
+
             } else {
+
                 x =
                         index == 0
                                 ? -SPHERE_X_OFFSET
@@ -209,6 +220,7 @@ public class AtomicCasingRenderer
             );
 
             if (active) {
+
                 poseStack.mulPose(
                         Axis.YP.rotationDegrees(
                                 localRotation
@@ -228,20 +240,18 @@ public class AtomicCasingRenderer
             renderSphere(
                     poseStack,
                     consumer,
-                    gasStack.getType(),
+                    color,
                     SPHERE_RADIUS,
                     0.92F
             );
 
             /*
              * Fumaça colorida.
-             *
-             * Continua presente mesmo com o AMR parado.
              */
             renderSmoke(
                     poseStack,
                     consumer,
-                    gasStack.getType(),
+                    color,
                     gameTime,
                     index,
                     active
@@ -250,10 +260,11 @@ public class AtomicCasingRenderer
             );
 
             if (active) {
+
                 /*
-                 * Atmosfera individual.
+                 * Atmosfera individual de mini-raios.
                  *
-                 * Branca e com densidade proporcional à energia.
+                 * Sempre branca.
                  */
                 renderAtmosphere(
                         poseStack,
@@ -268,16 +279,17 @@ public class AtomicCasingRenderer
         }
 
         /*
-         * Raios entre o núcleo e as bobinas.
+         * Raios entre as esferas e as bobinas.
          */
         if (active) {
+
             renderCoilRays(
                     poseStack,
                     consumer,
                     multiblock,
                     energyFactor,
                     gameTime,
-                    gases.size()
+                    colors.size()
             );
         }
 
@@ -286,114 +298,103 @@ public class AtomicCasingRenderer
 
     private void logState(
             AtomicCasingBlockEntity blockEntity,
-            AtomicMultiblockData multiblock,
-            List<GasStack> gases
+            AtomicMultiblockData multiblock
     ) {
         long gameTime =
-                blockEntity.getLevel().getGameTime();
+                blockEntity.getLevel()
+                        .getGameTime();
 
         if (gameTime == lastLogTick
                 || gameTime % 20 != 0) {
             return;
         }
 
-        lastLogTick = gameTime;
-
-        String gas1 =
-                multiblock.inputTank1
-                        .getStack()
-                        .isEmpty()
-                        ? "EMPTY"
-                        : multiblock.inputTank1
-                        .getStack()
-                        .getType()
-                        .getRegistryName().toString();
-
-        String gas2 =
-                multiblock.inputTank2
-                        .getStack()
-                        .isEmpty()
-                        ? "EMPTY"
-                        : multiblock.inputTank2
-                        .getStack()
-                        .getType()
-                        .getRegistryName().toString();
+        lastLogTick =
+                gameTime;
 
         LOGGER.info(
-                "[AMR-RENDER] master={} | formed={} | renderLocation={} | gases={} | input1={} | input2={} | energy={} | lastProcessed={} | progress={}",
+                "[AMR-RENDER] master={} | formed={} | renderLocation={} | gases={} | input1={} | input2={} | energy={} | processed={} | progress={}",
                 blockEntity.getBlockPos(),
                 multiblock.isFormed(),
                 multiblock.renderLocation,
-                gases.size(),
-                gas1,
-                gas2,
-                multiblock.lastReceivedEnergy,
-                multiblock.lastProcessed,
-                multiblock.getScaledProgress()
+                getActiveInputColors(
+                        multiblock
+                ).size(),
+                getDisplayName(
+                        multiblock.renderInput1Name
+                ),
+                getDisplayName(
+                        multiblock.renderInput2Name
+                ),
+                multiblock.renderEnergy,
+                multiblock.renderProcessed,
+                multiblock.renderProgress
         );
     }
 
-    private List<GasStack> getActiveInputGases(
+    private String getDisplayName(
+            String name
+    ) {
+        return name == null
+                || name.isEmpty()
+                ? "EMPTY"
+                : name;
+    }
+
+    private List<Integer> getActiveInputColors(
             AtomicMultiblockData multiblock
     ) {
-        List<GasStack> gases =
+        List<Integer> colors =
                 new ArrayList<>(2);
 
-        GasStack first =
-                multiblock.inputTank1.getStack();
-
-        GasStack second =
-                multiblock.inputTank2.getStack();
-
-        if (!first.isEmpty()) {
-            gases.add(first);
-        }
-
-        if (!second.isEmpty()
-                && (
-                gases.isEmpty()
-                        || second.getType()
-                        != gases.get(0).getType()
-        )) {
-            gases.add(second);
-        }
-
         /*
-         * O AMR utiliza somente estes quatro gases como entrada.
+         * -1 = vazio.
          */
-        gases.removeIf(
-                stack ->
-                        stack.getType()
-                                != AtomicGases.NIOBIUM.get()
-                                && stack.getType()
-                                != AtomicGases.GERMANIUM.get()
-                                && stack.getType()
-                                != AtomicGases.PALLADIUM.get()
-                                && stack.getType()
-                                != AtomicGases.COPPER.get()
-        );
+        if (multiblock.renderInput1Color >= 0) {
 
-        return gases;
+            colors.add(
+                    multiblock.renderInput1Color
+            );
+        }
+
+        if (multiblock.renderInput2Color >= 0) {
+
+            /*
+             * Evita desenhar duas esferas iguais caso,
+             * por algum motivo, os dois lados contenham
+             * o mesmo gás.
+             */
+            if (colors.isEmpty()
+                    || multiblock.renderInput2Color
+                    != colors.get(0)) {
+
+                colors.add(
+                        multiblock.renderInput2Color
+                );
+            }
+        }
+
+        return colors;
     }
 
     private void renderSphere(
             PoseStack poseStack,
             VertexConsumer consumer,
-            Gas gas,
+            int color,
             float radius,
             float alpha
     ) {
-        int color =
-                gas.getColorRepresentation();
-
         float red =
-                ((color >> 16) & 0xFF) / 255F;
+                ((color >> 16) & 0xFF)
+                        / 255F;
 
         float green =
-                ((color >> 8) & 0xFF) / 255F;
+                ((color >> 8) & 0xFF)
+                        / 255F;
 
         float blue =
-                (color & 0xFF) / 255F;
+                (color & 0xFF)
+                        / 255F;
 
         Matrix4f matrix =
                 poseStack.last().pose();
@@ -446,69 +447,61 @@ public class AtomicCasingRenderer
                                         / SPHERE_SEGMENTS
                         );
 
-                consumer.vertex(
-                                matrix,
-                                Mth.cos(phi1)
-                                        * ringRadius1,
-                                y1,
-                                Mth.sin(phi1)
-                                        * ringRadius1
-                        )
-                        .color(
-                                red,
-                                green,
-                                blue,
-                                alpha
-                        )
-                        .endVertex();
+                addVertex(
+                        consumer,
+                        matrix,
+                        Mth.cos(phi1)
+                                * ringRadius1,
+                        y1,
+                        Mth.sin(phi1)
+                                * ringRadius1,
+                        red,
+                        green,
+                        blue,
+                        alpha
+                );
 
-                consumer.vertex(
-                                matrix,
-                                Mth.cos(phi1)
-                                        * ringRadius2,
-                                y2,
-                                Mth.sin(phi1)
-                                        * ringRadius2
-                        )
-                        .color(
-                                red,
-                                green,
-                                blue,
-                                alpha
-                        )
-                        .endVertex();
+                addVertex(
+                        consumer,
+                        matrix,
+                        Mth.cos(phi1)
+                                * ringRadius2,
+                        y2,
+                        Mth.sin(phi1)
+                                * ringRadius2,
+                        red,
+                        green,
+                        blue,
+                        alpha
+                );
 
-                consumer.vertex(
-                                matrix,
-                                Mth.cos(phi2)
-                                        * ringRadius2,
-                                y2,
-                                Mth.sin(phi2)
-                                        * ringRadius2
-                        )
-                        .color(
-                                red,
-                                green,
-                                blue,
-                                alpha
-                        )
-                        .endVertex();
+                addVertex(
+                        consumer,
+                        matrix,
+                        Mth.cos(phi2)
+                                * ringRadius2,
+                        y2,
+                        Mth.sin(phi2)
+                                * ringRadius2,
+                        red,
+                        green,
+                        blue,
+                        alpha
+                );
 
-                consumer.vertex(
-                                matrix,
-                                Mth.cos(phi2)
-                                        * ringRadius1,
-                                y1,
-                                Mth.sin(phi2)
-                                        * ringRadius1
-                        )
-                        .color(
-                                red,
-                                green,
-                                blue,
-                                alpha
-                        )
-                        .endVertex();
+                addVertex(
+                        consumer,
+                        matrix,
+                        Mth.cos(phi2)
+                                * ringRadius1,
+                        y1,
+                        Mth.sin(phi2)
+                                * ringRadius1,
+                        red,
+                        green,
+                        blue,
+                        alpha
+                );
             }
         }
     }
@@ -516,22 +509,22 @@ public class AtomicCasingRenderer
     private void renderSmoke(
             PoseStack poseStack,
             VertexConsumer consumer,
-            Gas gas,
+            int color,
             double gameTime,
             int sphereIndex,
             float alpha
     ) {
-        int color =
-                gas.getColorRepresentation();
-
         float red =
-                ((color >> 16) & 0xFF) / 255F;
+                ((color >> 16) & 0xFF)
+                        / 255F;
 
         float green =
-                ((color >> 8) & 0xFF) / 255F;
+                ((color >> 8) & 0xFF)
+                        / 255F;
 
         float blue =
-                (color & 0xFF) / 255F;
+                (color & 0xFF)
+                        / 255F;
 
         Matrix4f matrix =
                 poseStack.last().pose();
@@ -584,7 +577,8 @@ public class AtomicCasingRenderer
 
             float size =
                     0.09F
-                            + (i % 3) * 0.025F;
+                            + (i % 3)
+                            * 0.025F;
 
             renderBillboard(
                     matrix,
@@ -612,7 +606,8 @@ public class AtomicCasingRenderer
                 poseStack.last().pose();
 
         /*
-         * Começa com poucos raios e aumenta até 8.
+         * Poucos raios com pouca energia.
+         * Mais energia = atmosfera mais densa.
          */
         int arcCount =
                 3
@@ -731,9 +726,7 @@ public class AtomicCasingRenderer
                     );
 
             /*
-             * Distribui os raios entre as esferas existentes.
-             *
-             * Se só existir uma esfera, todos vão para ela.
+             * Distribui as bobinas entre as esferas.
              */
             int sphereIndex =
                     gasCount <= 1
@@ -754,19 +747,19 @@ public class AtomicCasingRenderer
                             gameTime * IDLE_BOB_SPEED
                     ) * IDLE_BOB_AMPLITUDE;
 
-            /*
-             * Pequena variação para que os raios
-             * não pareçam perfeitamente idênticos.
-             */
             float pulse =
                     0.85F
-                            + 0.15F * Mth.sin(
+                            + 0.15F
+                            * Mth.sin(
                             (float) (
                                     gameTime * 0.25
                                             + index * 1.7
                             )
                     );
 
+            /*
+             * Raio branco.
+             */
             drawSegment(
                     matrix,
                     consumer,
@@ -803,61 +796,53 @@ public class AtomicCasingRenderer
             float blue,
             float alpha
     ) {
-        consumer.vertex(
-                        matrix,
-                        x - size,
-                        y - size,
-                        z
-                )
-                .color(
-                        red,
-                        green,
-                        blue,
-                        alpha
-                )
-                .endVertex();
+        addVertex(
+                consumer,
+                matrix,
+                x - size,
+                y - size,
+                z,
+                red,
+                green,
+                blue,
+                alpha
+        );
 
-        consumer.vertex(
-                        matrix,
-                        x - size,
-                        y + size,
-                        z
-                )
-                .color(
-                        red,
-                        green,
-                        blue,
-                        alpha
-                )
-                .endVertex();
+        addVertex(
+                consumer,
+                matrix,
+                x - size,
+                y + size,
+                z,
+                red,
+                green,
+                blue,
+                alpha
+        );
 
-        consumer.vertex(
-                        matrix,
-                        x + size,
-                        y + size,
-                        z
-                )
-                .color(
-                        red,
-                        green,
-                        blue,
-                        alpha
-                )
-                .endVertex();
+        addVertex(
+                consumer,
+                matrix,
+                x + size,
+                y + size,
+                z,
+                red,
+                green,
+                blue,
+                alpha
+        );
 
-        consumer.vertex(
-                        matrix,
-                        x + size,
-                        y - size,
-                        z
-                )
-                .color(
-                        red,
-                        green,
-                        blue,
-                        alpha
-                )
-                .endVertex();
+        addVertex(
+                consumer,
+                matrix,
+                x + size,
+                y - size,
+                z,
+                red,
+                green,
+                blue,
+                alpha
+        );
     }
 
     private void drawSegment(
@@ -882,7 +867,8 @@ public class AtomicCasingRenderer
                         z2 - z1
                 );
 
-        if (direction.lengthSqr() < 0.000001D) {
+        if (direction.lengthSqr()
+                < 0.000001D) {
             return;
         }
 
@@ -896,17 +882,20 @@ public class AtomicCasingRenderer
                         direction.x
                 );
 
-        if (perpendicular.lengthSqr() < 0.000001D) {
+        if (perpendicular.lengthSqr()
+                < 0.000001D) {
+
             perpendicular =
                     new Vec3(
                             1,
                             0,
                             0
                     );
+
         } else {
+
             perpendicular =
-                    perpendicular
-                            .normalize();
+                    perpendicular.normalize();
         }
 
         perpendicular =
@@ -923,53 +912,71 @@ public class AtomicCasingRenderer
         float pz =
                 (float) perpendicular.z;
 
-        consumer.vertex(
-                        matrix,
-                        x1 - px,
-                        y1 - py,
-                        z1 - pz
-                )
-                .color(
-                        red,
-                        green,
-                        blue,
-                        alpha
-                )
-                .endVertex();
+        addVertex(
+                consumer,
+                matrix,
+                x1 - px,
+                y1 - py,
+                z1 - pz,
+                red,
+                green,
+                blue,
+                alpha
+        );
 
-        consumer.vertex(
-                        matrix,
-                        x1 + px,
-                        y1 + py,
-                        z1 + pz
-                )
-                .color(
-                        red,
-                        green,
-                        blue,
-                        alpha
-                )
-                .endVertex();
+        addVertex(
+                consumer,
+                matrix,
+                x1 + px,
+                y1 + py,
+                z1 + pz,
+                red,
+                green,
+                blue,
+                alpha
+        );
 
-        consumer.vertex(
-                        matrix,
-                        x2 + px,
-                        y2 + py,
-                        z2 + pz
-                )
-                .color(
-                        red,
-                        green,
-                        blue,
-                        alpha
-                )
-                .endVertex();
+        addVertex(
+                consumer,
+                matrix,
+                x2 + px,
+                y2 + py,
+                z2 + pz,
+                red,
+                green,
+                blue,
+                alpha
+        );
 
+        addVertex(
+                consumer,
+                matrix,
+                x2 - px,
+                y2 - py,
+                z2 - pz,
+                red,
+                green,
+                blue,
+                alpha
+        );
+    }
+
+    private void addVertex(
+            VertexConsumer consumer,
+            Matrix4f matrix,
+            float x,
+            float y,
+            float z,
+            float red,
+            float green,
+            float blue,
+            float alpha
+    ) {
         consumer.vertex(
                         matrix,
-                        x2 - px,
-                        y2 - py,
-                        z2 - pz
+                        x,
+                        y,
+                        z
                 )
                 .color(
                         red,

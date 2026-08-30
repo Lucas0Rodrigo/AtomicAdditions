@@ -8,6 +8,7 @@ import java.util.Set;
 import mekanism.api.Action;
 import mekanism.api.AutomationType;
 import mekanism.api.chemical.attribute.ChemicalAttributeValidator;
+import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.gas.IGasTank;
 import mekanism.api.energy.IEnergyContainer;
@@ -16,6 +17,7 @@ import mekanism.common.capabilities.chemical.multiblock.MultiblockChemicalTankBu
 import mekanism.common.capabilities.energy.VariableCapacityEnergyContainer;
 import mekanism.common.inventory.container.sync.dynamic.ContainerSync;
 import mekanism.common.lib.multiblock.MultiblockData;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -28,6 +30,21 @@ public class AtomicMultiblockData
 
     private static final long ENERGY_CAPACITY =
             80_000_000L;
+
+    /*
+     * Dados usados pelo renderer no cliente.
+     *
+     * -1 = nenhum gás.
+     */
+    public int renderInput1Color = -1;
+    public int renderInput2Color = -1;
+
+    public String renderInput1Name = "";
+    public String renderInput2Name = "";
+
+    public double renderEnergy = 0;
+    public double renderProcessed = 0;
+    public double renderProgress = 0;
 
     public final Set<BlockPos> coils =
             new HashSet<>();
@@ -54,8 +71,6 @@ public class AtomicMultiblockData
 
     /*
      * Quanto foi processado neste tick.
-     *
-     * É usado pela GUI para determinar se o AMR está ativo.
      */
     @ContainerSync
     public double lastProcessed = 0;
@@ -63,8 +78,6 @@ public class AtomicMultiblockData
     /*
      * Energia efetivamente consumida pelo AMR
      * no último tick de processamento.
-     *
-     * Equivalente ao lastReceivedEnergy do SPS.
      */
     @ContainerSync
     public FloatingLong lastReceivedEnergy =
@@ -149,11 +162,19 @@ public class AtomicMultiblockData
          * foi processado durante o tick atual.
          */
         lastProcessed = 0;
+
         lastReceivedEnergy =
                 FloatingLong.ZERO;
 
         if (!isFormed()) {
             processProgress = 0;
+
+            /*
+             * Mesmo parado, precisamos mandar para o cliente
+             * quais gases existem para renderizar as esferas.
+             */
+            updateRenderData();
+
             return needsPacket;
         }
 
@@ -167,6 +188,9 @@ public class AtomicMultiblockData
                 || stack2.isEmpty()) {
 
             processProgress = 0;
+
+            updateRenderData();
+
             return needsPacket;
         }
 
@@ -180,6 +204,9 @@ public class AtomicMultiblockData
 
         if (recipe == null) {
             processProgress = 0;
+
+            updateRenderData();
+
             return needsPacket;
         }
 
@@ -191,6 +218,9 @@ public class AtomicMultiblockData
                 != recipe.getOutput()) {
 
             processProgress = 0;
+
+            updateRenderData();
+
             return needsPacket;
         }
 
@@ -198,11 +228,6 @@ public class AtomicMultiblockData
          * Uma receita completa exige:
          *
          * energyPerTick × duration
-         *
-         * Exemplo do Rênio:
-         *
-         * 250.000 FE/t × 400 ticks
-         * = 100.000.000 FE
          */
         double totalEnergyPerRecipe =
                 (double) recipe.getEnergyPerTick()
@@ -210,11 +235,14 @@ public class AtomicMultiblockData
 
         if (totalEnergyPerRecipe <= 0) {
             processProgress = 0;
+
+            updateRenderData();
+
             return needsPacket;
         }
 
         /*
-         * Quantas receitas completas a energia armazenada
+         * Quantas receitas completas a energia disponível
          * permite avançar neste tick.
          */
         double processableByEnergy =
@@ -222,8 +250,7 @@ public class AtomicMultiblockData
                         / totalEnergyPerRecipe;
 
         /*
-         * Quantas receitas completas os gases disponíveis
-         * permitem sustentar.
+         * Quantas receitas os gases permitem sustentar.
          */
         double processableByInput1 =
                 (double) stack1.getAmount()
@@ -234,15 +261,14 @@ public class AtomicMultiblockData
                         / recipe.getInput2Amount();
 
         /*
-         * Quantas receitas completas cabem no tanque de saída.
+         * Quantas receitas cabem na saída.
          */
         double processableByOutput =
                 (double) outputTank.getNeeded()
                         / recipe.getOutputAmount();
 
         /*
-         * Assim como no SPS, o processamento é limitado pelo
-         * recurso mais escasso.
+         * O recurso mais escasso determina a velocidade.
          */
         double processable =
                 Math.min(
@@ -257,12 +283,13 @@ public class AtomicMultiblockData
                 );
 
         if (processable <= 0) {
+            updateRenderData();
+
             return needsPacket;
         }
 
         /*
-         * Quanto de energia realmente precisamos consumir
-         * para avançar esse pedaço da receita.
+         * Energia necessária para avançar este fragmento.
          */
         double energyToUseDouble =
                 processable
@@ -279,6 +306,8 @@ public class AtomicMultiblockData
                 );
 
         if (energyToUse.isZero()) {
+            updateRenderData();
+
             return needsPacket;
         }
 
@@ -290,47 +319,45 @@ public class AtomicMultiblockData
                 );
 
         if (extractedEnergy.isZero()) {
+            updateRenderData();
+
             return needsPacket;
         }
 
         /*
-         * Guarda a energia realmente usada no último tick
-         * para a interface, igual ao SPS.
+         * Guarda a energia realmente usada.
          */
         lastReceivedEnergy =
                 extractedEnergy;
 
         /*
-         * Recalcula a fração real caso a extração efetiva
-         * tenha sido ligeiramente menor que a solicitada.
+         * Converte a energia utilizada neste tick
+         * em fração de receita.
          */
         double actualProcessable =
                 extractedEnergy.doubleValue()
                         / totalEnergyPerRecipe;
 
         if (actualProcessable <= 0) {
+            updateRenderData();
+
             return needsPacket;
         }
 
         /*
-         * Acumula progresso da receita.
+         * Acumula progresso.
          */
         processProgress +=
                 actualProcessable;
 
         /*
-         * A máquina esteve trabalhando neste tick.
+         * Registra o trabalho deste tick.
          */
         lastProcessed =
                 actualProcessable;
 
         /*
-         * Quando a barra chega a 100%, produzimos a saída.
-         *
-         * Caso o processamento esteja muito rápido e
-         * atravesse vários ciclos em um único tick, o loop
-         * completa todas as receitas possíveis e conserva
-         * o restante do progresso fracionário.
+         * Quando chega a 100%, produz.
          */
         while (
                 processProgress >= 1.0
@@ -352,7 +379,6 @@ public class AtomicMultiblockData
                             : currentInput2.getType(),
                     currentInput2.getAmount()
             )) {
-
                 break;
             }
 
@@ -381,7 +407,7 @@ public class AtomicMultiblockData
             }
 
             /*
-             * Consome os dois reagentes.
+             * Consome os reagentes.
              */
             inputTank1.extract(
                     recipe.getInput1Amount(),
@@ -396,8 +422,8 @@ public class AtomicMultiblockData
             );
 
             /*
-             * Produz somente quando a receita chegou
-             * a 100% do progresso.
+             * Produz a saída somente ao completar
+             * uma receita inteira.
              */
             outputTank.insert(
                     new GasStack(
@@ -408,10 +434,8 @@ public class AtomicMultiblockData
                     AutomationType.INTERNAL
             );
 
-            /*
-             * Remove uma receita completa do progresso.
-             */
-            processProgress -= 1.0;
+            processProgress -=
+                    1.0;
 
             needsPacket = true;
         }
@@ -420,17 +444,176 @@ public class AtomicMultiblockData
             needsPacket = true;
         }
 
+        /*
+         * Atualiza os dados que serão enviados ao renderer.
+         */
+        updateRenderData();
+
+        /*
+         * Mantemos uma frequência de atualização visual
+         * alta o suficiente para a animação parecer contínua,
+         * sem enviar um pacote a cada tick em qualquer situação.
+         */
+        if (world.getGameTime() % 2 == 0) {
+            needsPacket = true;
+        }
+
         return needsPacket;
     }
 
+    /**
+     * Prepara o snapshot utilizado pelo renderer.
+     *
+     * Este método roda no servidor.
+     */
+    private void updateRenderData() {
+
+        GasStack stack1 =
+                inputTank1.getStack();
+
+        GasStack stack2 =
+                inputTank2.getStack();
+
+        if (stack1.isEmpty()) {
+
+            renderInput1Color = -1;
+            renderInput1Name = "";
+
+        } else {
+
+            Gas gas =
+                    stack1.getType();
+
+            renderInput1Color =
+                    gas.getColorRepresentation();
+
+            renderInput1Name =
+                    gas.getRegistryName()
+                            .toString();
+        }
+
+        if (stack2.isEmpty()) {
+
+            renderInput2Color = -1;
+            renderInput2Name = "";
+
+        } else {
+
+            Gas gas =
+                    stack2.getType();
+
+            renderInput2Color =
+                    gas.getColorRepresentation();
+
+            renderInput2Name =
+                    gas.getRegistryName()
+                            .toString();
+        }
+
+        renderEnergy =
+                lastReceivedEnergy.doubleValue();
+
+        renderProcessed =
+                lastProcessed;
+
+        renderProgress =
+                getScaledProgress();
+    }
+
+    /**
+     * Envia para o cliente somente os dados necessários
+     * para a animação.
+     */
+    @Override
+    public void writeUpdateTag(
+            CompoundTag tag
+    ) {
+        super.writeUpdateTag(tag);
+
+        tag.putInt(
+                "amr_render_input1_color",
+                renderInput1Color
+        );
+
+        tag.putInt(
+                "amr_render_input2_color",
+                renderInput2Color
+        );
+
+        tag.putString(
+                "amr_render_input1_name",
+                renderInput1Name
+        );
+
+        tag.putString(
+                "amr_render_input2_name",
+                renderInput2Name
+        );
+
+        tag.putDouble(
+                "amr_render_energy",
+                renderEnergy
+        );
+
+        tag.putDouble(
+                "amr_render_processed",
+                renderProcessed
+        );
+
+        tag.putDouble(
+                "amr_render_progress",
+                renderProgress
+        );
+    }
+
+    /**
+     * Recebe no cliente os dados necessários
+     * para o renderer.
+     */
+    @Override
+    public void readUpdateTag(
+            CompoundTag tag
+    ) {
+        super.readUpdateTag(tag);
+
+        renderInput1Color =
+                tag.getInt(
+                        "amr_render_input1_color"
+                );
+
+        renderInput2Color =
+                tag.getInt(
+                        "amr_render_input2_color"
+                );
+
+        renderInput1Name =
+                tag.getString(
+                        "amr_render_input1_name"
+                );
+
+        renderInput2Name =
+                tag.getString(
+                        "amr_render_input2_name"
+                );
+
+        renderEnergy =
+                tag.getDouble(
+                        "amr_render_energy"
+                );
+
+        renderProcessed =
+                tag.getDouble(
+                        "amr_render_processed"
+                );
+
+        renderProgress =
+                tag.getDouble(
+                        "amr_render_progress"
+                );
+    }
+
     /*
-     * Retorna a taxa efetiva de produção em mB/t
-     * durante o último tick.
-     *
-     * lastProcessed representa quantas receitas
-     * fracionárias foram processadas neste tick.
-     *
-     * Multiplicamos pela quantidade de saída.
+     * Retorna a taxa efetiva de produção em mB/t.
      */
     public double getProcessRate() {
 
@@ -469,11 +652,7 @@ public class AtomicMultiblockData
     }
 
     /*
-     * Retorna o progresso normalizado da receita atual.
-     *
-     * 0.0 = 0%
-     * 0.5 = 50%
-     * 1.0 = 100%
+     * Retorna o progresso normalizado.
      */
     public double getScaledProgress() {
         return Math.min(
