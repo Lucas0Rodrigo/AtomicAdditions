@@ -67,7 +67,7 @@ public class AtomicCasingRenderer
      */
 
     private static final float CORE_RADIUS =
-            SPHERE_RADIUS * 0.285F;
+            SPHERE_RADIUS * 0.80F;
 
     /*
      * 60% de opacidade.
@@ -731,9 +731,6 @@ public class AtomicCasingRenderer
                             )
                     );
 
-            fade *=
-                    energyFactor;
-
             /*
              * Dá uma pequena curvatura vertical ao rastro.
              */
@@ -772,9 +769,9 @@ public class AtomicCasingRenderer
              */
             float alpha =
                     (
-                            0.55F
+                            0.70F
                                     + energyFactor
-                                    * 0.45F
+                                    * 0.30F
                     )
                             * fade;
 
