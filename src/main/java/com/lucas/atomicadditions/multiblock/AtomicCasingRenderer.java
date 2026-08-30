@@ -754,9 +754,9 @@ public class AtomicCasingRenderer
             float radius =
                     TRAIL_RADIUS
                             * (
-                            0.30F
+                            0.65F
                                     + energyFactor
-                                    * 0.70F
+                                    * 0.35F
                     )
                             * (
                             0.25F
