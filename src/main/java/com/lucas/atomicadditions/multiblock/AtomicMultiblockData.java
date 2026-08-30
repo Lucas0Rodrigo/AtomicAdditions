@@ -175,7 +175,11 @@ public class AtomicMultiblockData
              */
             updateRenderData();
 
-            return needsPacket;
+            /*
+             * IMPORTANTE:
+             * sempre envia o estado zerado ao cliente.
+             */
+            return true;
         }
 
         GasStack stack1 =
@@ -191,7 +195,11 @@ public class AtomicMultiblockData
 
             updateRenderData();
 
-            return needsPacket;
+            /*
+             * O AMR está parado.
+             * Força sincronização do renderer.
+             */
+            return true;
         }
 
         AtomicAMRRecipe recipe =
@@ -207,7 +215,10 @@ public class AtomicMultiblockData
 
             updateRenderData();
 
-            return needsPacket;
+            /*
+             * Sem receita válida = parado.
+             */
+            return true;
         }
 
         GasStack outputStack =
@@ -221,7 +232,10 @@ public class AtomicMultiblockData
 
             updateRenderData();
 
-            return needsPacket;
+            /*
+             * Saída incompatível = parado.
+             */
+            return true;
         }
 
         /*
@@ -238,7 +252,7 @@ public class AtomicMultiblockData
 
             updateRenderData();
 
-            return needsPacket;
+            return true;
         }
 
         /*
@@ -283,9 +297,13 @@ public class AtomicMultiblockData
                 );
 
         if (processable <= 0) {
+            /*
+             * Não há energia/reagentes/saída disponíveis
+             * para continuar.
+             */
             updateRenderData();
 
-            return needsPacket;
+            return true;
         }
 
         /*
@@ -308,7 +326,7 @@ public class AtomicMultiblockData
         if (energyToUse.isZero()) {
             updateRenderData();
 
-            return needsPacket;
+            return true;
         }
 
         FloatingLong extractedEnergy =
@@ -321,7 +339,7 @@ public class AtomicMultiblockData
         if (extractedEnergy.isZero()) {
             updateRenderData();
 
-            return needsPacket;
+            return true;
         }
 
         /*
@@ -341,7 +359,7 @@ public class AtomicMultiblockData
         if (actualProcessable <= 0) {
             updateRenderData();
 
-            return needsPacket;
+            return true;
         }
 
         /*
