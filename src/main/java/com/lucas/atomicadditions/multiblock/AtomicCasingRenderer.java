@@ -22,14 +22,29 @@ public class AtomicCasingRenderer
     private static final Logger LOGGER =
             LogUtils.getLogger();
 
+    /*
+     * 75% do tamanho anterior:
+     *
+     * 0.38F × 0.75 = 0.285F
+     */
     private static final float SPHERE_RADIUS =
+            0.285F;
+
+    /*
+     * As esferas ficam bem mais próximas.
+     */
+    private static final float SPHERE_X_OFFSET =
             0.38F;
 
-    private static final float SPHERE_X_OFFSET =
-            0.95F;
+    /*
+     * Pequena profundidade para dar a sensação
+     * de uma esfera estar atrás da outra.
+     */
+    private static final float SPHERE_Z_OFFSET =
+            0.10F;
 
     private static final float SMOKE_RADIUS =
-            0.48F;
+            0.34F;
 
     private static final float ATMOSPHERE_RADIUS =
             0.52F;
@@ -41,7 +56,7 @@ public class AtomicCasingRenderer
             8;
 
     private static final int SMOKE_PARTICLES =
-            16;
+            18;
 
     private static final int ATMOSPHERE_ARCS =
             8;
@@ -187,46 +202,73 @@ public class AtomicCasingRenderer
                     colors.get(index);
 
             float x;
+            float z;
 
             if (colors.size() == 1) {
 
                 x = 0;
+                z = 0;
 
             } else {
 
+                /*
+                 * As duas ficam próximas.
+                 *
+                 * A segunda fica levemente atrás no eixo Z,
+                 * dando a sensação de profundidade.
+                 */
                 x =
                         index == 0
                                 ? -SPHERE_X_OFFSET
                                 : SPHERE_X_OFFSET;
+
+                z =
+                        index == 0
+                                ? -SPHERE_Z_OFFSET
+                                : SPHERE_Z_OFFSET;
             }
 
             float y =
                     idleBob;
 
             /*
-             * As duas esferas giram em sentidos opostos.
+             * IMPORTANTE:
+             *
+             * As DUAS esferas giram no mesmo sentido.
+             *
+             * Antes havia:
+             *
+             * esfera 1 = rotation
+             * esfera 2 = -rotation * 0.82F
+             *
+             * Agora ambas usam exatamente a mesma rotação.
              */
             float localRotation =
-                    index == 0
-                            ? rotation
-                            : -rotation * 0.82F;
+                    rotation;
 
             poseStack.pushPose();
 
             poseStack.translate(
                     x,
                     y,
-                    0
+                    z
             );
 
             if (active) {
 
+                /*
+                 * Rotação principal.
+                 */
                 poseStack.mulPose(
                         Axis.YP.rotationDegrees(
                                 localRotation
                         )
                 );
 
+                /*
+                 * Pequena inclinação adicional,
+                 * também exatamente igual nas duas.
+                 */
                 poseStack.mulPose(
                         Axis.XP.rotationDegrees(
                                 localRotation * 0.47F
@@ -236,17 +278,23 @@ public class AtomicCasingRenderer
 
             /*
              * Esfera principal.
+             *
+             * O destaque móvel na superfície faz a rotação
+             * ser visível mesmo sendo uma esfera uniforme.
              */
             renderSphere(
                     poseStack,
                     consumer,
                     color,
                     SPHERE_RADIUS,
-                    0.92F
+                    0.92F,
+                    localRotation
             );
 
             /*
              * Fumaça colorida.
+             *
+             * Existe tanto parada quanto ligada.
              */
             renderSmoke(
                     poseStack,
@@ -382,7 +430,8 @@ public class AtomicCasingRenderer
             VertexConsumer consumer,
             int color,
             float radius,
-            float alpha
+            float alpha,
+            float rotationDegrees
     ) {
         float red =
                 ((color >> 16) & 0xFF)
@@ -395,6 +444,13 @@ public class AtomicCasingRenderer
         float blue =
                 (color & 0xFF)
                         / 255F;
+
+        /*
+         * Converte a rotação para radianos para controlar
+         * o destaque móvel na superfície.
+         */
+        float rotationRadians =
+                rotationDegrees * Mth.DEG_TO_RAD;
 
         Matrix4f matrix =
                 poseStack.last().pose();
@@ -447,6 +503,44 @@ public class AtomicCasingRenderer
                                         / SPHERE_SEGMENTS
                         );
 
+                /*
+                 * Centro angular do segmento.
+                 */
+                float phiCenter =
+                        (phi1 + phi2) * 0.5F;
+
+                /*
+                 * Destaque móvel.
+                 *
+                 * Isso cria uma região mais iluminada
+                 * que percorre a superfície da esfera.
+                 *
+                 * Assim conseguimos perceber visualmente
+                 * que a esfera está girando.
+                 */
+                float highlight =
+                        Math.max(
+                                0F,
+                                Mth.cos(
+                                        phiCenter
+                                                - rotationRadians
+                                )
+                        );
+
+                float shade =
+                        0.72F
+                                + 0.28F
+                                * highlight;
+
+                float shadedRed =
+                        red * shade;
+
+                float shadedGreen =
+                        green * shade;
+
+                float shadedBlue =
+                        blue * shade;
+
                 addVertex(
                         consumer,
                         matrix,
@@ -455,9 +549,9 @@ public class AtomicCasingRenderer
                         y1,
                         Mth.sin(phi1)
                                 * ringRadius1,
-                        red,
-                        green,
-                        blue,
+                        shadedRed,
+                        shadedGreen,
+                        shadedBlue,
                         alpha
                 );
 
@@ -469,9 +563,9 @@ public class AtomicCasingRenderer
                         y2,
                         Mth.sin(phi1)
                                 * ringRadius2,
-                        red,
-                        green,
-                        blue,
+                        shadedRed,
+                        shadedGreen,
+                        shadedBlue,
                         alpha
                 );
 
@@ -483,9 +577,9 @@ public class AtomicCasingRenderer
                         y2,
                         Mth.sin(phi2)
                                 * ringRadius2,
-                        red,
-                        green,
-                        blue,
+                        shadedRed,
+                        shadedGreen,
+                        shadedBlue,
                         alpha
                 );
 
@@ -497,9 +591,9 @@ public class AtomicCasingRenderer
                         y1,
                         Mth.sin(phi2)
                                 * ringRadius1,
-                        red,
-                        green,
-                        blue,
+                        shadedRed,
+                        shadedGreen,
+                        shadedBlue,
                         alpha
                 );
             }
@@ -514,21 +608,9 @@ public class AtomicCasingRenderer
             int sphereIndex,
             float alpha
     ) {
-        float red =
-                ((color >> 16) & 0xFF)
-                        / 255F;
-
-        float green =
-                ((color >> 8) & 0xFF)
-                        / 255F;
-
-        float blue =
-                (color & 0xFF)
-                        / 255F;
-
-        Matrix4f matrix =
-                poseStack.last().pose();
-
+        /*
+         * Fumaça individual e contínua em torno da esfera.
+         */
         for (int i = 0;
              i < SMOKE_PARTICLES;
              i++) {
@@ -539,24 +621,22 @@ public class AtomicCasingRenderer
                             / SMOKE_PARTICLES
                             + sphereIndex * 1.73;
 
-            double verticalWave =
-                    Math.sin(
-                            gameTime * 0.018
-                                    + i * 1.7
-                    ) * 0.10;
+            /*
+             * Pequena variação radial.
+             */
+            float radialWave =
+                    0.90F
+                            + 0.10F
+                            * Mth.sin(
+                            (float) (
+                                    gameTime * 0.035
+                                            + i * 1.3
+                            )
+                    );
 
             float radius =
                     SMOKE_RADIUS
-                            * (
-                            0.85F
-                                    + 0.12F
-                                    * Mth.sin(
-                                    (float) (
-                                            gameTime * 0.04
-                                                    + i
-                                    )
-                            )
-                    );
+                            * radialWave;
 
             float x =
                     (float) Math.cos(angle)
@@ -566,32 +646,59 @@ public class AtomicCasingRenderer
                     (float) Math.sin(angle)
                             * radius;
 
+            /*
+             * Movimento suave da fumaça.
+             */
             float y =
-                    (float) (
-                            verticalWave
-                                    + (
-                                    (i % 5)
-                                            - 2
-                            ) * 0.07
+                    0.025F
+                            + (i % 5) * 0.035F
+                            + (float) Math.sin(
+                            gameTime * 0.018
+                                    + i * 1.7
+                    ) * 0.045F;
+
+            /*
+             * Partículas pequenas.
+             */
+            float size =
+                    0.045F
+                            + (i % 3)
+                            * 0.020F;
+
+            float pulse =
+                    0.75F
+                            + 0.25F
+                            * Mth.sin(
+                            (float) (
+                                    gameTime * 0.025
+                                            + i * 2.1
+                            )
                     );
 
-            float size =
-                    0.09F
-                            + (i % 3)
-                            * 0.025F;
+            poseStack.pushPose();
 
-            renderBillboard(
-                    matrix,
-                    consumer,
+            poseStack.translate(
                     x,
                     y,
-                    z,
-                    size,
-                    red,
-                    green,
-                    blue,
-                    alpha * 0.22F
+                    z
             );
+
+            /*
+             * Pequenas partículas volumétricas.
+             *
+             * São muito mais suaves que a esfera principal,
+             * para funcionar visualmente como fumaça.
+             */
+            renderSphere(
+                    poseStack,
+                    consumer,
+                    color,
+                    size,
+                    alpha * 0.10F * pulse,
+                    0F
+            );
+
+            poseStack.popPose();
         }
     }
 
@@ -747,6 +854,15 @@ public class AtomicCasingRenderer
                             gameTime * IDLE_BOB_SPEED
                     ) * IDLE_BOB_AMPLITUDE;
 
+            float sphereZ =
+                    gasCount <= 1
+                            ? 0
+                            : (
+                            sphereIndex == 0
+                                    ? -SPHERE_Z_OFFSET
+                                    : SPHERE_Z_OFFSET
+                    );
+
             float pulse =
                     0.85F
                             + 0.15F
@@ -765,7 +881,7 @@ public class AtomicCasingRenderer
                     consumer,
                     sphereX,
                     sphereY,
-                    0,
+                    sphereZ,
                     (float) targetX,
                     (float) targetY,
                     (float) targetZ,
@@ -782,67 +898,6 @@ public class AtomicCasingRenderer
 
             index++;
         }
-    }
-
-    private void renderBillboard(
-            Matrix4f matrix,
-            VertexConsumer consumer,
-            float x,
-            float y,
-            float z,
-            float size,
-            float red,
-            float green,
-            float blue,
-            float alpha
-    ) {
-        addVertex(
-                consumer,
-                matrix,
-                x - size,
-                y - size,
-                z,
-                red,
-                green,
-                blue,
-                alpha
-        );
-
-        addVertex(
-                consumer,
-                matrix,
-                x - size,
-                y + size,
-                z,
-                red,
-                green,
-                blue,
-                alpha
-        );
-
-        addVertex(
-                consumer,
-                matrix,
-                x + size,
-                y + size,
-                z,
-                red,
-                green,
-                blue,
-                alpha
-        );
-
-        addVertex(
-                consumer,
-                matrix,
-                x + size,
-                y - size,
-                z,
-                red,
-                green,
-                blue,
-                alpha
-        );
     }
 
     private void drawSegment(
