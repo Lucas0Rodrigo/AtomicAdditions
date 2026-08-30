@@ -16,141 +16,59 @@ import org.joml.Matrix4f;
 public class AtomicCasingRenderer
         implements BlockEntityRenderer<AtomicCasingBlockEntity> {
 
-    /*
-     * ============================================================
-     * ESFERAS
-     * ============================================================
-     */
-
     private static final float SPHERE_RADIUS =
             0.285F;
 
-    /*
-     * Distância máxima das esferas em relação ao centro.
-     */
     private static final float ORBIT_RADIUS =
             0.62F;
 
-    /*
-     * E1 e E2 ficam exatamente opostas.
-     */
     private static final float ORBIT_PHASE_OFFSET =
             Mth.PI;
 
-    /*
-     * Oscilação vertical.
-     */
     private static final float IDLE_BOB_AMPLITUDE =
             0.11F;
 
     private static final float IDLE_BOB_SPEED =
             0.055F;
 
-    /*
-     * Velocidade orbital máxima.
-     */
     private static final float MAX_ORBIT_SPEED =
             1.22F;
 
-    /*
-     * Rotação própria das esferas.
-     */
     private static final float MAX_SPIN_SPEED =
             14.0F;
-
-    /*
-     * ============================================================
-     * NÚCLEO INTERNO
-     * ============================================================
-     *
-     * 80% do tamanho da esfera externa.
-     */
 
     private static final float CORE_RADIUS =
             SPHERE_RADIUS * 0.80F;
 
-    /*
-     * 60% de opacidade.
-     */
     private static final float CORE_ALPHA =
             0.60F;
 
-    /*
-     * ============================================================
-     * RASTRO
-     * ============================================================
-     */
-
-    /*
-     * Quantidade de segmentos do rastro.
-     */
     private static final int TRAIL_SEGMENTS =
             18;
 
-    /*
-     * Distância entre os segmentos.
-     */
     private static final float TRAIL_STEP_ANGLE =
             0.075F;
 
-    /*
-     * Espessura base.
-     */
     private static final float TRAIL_RADIUS =
             SPHERE_RADIUS * 0.80F;
-
-    /*
-     * ============================================================
-     * ATMOSFERA
-     * ============================================================
-     *
-     * É uma esfera maior envolvendo a principal.
-     */
 
     private static final float ATMOSPHERE_RADIUS =
             0.47F;
 
-    /*
-     * Atmosfera mais densa.
-     */
     private static final int ATMOSPHERE_ARCS =
             34;
-
-    /*
-     * ============================================================
-     * FLASHES ALEATÓRIOS
-     * ============================================================
-     */
 
     private static final int RANDOM_FLASHES =
             22;
 
-    /*
-     * ============================================================
-     * ENERGIA
-     * ============================================================
-     */
-
     private static final double MAX_REFERENCE_ENERGY =
             80_000_000D;
-
-    /*
-     * ============================================================
-     * GEOMETRIA
-     * ============================================================
-     */
 
     private static final int SPHERE_SEGMENTS =
             14;
 
     private static final int SPHERE_RINGS =
             8;
-
-    /*
-     * ============================================================
-     * ESTADO DA ÓRBITA
-     * ============================================================
-     */
 
     private float orbitAngle =
             0F;
@@ -181,12 +99,6 @@ public class AtomicCasingRenderer
             return;
         }
 
-        /*
-         * ========================================================
-         * GASES
-         * ========================================================
-         */
-
         List<Integer> colors =
                 getActiveInputColors(
                         multiblock
@@ -195,12 +107,6 @@ public class AtomicCasingRenderer
         if (colors.isEmpty()) {
             return;
         }
-
-        /*
-         * ========================================================
-         * CENTRO DO MULTIBLOCK
-         * ========================================================
-         */
 
         poseStack.pushPose();
 
@@ -229,12 +135,6 @@ public class AtomicCasingRenderer
                 blockEntity.getLevel().getGameTime()
                         + partialTick;
 
-        /*
-         * ========================================================
-         * ENERGIA
-         * ========================================================
-         */
-
         float energyFactor =
                 (float) Math.min(
                         1D,
@@ -244,12 +144,6 @@ public class AtomicCasingRenderer
 
         boolean active =
                 multiblock.renderProcessed > 0;
-
-        /*
-         * ========================================================
-         * ÓRBITA
-         * ========================================================
-         */
 
         float orbitFactor =
                 active
@@ -262,17 +156,11 @@ public class AtomicCasingRenderer
                 partialTick
         );
 
-        /*
-         * Oscilação vertical.
-         */
         float idleBob =
                 (float) Math.sin(
                         gameTime * IDLE_BOB_SPEED
                 ) * IDLE_BOB_AMPLITUDE;
 
-        /*
-         * Rotação própria da superfície.
-         */
         float spin =
                 active
                         ? (float) (
@@ -282,35 +170,15 @@ public class AtomicCasingRenderer
                 )
                         : 0F;
 
-        /*
-         * ========================================================
-         * BUFFER
-         * ========================================================
-         */
-
         VertexConsumer consumer =
                 buffer.getBuffer(
                         MekanismRenderType.MEK_LIGHTNING
                 );
 
-        /*
-         * ========================================================
-         * POSIÇÕES DAS ESFERAS
-         * ========================================================
-         *
-         * Usadas também pelo rastro.
-         */
-
         List<Vec3> spherePositions =
                 new ArrayList<>(
                         colors.size()
                 );
-
-        /*
-         * ========================================================
-         * ESFERAS
-         * ========================================================
-         */
 
         for (int index = 0;
              index < colors.size();
@@ -319,11 +187,6 @@ public class AtomicCasingRenderer
             int color =
                     colors.get(index);
 
-            /*
-             * E1 = ângulo atual
-             *
-             * E2 = exatamente 180° afastada.
-             */
             float localAngle =
                     orbitAngle;
 
@@ -334,9 +197,6 @@ public class AtomicCasingRenderer
                         ORBIT_PHASE_OFFSET;
             }
 
-            /*
-             * Em energia máxima a órbita fecha levemente.
-             */
             float effectiveOrbitRadius =
                     ORBIT_RADIUS
                             * (
@@ -375,9 +235,6 @@ public class AtomicCasingRenderer
                     orbitZ
             );
 
-            /*
-             * Rotação própria.
-             */
             if (active
                     && energyFactor > 0F) {
 
@@ -394,12 +251,6 @@ public class AtomicCasingRenderer
                 );
             }
 
-            /*
-             * ====================================================
-             * ESFERA EXTERNA
-             * ====================================================
-             */
-
             renderSphere(
                     poseStack,
                     consumer,
@@ -408,17 +259,6 @@ public class AtomicCasingRenderer
                     0.92F,
                     spin
             );
-
-            /*
-             * ====================================================
-             * NÚCLEO INTERNO
-             * ====================================================
-             *
-             * 80% do tamanho da esfera externa.
-             *
-             * Alterna rapidamente entre a cor original
-             * e branco.
-             */
 
             int coreColor =
                     isCoreWhite(
@@ -437,12 +277,6 @@ public class AtomicCasingRenderer
                     0F
             );
 
-            /*
-             * ====================================================
-             * ATMOSFERA
-             * ====================================================
-             */
-
             if (active
                     && energyFactor > 0F) {
 
@@ -457,19 +291,6 @@ public class AtomicCasingRenderer
 
             poseStack.popPose();
         }
-
-        /*
-         * ========================================================
-         * RASTROS
-         * ========================================================
-         *
-         * Importante:
-         *
-         * São desenhados no sistema de coordenadas do centro
-         * do multiblock, e não dentro do PoseStack da esfera.
-         *
-         * Assim o rastro corresponde à trajetória real.
-         */
 
         if (active
                 && energyFactor > 0F) {
@@ -510,12 +331,6 @@ public class AtomicCasingRenderer
             }
         }
 
-        /*
-         * ========================================================
-         * FLASHES ALEATÓRIOS
-         * ========================================================
-         */
-
         if (active
                 && energyFactor > 0F) {
 
@@ -528,95 +343,6 @@ public class AtomicCasingRenderer
         }
 
         poseStack.popPose();
-    }
-
-    /*
-     * ============================================================
-     * ÓRBITA
-     * ============================================================
-     */
-
-    private void renderCentralFog(
-            PoseStack poseStack,
-            MultiBufferSource buffer,
-            float energyFactor,
-            double gameTime
-    ) {
-        /*
-         * Quanto mais energia,
-         * maior e mais presente fica a névoa.
-         */
-        float scale =
-                1.8F
-                        + energyFactor
-                        * 0.45F;
-
-        /*
-         * Três camadas dão profundidade.
-         */
-        for (int layer = 0;
-             layer < 3;
-             layer++) {
-
-            poseStack.pushPose();
-
-            /*
-             * Cada camada possui pequena escala diferente.
-             */
-            float layerScale =
-                    scale
-                            * (
-                            0.82F
-                                    + layer
-                                    * 0.10F
-                    );
-
-            poseStack.scale(
-                    layerScale,
-                    layerScale,
-                    layerScale
-            );
-
-            /*
-             * Movimento extremamente lento entre as camadas.
-             */
-            poseStack.mulPose(
-                    Axis.YP.rotation(
-                            (float) (
-                                    gameTime
-                                            * (
-                                            0.003
-                                                    + layer
-                                                    * 0.001
-                                    )
-                            )
-                    )
-            );
-
-            /*
-             * Usa a esfera procedural já existente.
-             *
-             * A cor aqui é apenas base para o shader.
-             */
-
-            poseStack.popPose();
-        }
-    }
-
-    private void renderFogSphere(
-            PoseStack poseStack,
-            VertexConsumer consumer,
-            int color,
-            float alpha
-    ) {
-        renderSphere(
-                poseStack,
-                consumer,
-                color,
-                1.0F,
-                alpha,
-                0F
-        );
     }
 
     private void updateOrbit(
@@ -654,10 +380,6 @@ public class AtomicCasingRenderer
                         5
                 );
 
-        /*
-         * A órbita somente avança enquanto há energia
-         * e processamento.
-         */
         if (orbitFactor > 0F) {
 
             orbitAngle +=
@@ -689,12 +411,6 @@ public class AtomicCasingRenderer
                 currentTick;
     }
 
-    /*
-     * ============================================================
-     * GASES
-     * ============================================================
-     */
-
     private List<Integer> getActiveInputColors(
             AtomicMultiblockData multiblock
     ) {
@@ -723,19 +439,11 @@ public class AtomicCasingRenderer
         return colors;
     }
 
-    /*
-     * ============================================================
-     * NÚCLEO
-     * ============================================================
-     */
-
     private boolean isCoreWhite(
             double gameTime,
             int sphereIndex
     ) {
-        /*
-         * Alternância extremamente rápida.
-         */
+
         long phase =
                 (long) Math.floor(
                         gameTime * 18.0
@@ -744,12 +452,6 @@ public class AtomicCasingRenderer
 
         return (phase & 1L) == 0L;
     }
-
-    /*
-     * ============================================================
-     * RASTRO
-     * ============================================================
-     */
 
     private void renderTrail(
             PoseStack poseStack,
@@ -762,18 +464,12 @@ public class AtomicCasingRenderer
         Matrix4f matrix =
                 poseStack.last().pose();
 
-        /*
-         * Começa na posição atual da esfera.
-         */
         Vec3 previous =
                 getOrbitPosition(
                         currentAngle,
                         orbitRadius
                 );
 
-        /*
-         * Comprimento cresce bastante com a energia.
-         */
         float trailScale =
                 0.90F
                         + energyFactor
@@ -788,9 +484,6 @@ public class AtomicCasingRenderer
                             * TRAIL_STEP_ANGLE
                             * trailScale;
 
-            /*
-             * O rastro fica atrás da direção do movimento.
-             */
             float trailAngle =
                     currentAngle
                             - distance;
@@ -801,10 +494,6 @@ public class AtomicCasingRenderer
                             orbitRadius
                     );
 
-            /*
-             * A ponta próxima à esfera é forte.
-             * A extremidade traseira desaparece.
-             */
             float fade =
                     1.0F
                             - (
@@ -814,9 +503,6 @@ public class AtomicCasingRenderer
                             )
                     );
 
-            /*
-             * Dá uma pequena curvatura vertical ao rastro.
-             */
             float vertical =
                     (float) Math.sin(
                             distance * 2.0F
@@ -831,9 +517,6 @@ public class AtomicCasingRenderer
                             0
                     );
 
-            /*
-             * Espessura.
-             */
             float radius =
                     TRAIL_RADIUS
                             * (
@@ -847,9 +530,6 @@ public class AtomicCasingRenderer
                                     * 0.75F
                     );
 
-            /*
-             * Intensidade.
-             */
             float alpha =
                     (
                             0.70F
@@ -895,12 +575,6 @@ public class AtomicCasingRenderer
         );
     }
 
-    /*
-     * ============================================================
-     * ATMOSFERA ESFÉRICA
-     * ============================================================
-     */
-
     private void renderAtmosphere(
             PoseStack poseStack,
             VertexConsumer consumer,
@@ -911,16 +585,10 @@ public class AtomicCasingRenderer
         Matrix4f matrix =
                 poseStack.last().pose();
 
-        /*
-         * Esfera maior e ligeiramente afastada.
-         */
         float radius =
                 ATMOSPHERE_RADIUS
                         + energyFactor * 0.035F;
 
-        /*
-         * Muitos raios.
-         */
         int arcCount =
                 14
                         + Math.round(
@@ -939,9 +607,6 @@ public class AtomicCasingRenderer
                     sphereIndex * 73.71
                             + i * 19.37;
 
-            /*
-             * Distribuição pseudoaleatória pela esfera.
-             */
             double latitude =
                     (
                             pseudoRandom(
@@ -959,9 +624,6 @@ public class AtomicCasingRenderer
                             * Math.PI
                             * 2.0;
 
-            /*
-             * ATMOSFERA MAIS LENTA.
-             */
             double rotation =
                     gameTime
                             * (
@@ -973,9 +635,6 @@ public class AtomicCasingRenderer
             longitude +=
                     rotation;
 
-            /*
-             * Cada raio possui comprimento diferente.
-             */
             double arcLength =
                     0.16
                             + pseudoRandom(
@@ -987,9 +646,6 @@ public class AtomicCasingRenderer
                                     * 0.10
                     );
 
-            /*
-             * Piscam independentemente.
-             */
             float flicker =
                     lightningFlicker(
                             gameTime,
@@ -1016,9 +672,6 @@ public class AtomicCasingRenderer
                                     + arcLength
                     );
 
-            /*
-             * Ponto intermediário irregular.
-             */
             Vec3 middle =
                     spherePoint(
                             radius
@@ -1106,12 +759,6 @@ public class AtomicCasingRenderer
         );
     }
 
-    /*
-     * ============================================================
-     * FLASHES ALEATÓRIOS
-     * ============================================================
-     */
-
     private void renderRandomFlashes(
             PoseStack poseStack,
             VertexConsumer consumer,
@@ -1128,10 +775,6 @@ public class AtomicCasingRenderer
             double seed =
                     i * 47.193;
 
-            /*
-             * Ciclo mais longo:
-             * o flash permanece visível por mais tempo.
-             */
             double frequency =
                     0.006
                             + pseudoRandom(
@@ -1150,16 +793,10 @@ public class AtomicCasingRenderer
                             * frequency
                             - cycle;
 
-            /*
-             * Janela de flash maior.
-             */
             if (progress > 0.22) {
                 continue;
             }
 
-            /*
-             * Nem todo ciclo gera relâmpago.
-             */
             if (pseudoRandom(
                     seed,
                     cycle + 100
@@ -1167,9 +804,6 @@ public class AtomicCasingRenderer
                 continue;
             }
 
-            /*
-             * Fade.
-             */
             float strength =
                     (float) (
                             1.0
@@ -1177,9 +811,6 @@ public class AtomicCasingRenderer
                                     / 0.22
                     );
 
-            /*
-             * Posição aleatória no interior.
-             */
             float x =
                     -2.30F
                             + (float) pseudoRandom(
@@ -1201,9 +832,6 @@ public class AtomicCasingRenderer
                             cycle + 3
                     ) * 4.60F;
 
-            /*
-             * Direção aleatória.
-             */
             double angleA =
                     pseudoRandom(
                             seed,
@@ -1232,9 +860,6 @@ public class AtomicCasingRenderer
                                     * Math.cos(angleB)
                     ).normalize();
 
-            /*
-             * Flashes maiores.
-             */
             float length =
                     0.35F
                             + energyFactor
@@ -1254,9 +879,6 @@ public class AtomicCasingRenderer
                             )
                     );
 
-            /*
-             * Pequena irregularidade no meio.
-             */
             Vec3 middle =
                     start.add(
                             direction.scale(
@@ -1264,9 +886,6 @@ public class AtomicCasingRenderer
                             )
                     );
 
-            /*
-             * Segundo eixo perpendicular.
-             */
             Vec3 side =
                     direction.cross(
                             Math.abs(
@@ -1345,12 +964,6 @@ public class AtomicCasingRenderer
         }
     }
 
-    /*
-     * ============================================================
-     * PSEUDO-RANDOM
-     * ============================================================
-     */
-
     private double pseudoRandom(
             double seed,
             double salt
@@ -1365,12 +978,6 @@ public class AtomicCasingRenderer
         return value
                 - Math.floor(value);
     }
-
-    /*
-     * ============================================================
-     * FLICKER
-     * ============================================================
-     */
 
     private float lightningFlicker(
             double gameTime,
@@ -1388,9 +995,6 @@ public class AtomicCasingRenderer
                         * frequency
                         - bucket;
 
-        /*
-         * Chance de existir neste ciclo.
-         */
         double chance =
                 pseudoRandom(
                         seed,
@@ -1401,9 +1005,6 @@ public class AtomicCasingRenderer
             return 0F;
         }
 
-        /*
-         * Flash curto.
-         */
         if (position > 0.34) {
             return 0F;
         }
@@ -1414,12 +1015,6 @@ public class AtomicCasingRenderer
                         / 0.34
         );
     }
-
-    /*
-     * ============================================================
-     * ESFERA
-     * ============================================================
-     */
 
     private void renderSphere(
             PoseStack poseStack,
@@ -1497,9 +1092,6 @@ public class AtomicCasingRenderer
                         (phi1 + phi2)
                                 * 0.5F;
 
-                /*
-                 * Destaque superficial móvel.
-                 */
                 float highlight =
                         Math.max(
                                 0F,
@@ -1582,12 +1174,6 @@ public class AtomicCasingRenderer
         }
     }
 
-    /*
-     * ============================================================
-     * TUBO 3D
-     * ============================================================
-     */
-
     private void drawLightningTube(
             Matrix4f matrix,
             VertexConsumer consumer,
@@ -1618,9 +1204,6 @@ public class AtomicCasingRenderer
         direction =
                 direction.normalize();
 
-        /*
-         * Cria uma base perpendicular à direção.
-         */
         Vec3 reference =
                 Math.abs(direction.y) < 0.9
                         ? new Vec3(
@@ -1644,9 +1227,6 @@ public class AtomicCasingRenderer
                         side
                 ).normalize();
 
-        /*
-         * Tubo hexagonal.
-         */
         final int sides =
                 6;
 
@@ -1736,12 +1316,6 @@ public class AtomicCasingRenderer
         }
     }
 
-    /*
-     * ============================================================
-     * VERTEX
-     * ============================================================
-     */
-
     private void addVertex(
             VertexConsumer consumer,
             Matrix4f matrix,
@@ -1767,12 +1341,6 @@ public class AtomicCasingRenderer
                 )
                 .endVertex();
     }
-
-    /*
-     * ============================================================
-     * CORES DE COR
-     * ============================================================
-     */
 
     private float colorRed(
             int color
