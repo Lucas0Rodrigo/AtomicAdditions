@@ -120,6 +120,15 @@ public class AtomicAdditions {
                     )
             );
 
+    public static net.minecraft.resources.ResourceLocation rl(
+            String path
+    ) {
+        return net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(
+                MODID,
+                path
+        );
+    }
+
     private static AtomicCasingBlock<AtomicCasingBlockEntity> createCasing() {
         return new AtomicCasingBlock<>(
                 BlockBehaviour.Properties.of()

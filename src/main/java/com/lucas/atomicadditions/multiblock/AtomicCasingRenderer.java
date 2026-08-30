@@ -1,5 +1,7 @@
 package com.lucas.atomicadditions.multiblock;
 
+import com.lucas.atomicadditions.shaders.AtomicFogRenderType;
+import com.lucas.atomicadditions.shaders.AtomicShaders;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -306,6 +308,17 @@ public class AtomicCasingRenderer
                         colors.size()
                 );
 
+        if (active
+                && energyFactor > 0F) {
+
+            renderCentralFog(
+                    poseStack,
+                    buffer,
+                    energyFactor,
+                    gameTime
+            );
+        }
+
         /*
          * ========================================================
          * ESFERAS
@@ -535,6 +548,129 @@ public class AtomicCasingRenderer
      * ÓRBITA
      * ============================================================
      */
+
+    private void renderCentralFog(
+            PoseStack poseStack,
+            MultiBufferSource buffer,
+            float energyFactor,
+            double gameTime
+    ) {
+        /*
+         * Névoa somente quando o AMR estiver trabalhando.
+         */
+        if (energyFactor <= 0F) {
+            return;
+        }
+
+        VertexConsumer consumer =
+                buffer.getBuffer(
+                        AtomicFogRenderType.FOG
+                );
+
+        /*
+         * Atualiza o tempo do shader.
+         */
+        if (AtomicShaders.FOG.get() != null) {
+
+            var gameTimeUniform =
+                    AtomicShaders.FOG
+                            .get()
+                            .getUniform(
+                                    "GameTime"
+                            );
+
+            if (gameTimeUniform != null) {
+
+                gameTimeUniform.set(
+                        (float) gameTime
+                );
+            }
+        }
+
+        /*
+         * Quanto mais energia,
+         * maior e mais presente fica a névoa.
+         */
+        float scale =
+                1.8F
+                        + energyFactor
+                        * 0.45F;
+
+        /*
+         * Três camadas dão profundidade.
+         */
+        for (int layer = 0;
+             layer < 3;
+             layer++) {
+
+            poseStack.pushPose();
+
+            /*
+             * Cada camada possui pequena escala diferente.
+             */
+            float layerScale =
+                    scale
+                            * (
+                            0.82F
+                                    + layer
+                                    * 0.10F
+                    );
+
+            poseStack.scale(
+                    layerScale,
+                    layerScale,
+                    layerScale
+            );
+
+            /*
+             * Movimento extremamente lento entre as camadas.
+             */
+            poseStack.mulPose(
+                    Axis.YP.rotation(
+                            (float) (
+                                    gameTime
+                                            * (
+                                            0.003
+                                                    + layer
+                                                    * 0.001
+                                    )
+                            )
+                    )
+            );
+
+            /*
+             * Usa a esfera procedural já existente.
+             *
+             * A cor aqui é apenas base para o shader.
+             */
+            renderFogSphere(
+                    poseStack,
+                    consumer,
+                    0xFFFFFF,
+                    0.20F
+                            + energyFactor
+                            * 0.18F
+            );
+
+            poseStack.popPose();
+        }
+    }
+
+    private void renderFogSphere(
+            PoseStack poseStack,
+            VertexConsumer consumer,
+            int color,
+            float alpha
+    ) {
+        renderSphere(
+                poseStack,
+                consumer,
+                color,
+                1.0F,
+                alpha,
+                0F
+        );
+    }
 
     private void updateOrbit(
             AtomicCasingBlockEntity blockEntity,
