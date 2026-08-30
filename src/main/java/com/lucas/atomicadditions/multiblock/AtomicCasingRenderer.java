@@ -26,8 +26,7 @@ public class AtomicCasingRenderer
             0.285F;
 
     /*
-     * Distância das esferas em relação ao centro
-     * da órbita.
+     * Distância máxima das esferas em relação ao centro.
      */
     private static final float ORBIT_RADIUS =
             0.62F;
@@ -48,15 +47,13 @@ public class AtomicCasingRenderer
             0.055F;
 
     /*
-     * Velocidade máxima.
-     *
-     * 1.22 = 100% da energia.
+     * Velocidade orbital máxima.
      */
     private static final float MAX_ORBIT_SPEED =
             1.22F;
 
     /*
-     * Rotação própria.
+     * Rotação própria das esferas.
      */
     private static final float MAX_SPIN_SPEED =
             14.0F;
@@ -65,16 +62,15 @@ public class AtomicCasingRenderer
      * ============================================================
      * NÚCLEO INTERNO
      * ============================================================
+     *
+     * 80% do tamanho da esfera externa.
      */
 
-    /*
-     * Núcleo menor que a esfera principal.
-     */
     private static final float CORE_RADIUS =
-            SPHERE_RADIUS * 0.48F;
+            SPHERE_RADIUS * 0.80F;
 
     /*
-     * 60% opaco.
+     * 60% de opacidade.
      */
     private static final float CORE_ALPHA =
             0.60F;
@@ -85,32 +81,40 @@ public class AtomicCasingRenderer
      * ============================================================
      */
 
+    /*
+     * Quantidade de segmentos do rastro.
+     */
     private static final int TRAIL_SEGMENTS =
-            9;
+            18;
 
+    /*
+     * Distância entre os segmentos.
+     */
     private static final float TRAIL_STEP_ANGLE =
-            0.105F;
+            0.075F;
 
+    /*
+     * Espessura base.
+     */
     private static final float TRAIL_RADIUS =
-            0.030F;
+            0.026F;
 
     /*
      * ============================================================
-     * ATMOSFERA ESFÉRICA
+     * ATMOSFERA
      * ============================================================
+     *
+     * É uma esfera maior envolvendo a principal.
      */
 
-    /*
-     * Maior que a esfera principal.
-     */
     private static final float ATMOSPHERE_RADIUS =
-            0.46F;
+            0.47F;
 
     /*
-     * Número máximo de pequenos raios sobre a esfera.
+     * Atmosfera mais densa.
      */
     private static final int ATMOSPHERE_ARCS =
-            26;
+            34;
 
     /*
      * ============================================================
@@ -119,7 +123,7 @@ public class AtomicCasingRenderer
      */
 
     private static final int RANDOM_FLASHES =
-            18;
+            22;
 
     /*
      * ============================================================
@@ -194,7 +198,7 @@ public class AtomicCasingRenderer
 
         /*
          * ========================================================
-         * CENTRO
+         * CENTRO DO MULTIBLOCK
          * ========================================================
          */
 
@@ -267,7 +271,7 @@ public class AtomicCasingRenderer
                 ) * IDLE_BOB_AMPLITUDE;
 
         /*
-         * Rotação própria.
+         * Rotação própria da superfície.
          */
         float spin =
                 active
@@ -291,6 +295,19 @@ public class AtomicCasingRenderer
 
         /*
          * ========================================================
+         * POSIÇÕES DAS ESFERAS
+         * ========================================================
+         *
+         * Usadas também pelo rastro.
+         */
+
+        List<Vec3> spherePositions =
+                new ArrayList<>(
+                        colors.size()
+                );
+
+        /*
+         * ========================================================
          * ESFERAS
          * ========================================================
          */
@@ -305,7 +322,7 @@ public class AtomicCasingRenderer
             /*
              * E1 = ângulo atual
              *
-             * E2 = exatamente 180 graus afastada.
+             * E2 = exatamente 180° afastada.
              */
             float localAngle =
                     orbitAngle;
@@ -318,8 +335,7 @@ public class AtomicCasingRenderer
             }
 
             /*
-             * Quanto maior a energia,
-             * menor fica levemente a órbita.
+             * Em energia máxima a órbita fecha levemente.
              */
             float effectiveOrbitRadius =
                     ORBIT_RADIUS
@@ -340,6 +356,17 @@ public class AtomicCasingRenderer
             float orbitY =
                     idleBob;
 
+            Vec3 spherePosition =
+                    new Vec3(
+                            orbitX,
+                            orbitY,
+                            orbitZ
+                    );
+
+            spherePositions.add(
+                    spherePosition
+            );
+
             poseStack.pushPose();
 
             poseStack.translate(
@@ -349,7 +376,7 @@ public class AtomicCasingRenderer
             );
 
             /*
-             * Rotação da esfera.
+             * Rotação própria.
              */
             if (active
                     && energyFactor > 0F) {
@@ -368,8 +395,11 @@ public class AtomicCasingRenderer
             }
 
             /*
-             * Esfera principal.
+             * ====================================================
+             * ESFERA EXTERNA
+             * ====================================================
              */
+
             renderSphere(
                     poseStack,
                     consumer,
@@ -384,13 +414,10 @@ public class AtomicCasingRenderer
              * NÚCLEO INTERNO
              * ====================================================
              *
-             * Alterna rapidamente entre:
+             * 80% do tamanho da esfera externa.
              *
-             * cor do elemento
-             *        e
-             * branco
-             *
-             * 60% de opacidade.
+             * Alterna rapidamente entre a cor original
+             * e branco.
              */
 
             int coreColor =
@@ -409,25 +436,6 @@ public class AtomicCasingRenderer
                     CORE_ALPHA,
                     0F
             );
-
-            /*
-             * ====================================================
-             * RASTRO
-             * ====================================================
-             */
-
-            if (active
-                    && energyFactor > 0F) {
-
-                renderTrail(
-                        poseStack,
-                        consumer,
-                        color,
-                        localAngle,
-                        effectiveOrbitRadius,
-                        energyFactor
-                );
-            }
 
             /*
              * ====================================================
@@ -452,7 +460,59 @@ public class AtomicCasingRenderer
 
         /*
          * ========================================================
-         * FLASHES ESPALHADOS PELO AMR
+         * RASTROS
+         * ========================================================
+         *
+         * Importante:
+         *
+         * São desenhados no sistema de coordenadas do centro
+         * do multiblock, e não dentro do PoseStack da esfera.
+         *
+         * Assim o rastro corresponde à trajetória real.
+         */
+
+        if (active
+                && energyFactor > 0F) {
+
+            for (int index = 0;
+                 index < spherePositions.size();
+                 index++) {
+
+                int color =
+                        colors.get(index);
+
+                float localAngle =
+                        orbitAngle;
+
+                if (colors.size() > 1
+                        && index == 1) {
+
+                    localAngle +=
+                            ORBIT_PHASE_OFFSET;
+                }
+
+                float effectiveOrbitRadius =
+                        ORBIT_RADIUS
+                                * (
+                                1.0F
+                                        - 0.25F
+                                        * energyFactor
+                        );
+
+                renderTrail(
+                        poseStack,
+                        consumer,
+                        color,
+                        localAngle,
+                        effectiveOrbitRadius,
+                        energyFactor
+                );
+            }
+        }
+
+        /*
+         * ========================================================
+         * FLASHES ALEATÓRIOS
          * ========================================================
          */
 
@@ -512,10 +572,8 @@ public class AtomicCasingRenderer
                 );
 
         /*
-         * O ângulo só avança quando existe processamento.
-         *
-         * A velocidade é diretamente proporcional
-         * à energia utilizada.
+         * A órbita somente avança enquanto há energia
+         * e processamento.
          */
         if (orbitFactor > 0F) {
 
@@ -569,10 +627,6 @@ public class AtomicCasingRenderer
 
         if (multiblock.renderInput2Color >= 0) {
 
-            /*
-             * Não cria uma segunda esfera se os dois inputs
-             * possuírem exatamente a mesma cor.
-             */
             if (colors.isEmpty()
                     || multiblock.renderInput2Color
                     != colors.get(0)) {
@@ -597,17 +651,12 @@ public class AtomicCasingRenderer
             int sphereIndex
     ) {
         /*
-         * Alternância muito rápida.
-         *
-         * 12 mudanças por tick.
-         *
-         * A segunda esfera fica ligeiramente
-         * defasada da primeira.
+         * Alternância extremamente rápida.
          */
         long phase =
                 (long) Math.floor(
-                        gameTime * 12.0
-                                + sphereIndex * 3
+                        gameTime * 18.0
+                                + sphereIndex * 0.5
                 );
 
         return (phase & 1L) == 0L;
@@ -630,6 +679,9 @@ public class AtomicCasingRenderer
         Matrix4f matrix =
                 poseStack.last().pose();
 
+        /*
+         * Começa na posição atual da esfera.
+         */
         Vec3 previous =
                 getOrbitPosition(
                         currentAngle,
@@ -637,13 +689,12 @@ public class AtomicCasingRenderer
                 );
 
         /*
-         * Quanto mais energia,
-         * maior e mais forte o rastro.
+         * Comprimento cresce bastante com a energia.
          */
         float trailScale =
-                0.45F
+                0.70F
                         + energyFactor
-                        * 0.75F;
+                        * 1.30F;
 
         for (int i = 1;
              i <= TRAIL_SEGMENTS;
@@ -654,18 +705,22 @@ public class AtomicCasingRenderer
                             * TRAIL_STEP_ANGLE
                             * trailScale;
 
-            float angle =
+            /*
+             * O rastro fica atrás da direção do movimento.
+             */
+            float trailAngle =
                     currentAngle
                             - distance;
 
             Vec3 point =
                     getOrbitPosition(
-                            angle,
+                            trailAngle,
                             orbitRadius
                     );
 
             /*
-             * A parte traseira desaparece gradualmente.
+             * A ponta próxima à esfera é forte.
+             * A extremidade traseira desaparece.
              */
             float fade =
                     1.0F
@@ -679,22 +734,49 @@ public class AtomicCasingRenderer
             fade *=
                     energyFactor;
 
-            float radius =
-                    TRAIL_RADIUS
-                            * fade
-                            * (
-                            0.35F
-                                    + energyFactor
-                                    * 0.65F
+            /*
+             * Dá uma pequena curvatura vertical ao rastro.
+             */
+            float vertical =
+                    (float) Math.sin(
+                            distance * 2.0F
+                    )
+                            * 0.025F
+                            * energyFactor;
+
+            point =
+                    point.add(
+                            0,
+                            vertical,
+                            0
                     );
 
-            float alpha =
-                    fade
+            /*
+             * Espessura.
+             */
+            float radius =
+                    TRAIL_RADIUS
                             * (
-                            0.25F
+                            0.45F
                                     + energyFactor
-                                    * 0.75F
+                                    * 1.20F
+                    )
+                            * (
+                            0.55F
+                                    + fade
+                                    * 0.45F
                     );
+
+            /*
+             * Intensidade.
+             */
+            float alpha =
+                    (
+                            0.20F
+                                    + energyFactor
+                                    * 0.80F
+                    )
+                            * fade;
 
             drawLightningTube(
                     matrix,
@@ -710,7 +792,7 @@ public class AtomicCasingRenderer
                     colorBlue(color),
                     alpha,
                     Math.max(
-                            0.006F,
+                            0.005F,
                             radius
                     )
             );
@@ -725,9 +807,11 @@ public class AtomicCasingRenderer
             float radius
     ) {
         return new Vec3(
-                Mth.cos(angle) * radius,
+                Mth.cos(angle)
+                        * radius,
                 0,
-                Mth.sin(angle) * radius
+                Mth.sin(angle)
+                        * radius
         );
     }
 
@@ -735,13 +819,6 @@ public class AtomicCasingRenderer
      * ============================================================
      * ATMOSFERA ESFÉRICA
      * ============================================================
-     *
-     * A atmosfera é uma esfera maior que a principal.
-     *
-     * Não é um anel plano.
-     *
-     * Cada pequeno raio é colocado sobre a superfície
-     * tridimensional da esfera.
      */
 
     private void renderAtmosphere(
@@ -755,41 +832,35 @@ public class AtomicCasingRenderer
                 poseStack.last().pose();
 
         /*
-         * Maior que a esfera principal e com pequena separação.
+         * Esfera maior e ligeiramente afastada.
          */
         float radius =
                 ATMOSPHERE_RADIUS
-                        + energyFactor * 0.045F;
+                        + energyFactor * 0.035F;
 
         /*
-         * Alguns raios extras conforme a energia.
+         * Muitos raios.
          */
         int arcCount =
-                10
+                14
                         + Math.round(
                         energyFactor
                                 * (
                                 ATMOSPHERE_ARCS
-                                        - 10
+                                        - 14
                         )
                 );
 
-        /*
-         * Cada arco possui sua própria chance de piscar.
-         */
         for (int i = 0;
              i < arcCount;
              i++) {
 
-            /*
-             * Identificador estável do arco.
-             */
             double seed =
                     sphereIndex * 73.71
                             + i * 19.37;
 
             /*
-             * Posição pseudoaleatória na esfera.
+             * Distribuição pseudoaleatória pela esfera.
              */
             double latitude =
                     (
@@ -809,30 +880,44 @@ public class AtomicCasingRenderer
                             * 2.0;
 
             /*
-             * Pequena extensão angular.
+             * ATMOSFERA MAIS LENTA.
+             */
+            double rotation =
+                    gameTime
+                            * (
+                            0.008
+                                    + energyFactor
+                                    * 0.025
+                    );
+
+            longitude +=
+                    rotation;
+
+            /*
+             * Cada raio possui comprimento diferente.
              */
             double arcLength =
-                    0.10
+                    0.09
                             + pseudoRandom(
                             seed,
                             2
                     ) * (
-                            0.12
+                            0.10
                                     + energyFactor
-                                    * 0.10
+                                    * 0.08
                     );
 
             /*
-             * Pisca independente dos demais.
+             * Piscam independentemente.
              */
-            float flash =
+            float flicker =
                     lightningFlicker(
                             gameTime,
                             seed,
-                            0.85F
+                            0.55F
                     );
 
-            if (flash <= 0F) {
+            if (flicker <= 0F) {
                 continue;
             }
 
@@ -852,40 +937,32 @@ public class AtomicCasingRenderer
                     );
 
             /*
-             * Pequeno terceiro ponto para fazer o raio
-             * parecer irregular.
+             * Ponto intermediário irregular.
              */
-            double middleLongitude =
-                    longitude
-                            + arcLength
-                            * 0.5;
-
             Vec3 middle =
                     spherePoint(
                             radius
-                                    + 0.008F
+                                    + 0.010F
                                     * (float) Math.sin(
-                                    gameTime
-                                            * 0.7
+                                    gameTime * 0.35
                                             + seed
                             ),
                             latitude,
-                            middleLongitude
+                            longitude
+                                    + arcLength
+                                    * 0.50
                     );
 
-            /*
-             * Raio fino, porém 3D.
-             */
             float thickness =
-                    0.013F
-                            + energyFactor * 0.020F;
+                    0.014F
+                            + energyFactor * 0.018F;
 
             float alpha =
-                    flash
+                    flicker
                             * (
-                            0.35F
+                            0.45F
                                     + energyFactor
-                                    * 0.60F
+                                    * 0.50F
                     );
 
             drawLightningTube(
@@ -953,9 +1030,6 @@ public class AtomicCasingRenderer
      * ============================================================
      * FLASHES ALEATÓRIOS
      * ============================================================
-     *
-     * Pequenos relâmpagos que aparecem em pontos diferentes
-     * do interior do AMR e desaparecem rapidamente.
      */
 
     private void renderRandomFlashes(
@@ -967,9 +1041,6 @@ public class AtomicCasingRenderer
         Matrix4f matrix =
                 poseStack.last().pose();
 
-        /*
-         * Cada flash possui seu próprio ciclo.
-         */
         for (int i = 0;
              i < RANDOM_FLASHES;
              i++) {
@@ -978,90 +1049,77 @@ public class AtomicCasingRenderer
                     i * 47.193;
 
             /*
-             * Frequência individual.
+             * Ciclo mais longo:
+             * o flash permanece visível por mais tempo.
              */
             double frequency =
-                    0.010
+                    0.006
                             + pseudoRandom(
                             seed,
                             3
-                    ) * 0.018;
+                    ) * 0.010;
 
-            /*
-             * Ciclo em que estamos.
-             */
             long cycle =
                     (long) Math.floor(
                             gameTime
                                     * frequency
                     );
 
-            /*
-             * Momento do ciclo.
-             */
-            double cycleProgress =
+            double progress =
                     gameTime
                             * frequency
                             - cycle;
 
             /*
-             * O flash ocupa somente uma pequena parte
-             * do ciclo.
+             * Janela de flash maior.
              */
-            if (cycleProgress > 0.10) {
+            if (progress > 0.22) {
                 continue;
             }
 
             /*
-             * Nem todo ciclo necessariamente gera flash.
+             * Nem todo ciclo gera relâmpago.
              */
             if (pseudoRandom(
                     seed,
-                    cycle
-                            + 100
-            ) > 0.58) {
+                    cycle + 100
+            ) > 0.60) {
                 continue;
             }
 
             /*
-             * Fade rápido.
+             * Fade.
              */
             float strength =
                     (float) (
                             1.0
-                                    - cycleProgress
-                                    / 0.10
+                                    - progress
+                                    / 0.22
                     );
 
             /*
-             * Posição pseudoaleatória dentro do AMR.
-             *
-             * Mantemos uma margem para não atravessar
-             * visualmente o casing.
+             * Posição aleatória no interior.
              */
             float x =
-                    -2.45F
+                    -2.30F
                             + (float) pseudoRandom(
                             seed,
-                            cycle
-                                    + 1
-                    ) * 4.90F;
+                            cycle + 1
+                    ) * 4.60F;
 
             float y =
-                    -2.45F
+                    -2.30F
                             + (float) pseudoRandom(
                             seed,
-                            cycle
-                                    + 2
-                    ) * 4.90F;
+                            cycle + 2
+                    ) * 4.60F;
 
             float z =
-                    -2.45F
+                    -2.30F
                             + (float) pseudoRandom(
                             seed,
-                            cycle
-                                    + 3
-                    ) * 4.90F;
+                            cycle + 3
+                    ) * 4.60F;
 
             /*
              * Direção aleatória.
@@ -1069,19 +1127,21 @@ public class AtomicCasingRenderer
             double angleA =
                     pseudoRandom(
                             seed,
-                            cycle
-                                    + 4
-                    ) * Math.PI * 2;
+                            cycle + 4
+                    )
+                            * Math.PI
+                            * 2.0;
 
             double angleB =
                     (
                             pseudoRandom(
                                     seed,
-                                    cycle
-                                            + 5
+                                    cycle + 5
                             ) * 2.0
                                     - 1.0
-                    ) * Math.PI * 0.5;
+                    )
+                            * Math.PI
+                            * 0.5;
 
             Vec3 direction =
                     new Vec3(
@@ -1093,12 +1153,12 @@ public class AtomicCasingRenderer
                     ).normalize();
 
             /*
-             * Flash curto.
+             * Flashes maiores.
              */
             float length =
-                    0.18F
+                    0.35F
                             + energyFactor
-                            * 0.35F;
+                            * 0.60F;
 
             Vec3 start =
                     new Vec3(
@@ -1114,10 +1174,62 @@ public class AtomicCasingRenderer
                             )
                     );
 
+            /*
+             * Pequena irregularidade no meio.
+             */
+            Vec3 middle =
+                    start.add(
+                            direction.scale(
+                                    length * 0.50F
+                            )
+                    );
+
+            /*
+             * Segundo eixo perpendicular.
+             */
+            Vec3 side =
+                    direction.cross(
+                            Math.abs(
+                                    direction.y
+                            ) < 0.9
+                                    ? new Vec3(
+                                    0,
+                                    1,
+                                    0
+                            )
+                                    : new Vec3(
+                                    1,
+                                    0,
+                                    0
+                            )
+                    ).normalize();
+
+            middle =
+                    middle.add(
+                            side.scale(
+                                    0.10F
+                                            * Mth.sin(
+                                            (float) (
+                                                    gameTime
+                                                            * 0.9
+                                                            + seed
+                                            )
+                                    )
+                            )
+                    );
+
             float thickness =
-                    0.015F
+                    0.024F
                             + energyFactor
-                            * 0.025F;
+                            * 0.038F;
+
+            float alpha =
+                    strength
+                            * (
+                            0.70F
+                                    + energyFactor
+                                    * 0.30F
+                    );
 
             drawLightningTube(
                     matrix,
@@ -1125,18 +1237,29 @@ public class AtomicCasingRenderer
                     (float) start.x,
                     (float) start.y,
                     (float) start.z,
+                    (float) middle.x,
+                    (float) middle.y,
+                    (float) middle.z,
+                    1F,
+                    1F,
+                    1F,
+                    alpha,
+                    thickness
+            );
+
+            drawLightningTube(
+                    matrix,
+                    consumer,
+                    (float) middle.x,
+                    (float) middle.y,
+                    (float) middle.z,
                     (float) end.x,
                     (float) end.y,
                     (float) end.z,
                     1F,
                     1F,
                     1F,
-                    strength
-                            * (
-                            0.55F
-                                    + energyFactor
-                                    * 0.45F
-                    ),
+                    alpha,
                     thickness
             );
         }
@@ -1144,10 +1267,8 @@ public class AtomicCasingRenderer
 
     /*
      * ============================================================
-     * PSEUDO-RANDOM DETERMINÍSTICO
+     * PSEUDO-RANDOM
      * ============================================================
-     *
-     * Evita criar Random a cada frame.
      */
 
     private double pseudoRandom(
@@ -1167,7 +1288,7 @@ public class AtomicCasingRenderer
 
     /*
      * ============================================================
-     * FLICKER DOS RAIOS
+     * FLICKER
      * ============================================================
      */
 
@@ -1176,9 +1297,6 @@ public class AtomicCasingRenderer
             double seed,
             float frequency
     ) {
-        /*
-         * Divide o tempo em pequenas janelas.
-         */
         long bucket =
                 (long) Math.floor(
                         gameTime
@@ -1191,30 +1309,29 @@ public class AtomicCasingRenderer
                         - bucket;
 
         /*
-         * Chance de o raio estar ativo nessa janela.
+         * Chance de existir neste ciclo.
          */
         double chance =
                 pseudoRandom(
                         seed,
-                        bucket
-                                + 17
+                        bucket + 17
                 );
 
-        if (chance < 0.48) {
+        if (chance < 0.40) {
             return 0F;
         }
 
         /*
-         * Flash extremamente rápido.
+         * Flash curto.
          */
-        if (position > 0.26) {
+        if (position > 0.34) {
             return 0F;
         }
 
         return (float) (
                 1.0
                         - position
-                        / 0.26
+                        / 0.34
         );
     }
 
@@ -1301,7 +1418,7 @@ public class AtomicCasingRenderer
                                 * 0.5F;
 
                 /*
-                 * Destaque móvel.
+                 * Destaque superficial móvel.
                  */
                 float highlight =
                         Math.max(
@@ -1387,12 +1504,8 @@ public class AtomicCasingRenderer
 
     /*
      * ============================================================
-     * TUBO DE LIGHTNING 3D
+     * TUBO 3D
      * ============================================================
-     *
-     * O antigo drawSegment() era essencialmente uma superfície
-     * 2D. Este método cria uma seção hexagonal, portanto o efeito
-     * mantém volume e não desaparece dependendo do ângulo.
      */
 
     private void drawLightningTube(
@@ -1425,6 +1538,9 @@ public class AtomicCasingRenderer
         direction =
                 direction.normalize();
 
+        /*
+         * Cria uma base perpendicular à direção.
+         */
         Vec3 reference =
                 Math.abs(direction.y) < 0.9
                         ? new Vec3(
@@ -1449,8 +1565,7 @@ public class AtomicCasingRenderer
                 ).normalize();
 
         /*
-         * Hexágono é suficiente para dar volume
-         * sem exagerar no custo.
+         * Tubo hexagonal.
          */
         final int sides =
                 6;
@@ -1575,7 +1690,7 @@ public class AtomicCasingRenderer
 
     /*
      * ============================================================
-     * CORES
+     * CORES DE COR
      * ============================================================
      */
 
