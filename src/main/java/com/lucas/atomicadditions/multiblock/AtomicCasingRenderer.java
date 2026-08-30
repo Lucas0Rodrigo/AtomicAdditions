@@ -3,12 +3,13 @@ package com.lucas.atomicadditions.multiblock;
 import com.lucas.atomicadditions.chemical.AtomicGases;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.logging.LogUtils;
 import com.mojang.math.Axis;
 import java.util.ArrayList;
 import java.util.List;
-import mekanism.client.render.MekanismRenderType;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
+import mekanism.client.render.MekanismRenderType;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -16,39 +17,36 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
+import org.slf4j.Logger;
 
 public class AtomicCasingRenderer
         implements BlockEntityRenderer<AtomicCasingBlockEntity> {
+
+    private static final Logger LOGGER =
+            LogUtils.getLogger();
+
+    private static final float SPHERE_RADIUS = 0.38F;
+    private static final float SPHERE_X_OFFSET = 0.95F;
+    private static final float SMOKE_RADIUS = 0.48F;
+    private static final float ATMOSPHERE_RADIUS = 0.52F;
+
+    private static final int SPHERE_SEGMENTS = 14;
+    private static final int SPHERE_RINGS = 8;
+    private static final int SMOKE_PARTICLES = 16;
+    private static final int ATMOSPHERE_ARCS = 8;
+
+    private static final float IDLE_BOB_AMPLITUDE = 0.06F;
+    private static final float IDLE_BOB_SPEED = 0.06F;
+
+    private static final double MAX_REFERENCE_ENERGY =
+            80_000_000D;
+
+    private long lastLogTick = -1;
 
     public AtomicCasingRenderer(
             BlockEntityRendererProvider.Context context
     ) {
     }
-
-    private static final float SPHERE_RADIUS = 0.38F;
-
-    private static final float SPHERE_HEIGHT = 3.5F;
-
-    private static final float SPHERE_X_OFFSET = 0.95F;
-
-    private static final float SMOKE_RADIUS = 0.48F;
-
-    private static final float ATMOSPHERE_RADIUS = 0.52F;
-
-    private static final int SPHERE_SEGMENTS = 14;
-
-    private static final int SPHERE_RINGS = 8;
-
-    private static final int SMOKE_PARTICLES = 16;
-
-    private static final int ATMOSPHERE_ARCS = 8;
-
-    private static final float IDLE_BOB_AMPLITUDE = 0.06F;
-
-    private static final float IDLE_BOB_SPEED = 0.06F;
-
-    private static final float MAX_REFERENCE_ENERGY =
-            80_000_000F;
 
     @Override
     public void render(
@@ -62,17 +60,37 @@ public class AtomicCasingRenderer
         AtomicMultiblockData multiblock =
                 blockEntity.getMultiblock();
 
-        if (multiblock == null
-                || !multiblock.isFormed()
-                || multiblock.renderLocation == null
-                || !blockEntity.getBlockPos().equals(
-                multiblock.renderLocation
-        )) {
+        if (multiblock == null) {
+            return;
+        }
+
+        /*
+         * Somente o Master renderiza a animação.
+         *
+         * É assim que evitamos desenhar o mesmo núcleo
+         * dezenas de vezes, uma vez por casing.
+         */
+        if (!blockEntity.isMaster()) {
+            return;
+        }
+
+        if (!multiblock.isFormed()) {
             return;
         }
 
         List<GasStack> gases =
                 getActiveInputGases(multiblock);
+
+        /*
+         * Debug periódico.
+         *
+         * Um log por segundo aproximadamente.
+         */
+        logState(
+                blockEntity,
+                multiblock,
+                gases
+        );
 
         if (gases.isEmpty()) {
             return;
@@ -81,9 +99,10 @@ public class AtomicCasingRenderer
         poseStack.pushPose();
 
         /*
-         * O renderer está sendo executado no bloco
-         * renderLocation. Deslocamos o núcleo para o
-         * centro geométrico do multiblock.
+         * O renderer está preso ao BlockEntity Master.
+         *
+         * Usamos os limites reais do multiblock para colocar
+         * o núcleo exatamente no centro da estrutura.
          */
         double centerX =
                 multiblock.getMinPos().getX()
@@ -116,8 +135,10 @@ public class AtomicCasingRenderer
                 ) * IDLE_BOB_AMPLITUDE;
 
         /*
-         * A intensidade é determinada pela energia
-         * efetivamente utilizada no último tick.
+         * Energia efetivamente usada no último tick.
+         *
+         * 0      = sem energia
+         * 1      = 80 MFE/t
          */
         float energyFactor =
                 (float) Math.min(
@@ -131,10 +152,7 @@ public class AtomicCasingRenderer
                 multiblock.lastProcessed > 0;
 
         /*
-         * Velocidade da rotação.
-         *
-         * Mesmo sem atingir o máximo, a esfera começa
-         * a girar assim que existe processamento.
+         * Velocidade baseada na energia.
          */
         float rotationSpeed =
                 active
@@ -175,7 +193,7 @@ public class AtomicCasingRenderer
                     idleBob;
 
             /*
-             * Os dois elementos giram em sentidos diferentes.
+             * As duas esferas giram em sentidos opostos.
              */
             float localRotation =
                     index == 0
@@ -218,7 +236,7 @@ public class AtomicCasingRenderer
             /*
              * Fumaça colorida.
              *
-             * Ela existe tanto parado quanto ligado.
+             * Continua presente mesmo com o AMR parado.
              */
             renderSmoke(
                     poseStack,
@@ -232,12 +250,10 @@ public class AtomicCasingRenderer
             );
 
             if (active) {
-
                 /*
-                 * Atmosfera individual de mini-raios.
+                 * Atmosfera individual.
                  *
-                 * Branca e cada vez mais densa conforme
-                 * aumenta a energia.
+                 * Branca e com densidade proporcional à energia.
                  */
                 renderAtmosphere(
                         poseStack,
@@ -252,9 +268,7 @@ public class AtomicCasingRenderer
         }
 
         /*
-         * Raios entre as esferas e as bobinas.
-         *
-         * Só aparecem durante o processamento.
+         * Raios entre o núcleo e as bobinas.
          */
         if (active) {
             renderCoilRays(
@@ -262,11 +276,61 @@ public class AtomicCasingRenderer
                     consumer,
                     multiblock,
                     energyFactor,
-                    gameTime
+                    gameTime,
+                    gases.size()
             );
         }
 
         poseStack.popPose();
+    }
+
+    private void logState(
+            AtomicCasingBlockEntity blockEntity,
+            AtomicMultiblockData multiblock,
+            List<GasStack> gases
+    ) {
+        long gameTime =
+                blockEntity.getLevel().getGameTime();
+
+        if (gameTime == lastLogTick
+                || gameTime % 20 != 0) {
+            return;
+        }
+
+        lastLogTick = gameTime;
+
+        String gas1 =
+                multiblock.inputTank1
+                        .getStack()
+                        .isEmpty()
+                        ? "EMPTY"
+                        : multiblock.inputTank1
+                        .getStack()
+                        .getType()
+                        .getRegistryName().toString();
+
+        String gas2 =
+                multiblock.inputTank2
+                        .getStack()
+                        .isEmpty()
+                        ? "EMPTY"
+                        : multiblock.inputTank2
+                        .getStack()
+                        .getType()
+                        .getRegistryName().toString();
+
+        LOGGER.info(
+                "[AMR-RENDER] master={} | formed={} | renderLocation={} | gases={} | input1={} | input2={} | energy={} | lastProcessed={} | progress={}",
+                blockEntity.getBlockPos(),
+                multiblock.isFormed(),
+                multiblock.renderLocation,
+                gases.size(),
+                gas1,
+                gas2,
+                multiblock.lastReceivedEnergy,
+                multiblock.lastProcessed,
+                multiblock.getScaledProgress()
+        );
     }
 
     private List<GasStack> getActiveInputGases(
@@ -286,15 +350,16 @@ public class AtomicCasingRenderer
         }
 
         if (!second.isEmpty()
-                && (gases.isEmpty()
-                || second.getType()
-                != gases.get(0).getType())) {
-
+                && (
+                gases.isEmpty()
+                        || second.getType()
+                        != gases.get(0).getType()
+        )) {
             gases.add(second);
         }
 
         /*
-         * Apenas os quatro gases de entrada do AMR.
+         * O AMR utiliza somente estes quatro gases como entrada.
          */
         gases.removeIf(
                 stack ->
@@ -489,14 +554,16 @@ public class AtomicCasingRenderer
 
             float radius =
                     SMOKE_RADIUS
-                            * (0.85F
-                            + 0.12F
-                            * Mth.sin(
-                            (float) (
-                                    gameTime * 0.04
-                                            + i
+                            * (
+                            0.85F
+                                    + 0.12F
+                                    * Mth.sin(
+                                    (float) (
+                                            gameTime * 0.04
+                                                    + i
+                                    )
                             )
-                    ));
+                    );
 
             float x =
                     (float) Math.cos(angle)
@@ -510,8 +577,7 @@ public class AtomicCasingRenderer
                     (float) (
                             verticalWave
                                     + (
-                                    (i
-                                            % 5)
+                                    (i % 5)
                                             - 2
                             ) * 0.07
                     );
@@ -545,11 +611,16 @@ public class AtomicCasingRenderer
         Matrix4f matrix =
                 poseStack.last().pose();
 
+        /*
+         * Começa com poucos raios e aumenta até 8.
+         */
         int arcCount =
                 3
                         + Math.round(
-                        energyFactor * (
-                                ATMOSPHERE_ARCS - 3
+                        energyFactor
+                                * (
+                                ATMOSPHERE_ARCS
+                                        - 3
                         )
                 );
 
@@ -561,7 +632,8 @@ public class AtomicCasingRenderer
                     gameTime
                             * (
                             0.02
-                                    + energyFactor * 0.10
+                                    + energyFactor
+                                    * 0.10
                     )
                             + i * Math.PI * 2
                             / ATMOSPHERE_ARCS
@@ -604,8 +676,7 @@ public class AtomicCasingRenderer
                     y,
                     z1,
                     x2,
-                    y
-                            + 0.05F,
+                    y + 0.05F,
                     z2,
                     1F,
                     1F,
@@ -623,7 +694,8 @@ public class AtomicCasingRenderer
             VertexConsumer consumer,
             AtomicMultiblockData multiblock,
             float energyFactor,
-            double gameTime
+            double gameTime,
+            int gasCount
     ) {
         if (multiblock.coils.isEmpty()) {
             return;
@@ -638,42 +710,62 @@ public class AtomicCasingRenderer
                 multiblock.coils) {
 
             double targetX =
-                    coil.getX() + 0.5
+                    coil.getX()
+                            + 0.5
                             - blockRenderAnchorX(
                             multiblock
                     );
 
             double targetY =
-                    coil.getY() + 0.5
+                    coil.getY()
+                            + 0.5
                             - blockRenderAnchorY(
                             multiblock
                     );
 
             double targetZ =
-                    coil.getZ() + 0.5
+                    coil.getZ()
+                            + 0.5
                             - blockRenderAnchorZ(
                             multiblock
                     );
 
             /*
-             * Alterna entre as duas esferas.
+             * Distribui os raios entre as esferas existentes.
+             *
+             * Se só existir uma esfera, todos vão para ela.
              */
             int sphereIndex =
-                    index++ % 2;
+                    gasCount <= 1
+                            ? 0
+                            : index % gasCount;
 
             float sphereX =
-                    multiblock.width() == 7
-                            ? (
+                    gasCount <= 1
+                            ? 0
+                            : (
                             sphereIndex == 0
                                     ? -SPHERE_X_OFFSET
                                     : SPHERE_X_OFFSET
-                    )
-                            : 0;
+                    );
 
             float sphereY =
                     (float) Math.sin(
                             gameTime * IDLE_BOB_SPEED
                     ) * IDLE_BOB_AMPLITUDE;
+
+            /*
+             * Pequena variação para que os raios
+             * não pareçam perfeitamente idênticos.
+             */
+            float pulse =
+                    0.85F
+                            + 0.15F * Mth.sin(
+                            (float) (
+                                    gameTime * 0.25
+                                            + index * 1.7
+                            )
+                    );
 
             drawSegment(
                     matrix,
@@ -687,11 +779,15 @@ public class AtomicCasingRenderer
                     1F,
                     1F,
                     1F,
-                    0.30F
-                            + energyFactor * 0.65F,
+                    (
+                            0.20F
+                                    + energyFactor * 0.80F
+                    ) * pulse,
                     0.018F
-                            + energyFactor * 0.035F
+                            + energyFactor * 0.045F
             );
+
+            index++;
         }
     }
 
@@ -784,15 +880,39 @@ public class AtomicCasingRenderer
                         x2 - x1,
                         y2 - y1,
                         z2 - z1
-                ).normalize();
+                );
+
+        if (direction.lengthSqr() < 0.000001D) {
+            return;
+        }
+
+        direction =
+                direction.normalize();
 
         Vec3 perpendicular =
                 new Vec3(
                         -direction.z,
                         0,
                         direction.x
-                ).normalize()
-                        .scale(thickness);
+                );
+
+        if (perpendicular.lengthSqr() < 0.000001D) {
+            perpendicular =
+                    new Vec3(
+                            1,
+                            0,
+                            0
+                    );
+        } else {
+            perpendicular =
+                    perpendicular
+                            .normalize();
+        }
+
+        perpendicular =
+                perpendicular.scale(
+                        thickness
+                );
 
         float px =
                 (float) perpendicular.x;
