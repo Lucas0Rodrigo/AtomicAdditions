@@ -42,7 +42,7 @@ public class AtomicCasingRenderer
      * Ambas percorrem a mesma órbita e no mesmo sentido.
      */
     private static final float ORBIT_PHASE_OFFSET =
-            0.42F;
+            Mth.PI;
 
     /*
      * Oscilação vertical.
@@ -61,7 +61,7 @@ public class AtomicCasingRenderer
      * Esse valor é multiplicado pelo percentual de energia.
      */
     private static final float MAX_ORBIT_SPEED =
-            0.22F;
+            0.82F;
 
     /*
      * Pequena rotação própria somente para deixar
@@ -309,13 +309,21 @@ public class AtomicCasingRenderer
             /*
              * Translação orbital no plano horizontal.
              */
+            float effectiveOrbitRadius =
+                    ORBIT_RADIUS
+                            * (
+                            1.0F
+                                    - 0.25F
+                                    * energyFactor
+                    );
+
             float orbitX =
                     Mth.cos(localAngle)
-                            * ORBIT_RADIUS;
+                            * effectiveOrbitRadius;
 
             float orbitZ =
                     Mth.sin(localAngle)
-                            * ORBIT_RADIUS;
+                            * effectiveOrbitRadius;
 
             float orbitY =
                     idleBob;
