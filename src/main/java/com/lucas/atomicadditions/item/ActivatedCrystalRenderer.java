@@ -4,8 +4,10 @@ import com.lucas.atomicadditions.AtomicAdditions;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
@@ -30,7 +32,7 @@ public class ActivatedCrystalRenderer
 
     public ActivatedCrystalRenderer(
             BlockEntityRenderDispatcher dispatcher,
-            net.minecraft.client.model.geom.EntityModelSet modelSet
+            EntityModelSet modelSet
     ) {
         super(dispatcher, modelSet);
     }
@@ -45,31 +47,37 @@ public class ActivatedCrystalRenderer
             int combinedOverlay
     ) {
         Minecraft minecraft = Minecraft.getInstance();
-        ItemRenderer itemRenderer = minecraft.getItemRenderer();
-        Level level = minecraft.level;
+
+        ItemRenderer itemRenderer =
+                minecraft.getItemRenderer();
+
+        Level level =
+                minecraft.level;
 
         ResourceLocation sourceId =
                 ActivatedCrystalItem.getSourceCrystalId(
                         activatedStack
                 );
 
-        if (sourceId == null ||
-                !net.minecraft.core.registries.BuiltInRegistries.ITEM
-                        .containsKey(sourceId)) {
+        if (sourceId == null) {
+            return;
+        }
+
+        if (!net.minecraft.core.registries.BuiltInRegistries.ITEM
+                .containsKey(sourceId)) {
             return;
         }
 
         ItemStack sourceStack =
                 new ItemStack(
-                        net.minecraft.core.registries.BuiltInRegistries.ITEM
+                        net.minecraft.core.registries
+                                .BuiltInRegistries.ITEM
                                 .get(sourceId)
                 );
 
-        /*
-         * =========================================================
-         * CRISTAL ORIGINAL
-         * =========================================================
-         */
+        if (sourceStack.isEmpty()) {
+            return;
+        }
 
         BakedModel sourceModel =
                 itemRenderer.getModel(
@@ -88,31 +96,27 @@ public class ActivatedCrystalRenderer
 
         poseStack.pushPose();
 
-        BakedModel transformedSource =
+        BakedModel transformedSourceModel =
                 sourceModel.applyTransform(
                         displayContext,
                         poseStack,
                         leftHand
                 );
 
+        int crystalLight = 0xF000F0;
+
         renderModel(
                 itemRenderer,
-                transformedSource,
+                transformedSourceModel,
                 sourceStack,
                 poseStack,
                 bufferSource,
-                combinedLight,
+                crystalLight,
                 combinedOverlay,
                 minecraft
         );
 
         poseStack.popPose();
-
-        /*
-         * =========================================================
-         * OVERLAY
-         * =========================================================
-         */
 
         BakedModel overlayModel =
                 minecraft.getModelManager()
@@ -124,16 +128,15 @@ public class ActivatedCrystalRenderer
 
         poseStack.pushPose();
 
-        BakedModel transformedOverlay =
-                overlayModel.applyTransform(
-                        displayContext,
-                        poseStack,
-                        leftHand
-                );
+        overlayModel.applyTransform(
+                displayContext,
+                poseStack,
+                leftHand
+        );
 
         renderModel(
                 itemRenderer,
-                transformedOverlay,
+                overlayModel,
                 activatedStack,
                 poseStack,
                 bufferSource,
@@ -159,11 +162,16 @@ public class ActivatedCrystalRenderer
                 minecraft.options.graphicsMode().get()
                         == net.minecraft.client.GraphicsStatus.FABULOUS;
 
-        for (var renderType :
-                model.getRenderTypes(stack, fabulous)) {
+        for (RenderType renderType :
+                model.getRenderTypes(
+                        stack,
+                        fabulous
+                )) {
 
-            VertexConsumer consumer =
-                    bufferSource.getBuffer(renderType);
+            VertexConsumer vertexConsumer =
+                    bufferSource.getBuffer(
+                            renderType
+                    );
 
             itemRenderer.renderModelLists(
                     model,
@@ -171,7 +179,7 @@ public class ActivatedCrystalRenderer
                     combinedLight,
                     combinedOverlay,
                     poseStack,
-                    consumer
+                    vertexConsumer
             );
         }
     }
