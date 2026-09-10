@@ -14,7 +14,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 public class ActivatedCrystalRenderer
         extends BlockEntityWithoutLevelRenderer {
@@ -57,16 +60,14 @@ public class ActivatedCrystalRenderer
             return;
         }
 
-        if (!net.minecraft.core.registries.BuiltInRegistries.ITEM
+        if (!net.minecraftforge.registries.ForgeRegistries.ITEMS
                 .containsKey(sourceId)) {
             return;
         }
 
         ItemStack sourceStack =
                 new ItemStack(
-                        net.minecraft.core.registries
-                                .BuiltInRegistries.ITEM
-                                .get(sourceId)
+                        Objects.requireNonNull(ForgeRegistries.ITEMS.getValue(sourceId))
                 );
 
         if (sourceStack.isEmpty()) {
@@ -102,10 +103,6 @@ public class ActivatedCrystalRenderer
         BakedModel overlayModel =
                 minecraft.getModelManager()
                         .getModel(OVERLAY_MODEL);
-
-        if (overlayModel == null) {
-            return;
-        }
 
         poseStack.pushPose();
 
