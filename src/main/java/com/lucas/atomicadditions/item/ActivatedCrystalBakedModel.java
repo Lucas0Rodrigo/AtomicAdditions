@@ -37,19 +37,21 @@ public class ActivatedCrystalBakedModel
         this.overrides = new ItemOverrides() {
             @Override
             public BakedModel resolve(
-                    @NotNull BakedModel originalModel,
+                    @NotNull BakedModel model,
                     @NotNull ItemStack stack,
                     @Nullable ClientLevel level,
                     @Nullable LivingEntity entity,
                     int seed
             ) {
                 ResourceLocation sourceId =
-                        ActivatedCrystalItem.getSourceCrystalId(stack);
+                        ActivatedCrystalItem.getSourceCrystalId(
+                                stack
+                        );
 
                 if (sourceId == null ||
                         !net.minecraft.core.registries.BuiltInRegistries.ITEM
                                 .containsKey(sourceId)) {
-                    return originalModel;
+                    return model;
                 }
 
                 ItemStack sourceStack =
@@ -102,7 +104,7 @@ public class ActivatedCrystalBakedModel
 
         @Override
         public List<BakedModel> getRenderPasses(
-                ItemStack itemStack,
+                ItemStack stack,
                 boolean fabulous
         ) {
             return List.of(
