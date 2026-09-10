@@ -1,0 +1,24 @@
+{
+  "type": "mekanism:reaction",
+  "itemInput": {
+    "item": "minecraft:copper_ingot",
+    "count": 10
+  },
+  "fluidInput": {
+    "fluid": "minecraft:water",
+    "amount": 2000
+  },
+  "gasInput": {
+    "gas": "mekanism:uranium_hexafluoride",
+    "amount": 2000
+  },
+  "duration": 100,
+  "itemOutput": {
+    "item": "mekanism:dirty_dust_copper",
+    "count": 1
+  },
+  "gasOutput": {
+    "gas": "atomicadditions:copper",
+    "amount": 1000
+  }
+}

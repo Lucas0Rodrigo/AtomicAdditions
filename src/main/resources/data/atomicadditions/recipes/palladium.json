@@ -1,0 +1,20 @@
+{
+  "type": "mekanism:reaction",
+  "itemInput": {
+    "item": "mekanism:sulfur_dust",
+    "count": 10
+  },
+  "fluidInput": {
+    "fluid": "minecraft:water",
+    "amount": 2000
+  },
+  "gasInput": {
+    "gas": "atomicadditions:copper",
+    "amount": 1000
+  },
+  "duration": 100,
+  "gasOutput": {
+    "gas": "atomicadditions:palladium",
+    "amount": 1000
+  }
+}
