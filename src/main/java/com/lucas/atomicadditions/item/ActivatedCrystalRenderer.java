@@ -2,11 +2,13 @@ package com.lucas.atomicadditions.item;
 
 import com.lucas.atomicadditions.AtomicAdditions;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
@@ -23,13 +25,13 @@ public class ActivatedCrystalRenderer
             new ModelResourceLocation(
                     ResourceLocation.fromNamespaceAndPath(
                             AtomicAdditions.MODID,
-                            "activated_crystal_overlay"
+                            "item/activated_crystal_overlay"
                     ),
                     "inventory"
             );
 
     public ActivatedCrystalRenderer(
-            net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher dispatcher,
+            BlockEntityRenderDispatcher dispatcher,
             EntityModelSet modelSet
     ) {
         super(dispatcher, modelSet);
@@ -60,6 +62,20 @@ public class ActivatedCrystalRenderer
             return;
         }
 
+        Minecraft minecraft =
+                Minecraft.getInstance();
+
+        ItemRenderer itemRenderer =
+                minecraft.getItemRenderer();
+
+        Level level =
+                minecraft.level;
+
+        /*
+         * =========================================================
+         * 1. CRISTAL ORIGINAL
+         * =========================================================
+         */
         ItemStack sourceStack =
                 new ItemStack(
                         net.minecraft.core.registries
@@ -71,18 +87,6 @@ public class ActivatedCrystalRenderer
             return;
         }
 
-        Minecraft minecraft =
-                Minecraft.getInstance();
-
-        ItemRenderer itemRenderer =
-                minecraft.getItemRenderer();
-
-        Level level =
-                minecraft.level;
-
-        /*
-         * Primeiro: cristal original.
-         */
         itemRenderer.renderStatic(
                 sourceStack,
                 displayContext,
@@ -95,31 +99,47 @@ public class ActivatedCrystalRenderer
         );
 
         /*
-         * Segundo: overlay do Cristal Ativado.
+         * =========================================================
+         * 2. OVERLAY
+         * =========================================================
          *
-         * Chamamos render(...) diretamente com o modelo,
-         * evitando voltar para o renderer customizado do próprio item.
+         * Não usamos itemRenderer.render(), porque ele pode aplicar
+         * novamente o transform do ItemDisplayContext.
+         *
+         * renderModelLists() desenha o modelo diretamente na pose
+         * atual, mantendo o overlay exatamente sobre o cristal.
          */
         BakedModel overlayModel =
                 minecraft.getModelManager()
                         .getModel(OVERLAY_MODEL);
 
-        boolean leftHand =
-                displayContext ==
-                        ItemDisplayContext.FIRST_PERSON_LEFT_HAND
-                        ||
-                        displayContext ==
-                                ItemDisplayContext.THIRD_PERSON_LEFT_HAND;
+        if (overlayModel == null) {
+            AtomicAdditions.LOGGER.warn(
+                    "[AA DEBUG] Não foi possível carregar o modelo do overlay: {}",
+                    OVERLAY_MODEL
+            );
+            return;
+        }
 
-        itemRenderer.render(
-                activatedStack,
-                displayContext,
-                leftHand,
-                poseStack,
-                bufferSource,
-                combinedLight,
-                combinedOverlay,
-                overlayModel
-        );
+        for (RenderType renderType :
+                overlayModel.getRenderTypes(
+                        activatedStack,
+                        false
+                )) {
+
+            VertexConsumer vertexConsumer =
+                    bufferSource.getBuffer(
+                            renderType
+                    );
+
+            itemRenderer.renderModelLists(
+                    overlayModel,
+                    activatedStack,
+                    combinedLight,
+                    combinedOverlay,
+                    poseStack,
+                    vertexConsumer
+            );
+        }
     }
 }
