@@ -11,7 +11,6 @@ import mekanism.api.recipes.ingredients.creator.IngredientCreatorAccess;
 import mekanism.common.recipe.MekanismRecipeType;
 import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.registries.MekanismGases;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -43,20 +42,17 @@ public class AtomicActivatedCrystalRecipe
         this.operation = operation;
     }
 
-    /**
-     * Cria:
-     *
-     * 5x Crystal
+    /*
+     * 5x Cristal
      * +
-     * 1 mB Tantalum
+     * 1 mB Tântalo
      * =
-     * 8x Activated Crystal
+     * 8x Cristal Ativado
      */
     public static AtomicActivatedCrystalRecipe createActivationRecipe(
             ResourceLocation id,
             ItemStack sourceCrystal
     ) {
-
         return new AtomicActivatedCrystalRecipe(
                 id,
 
@@ -145,68 +141,78 @@ public class AtomicActivatedCrystalRecipe
 
         switch (operation) {
 
+            /*
+             * 5 Cristais + Tântalo
+             */
             case ACTIVATE:
 
-                /*
-                 * A receita concreta já foi criada para um cristal
-                 * específico. Portanto não usamos tag aqui.
-                 */
                 if (itemStack.getCount() < 5) {
                     return false;
                 }
 
-                if (!matchesActivationCrystal(itemStack)) {
+                /*
+                 * O próprio recipe foi criado para um cristal
+                 * específico. Então conferimos a representação
+                 * diretamente.
+                 */
+                boolean correctCrystal = false;
+
+                for (ItemStack representation :
+                        getItemInput().getRepresentations()) {
+
+                    if (representation.isEmpty()) {
+                        continue;
+                    }
+
+                    if (ItemStack.isSameItem(
+                            representation,
+                            itemStack
+                    )) {
+                        correctCrystal = true;
+                        break;
+                    }
+                }
+
+                if (!correctCrystal) {
                     return false;
                 }
 
-                return gasStack.getType()
-                        == AtomicGases.TANTALUM.get();
+                /*
+                 * Comparação nativa da API do Mekanism.
+                 */
+                return gasStack.isTypeEqual(
+                        AtomicGases.TANTALUM.get()
+                );
 
+            /*
+             * 1 Cristal Ativado + HCl
+             */
             case HYDROGEN_CHLORIDE:
 
                 return isActivatedCrystal(itemStack)
                         &&
-                        gasStack.getType()
-                                == MekanismGases
-                                .HYDROGEN_CHLORIDE
-                                .get();
+                        gasStack.isTypeEqual(
+                                MekanismGases
+                                        .HYDROGEN_CHLORIDE
+                                        .get()
+                        );
 
+            /*
+             * 1 Cristal Ativado + Rênio
+             *
+             * Será convertido em 2 Shards.
+             */
             case RHENIUM:
 
                 return isActivatedCrystal(itemStack)
                         &&
-                        gasStack.getType()
-                                == AtomicGases.RHENIUM.get();
+                        gasStack.isTypeEqual(
+                                AtomicGases.RHENIUM.get()
+                        );
 
             default:
                 return false;
         }
-    }
-
-    /**
-     * Confere se o item recebido é exatamente o cristal
-     * para o qual esta receita concreta foi criada.
-     */
-    private boolean matchesActivationCrystal(
-            ItemStack itemStack
-    ) {
-
-        for (ItemStack representation :
-                getItemInput().getRepresentations()) {
-
-            if (representation.isEmpty()) {
-                continue;
-            }
-
-            if (ItemStack.isSameItem(
-                    representation,
-                    itemStack
-            )) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     @Override
@@ -268,9 +274,11 @@ public class AtomicActivatedCrystalRecipe
                 );
 
         ResourceLocation sourceId =
-                BuiltInRegistries.ITEM.getKey(
-                        sourceCrystal.getItem()
-                );
+                net.minecraft.core.registries
+                        .BuiltInRegistries.ITEM
+                        .getKey(
+                                sourceCrystal.getItem()
+                        );
 
         ActivatedCrystalItem.setSourceCrystal(
                 result,
@@ -328,11 +336,11 @@ public class AtomicActivatedCrystalRecipe
         }
 
         /*
-         * Caminho normal:
-         * Activated Crystal + HCl -> 1 Shard
+         * HCl:
+         * 1x Activated Crystal -> 1x Shard
          *
-         * Caminho avançado:
-         * Activated Crystal + Rhenium -> 2 Shards
+         * Rênio:
+         * 1x Activated Crystal -> 2x Shards
          */
         result.setCount(amount);
 
@@ -350,8 +358,7 @@ public class AtomicActivatedCrystalRecipe
                         .get();
     }
 
-    private ItemStackGasToItemStackRecipe
-    findOriginalShardRecipe(
+    private ItemStackGasToItemStackRecipe findOriginalShardRecipe(
             ItemStack activatedStack
     ) {
 
@@ -382,6 +389,14 @@ public class AtomicActivatedCrystalRecipe
                         1_000_000
                 );
 
+        /*
+         * Aqui procuramos somente a receita original
+         * que transforma o cristal em shard.
+         *
+         * A consulta usa o cache do Mekanism porque este
+         * método só é chamado depois que a receita já foi
+         * efetivamente selecionada pela máquina.
+         */
         for (
                 ItemStackGasToItemStackRecipe recipe :
                 MekanismRecipeType.INJECTING
@@ -389,6 +404,9 @@ public class AtomicActivatedCrystalRecipe
                         .getRecipes(null)
         ) {
 
+            /*
+             * Nunca usar as nossas próprias receitas.
+             */
             if (recipe instanceof
                     AtomicActivatedCrystalRecipe) {
                 continue;
@@ -420,13 +438,17 @@ public class AtomicActivatedCrystalRecipe
     ) {
 
         if (id == null ||
-                !BuiltInRegistries.ITEM.containsKey(id)) {
+                !net.minecraft.core.registries
+                        .BuiltInRegistries.ITEM
+                        .containsKey(id)) {
 
             return ItemStack.EMPTY;
         }
 
         return new ItemStack(
-                BuiltInRegistries.ITEM.get(id)
+                net.minecraft.core.registries
+                        .BuiltInRegistries.ITEM
+                        .get(id)
         );
     }
 }
