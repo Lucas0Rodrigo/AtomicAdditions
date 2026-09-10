@@ -9,14 +9,16 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.block.model.ItemTransform;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.client.ForgeHooksClient;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3f;
 
 import java.util.List;
 
@@ -57,12 +59,9 @@ public class ActivatedCrystalRenderer
                         activatedStack
                 );
 
-        if (sourceId == null) {
-            return;
-        }
-
-        if (!net.minecraft.core.registries.BuiltInRegistries.ITEM
-                .containsKey(sourceId)) {
+        if (sourceId == null ||
+                !net.minecraft.core.registries.BuiltInRegistries.ITEM
+                        .containsKey(sourceId)) {
             return;
         }
 
@@ -94,23 +93,30 @@ public class ActivatedCrystalRenderer
 
         poseStack.pushPose();
 
-        BakedModel transformedSourceModel =
-                ForgeHooksClient.handleCameraTransforms(
-                        poseStack,
-                        sourceModel,
-                        displayContext,
-                        leftHand
-                );
+        if (displayContext == ItemDisplayContext.GUI) {
+            sourceModel.applyTransform(
+                    displayContext,
+                    poseStack,
+                    leftHand
+            );
+        } else {
+            applyRotationAndScaleOnly(
+                    sourceModel.getTransforms(),
+                    displayContext,
+                    leftHand,
+                    poseStack
+            );
+        }
 
         List<RenderType> sourceRenderTypes =
-                transformedSourceModel.getRenderTypes(
+                sourceModel.getRenderTypes(
                         sourceStack,
                         false
                 );
 
         for (RenderType renderType : sourceRenderTypes) {
             itemRenderer.renderModelLists(
-                    transformedSourceModel,
+                    sourceModel,
                     sourceStack,
                     combinedLight,
                     combinedOverlay,
@@ -131,23 +137,54 @@ public class ActivatedCrystalRenderer
 
         poseStack.pushPose();
 
-        BakedModel transformedOverlayModel =
-                ForgeHooksClient.handleCameraTransforms(
-                        poseStack,
-                        overlayModel,
-                        displayContext,
-                        leftHand
-                );
+        if (displayContext == ItemDisplayContext.GUI) {
+            overlayModel.applyTransform(
+                    displayContext,
+                    poseStack,
+                    leftHand
+            );
+        } else {
+            ItemTransforms sourceTransforms =
+                    sourceModel.getTransforms();
+
+            ItemTransform sourceTransform =
+                    sourceTransforms.getTransform(
+                            displayContext
+                    );
+
+            ItemTransform overlayTransform =
+                    new ItemTransform(
+                            new Vector3f(
+                                    sourceTransform.rotation
+                            ),
+                            new Vector3f(
+                                    0.0F,
+                                    0.0F,
+                                    0.0F
+                            ),
+                            new Vector3f(
+                                    sourceTransform.scale
+                            ),
+                            new Vector3f(
+                                    sourceTransform.rightRotation
+                            )
+                    );
+
+            overlayTransform.apply(
+                    leftHand,
+                    poseStack
+            );
+        }
 
         List<RenderType> overlayRenderTypes =
-                transformedOverlayModel.getRenderTypes(
+                overlayModel.getRenderTypes(
                         activatedStack,
                         false
                 );
 
         for (RenderType renderType : overlayRenderTypes) {
             itemRenderer.renderModelLists(
-                    transformedOverlayModel,
+                    overlayModel,
                     activatedStack,
                     combinedLight,
                     combinedOverlay,
@@ -157,5 +194,40 @@ public class ActivatedCrystalRenderer
         }
 
         poseStack.popPose();
+    }
+
+    private void applyRotationAndScaleOnly(
+            ItemTransforms transforms,
+            ItemDisplayContext displayContext,
+            boolean leftHand,
+            PoseStack poseStack
+    ) {
+        ItemTransform sourceTransform =
+                transforms.getTransform(
+                        displayContext
+                );
+
+        ItemTransform transform =
+                new ItemTransform(
+                        new Vector3f(
+                                sourceTransform.rotation
+                        ),
+                        new Vector3f(
+                                0.0F,
+                                0.0F,
+                                0.0F
+                        ),
+                        new Vector3f(
+                                sourceTransform.scale
+                        ),
+                        new Vector3f(
+                                sourceTransform.rightRotation
+                        )
+                );
+
+        transform.apply(
+                leftHand,
+                poseStack
+        );
     }
 }
