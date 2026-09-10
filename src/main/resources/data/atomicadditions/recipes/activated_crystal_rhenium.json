@@ -5,7 +5,7 @@
     "chemical": "atomicadditions:tantalum"
   },
   "item_input": {
-    "tag": "mekanism:crystals"
+    "tag": "c:crystals"
   },
   "output": {
     "count": 1,

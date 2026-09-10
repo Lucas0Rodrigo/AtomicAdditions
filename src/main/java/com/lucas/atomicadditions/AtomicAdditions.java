@@ -3,6 +3,7 @@ package com.lucas.atomicadditions;
 import com.lucas.atomicadditions.multiblock.*;
 import com.lucas.atomicadditions.chemical.*;
 import com.lucas.atomicadditions.item.ActivatedCrystalItem;
+import com.lucas.atomicadditions.recipes.AtomicActivatedCrystalRecipeInjector;
 import com.lucas.atomicadditions.recipes.AtomicRecipes;
 import com.lucas.atomicadditions.recipes.AtomicRecipeSerializers;
 import com.mojang.logging.LogUtils;
@@ -178,6 +179,8 @@ public class AtomicAdditions {
         AtomicGases.GASES.register(modEventBus);
 
         MinecraftForge.EVENT_BUS.addListener(AtomicRecipes::addReloadListener);
+
+        MinecraftForge.EVENT_BUS.addListener(AtomicActivatedCrystalRecipeInjector::onDatapackSync);
 
         MinecraftForge.EVENT_BUS.register(this);
 

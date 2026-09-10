@@ -5,35 +5,22 @@ import com.lucas.atomicadditions.item.ActivatedCrystalItem;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.recipes.ItemStackGasToItemStackRecipe;
 import mekanism.api.recipes.ingredients.ChemicalStackIngredient.GasStackIngredient;
+import mekanism.api.recipes.ingredients.creator.IngredientCreatorAccess;
 import mekanism.api.recipes.ingredients.ItemStackIngredient;
 import mekanism.common.recipe.MekanismRecipeType;
 import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.registries.MekanismGases;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class AtomicActivatedCrystalRecipe
         extends ItemStackGasToItemStackRecipe {
-
-    private static final TagKey<Item> CRYSTALS_TAG =
-            TagKey.create(
-                    Registries.ITEM,
-                    ResourceLocation.fromNamespaceAndPath(
-                            "c",
-                            "crystals"
-                    )
-            );
 
     private final AtomicRecipeSerializers.Operation operation;
 
@@ -54,40 +41,76 @@ public class AtomicActivatedCrystalRecipe
         this.operation = operation;
     }
 
-    public AtomicRecipeSerializers.Operation getOperation() {
+    public static AtomicActivatedCrystalRecipe
+    createActivationRecipe(
+            ResourceLocation id,
+            ItemStack sourceCrystal
+    ) {
+
+        return new AtomicActivatedCrystalRecipe(
+                id,
+
+                mekanism.api.recipes.ingredients.creator
+                        .IngredientCreatorAccess
+                        .item()
+                        .from(
+                                sourceCrystal,
+                                1
+                        ),
+
+                mekanism.api.recipes.ingredients.creator
+                        .IngredientCreatorAccess
+                        .gas()
+                        .from(
+                                com.lucas.atomicadditions.chemical.AtomicGases
+                                        .TANTALUM,
+                                1
+                        ),
+
+                new ItemStack(
+                        AtomicAdditions
+                                .ACTIVATED_CRYSTAL
+                                .get()
+                ),
+
+                AtomicRecipeSerializers.Operation.ACTIVATE
+        );
+    }
+
+    public AtomicRecipeSerializers.Operation
+    getOperation() {
         return operation;
     }
 
     @Override
-    public RecipeType<ItemStackGasToItemStackRecipe> getType() {
+    public RecipeType<ItemStackGasToItemStackRecipe>
+    getType() {
         return MekanismRecipeType.INJECTING.get();
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public RecipeSerializer<ItemStackGasToItemStackRecipe> getSerializer() {
+    public RecipeSerializer<ItemStackGasToItemStackRecipe>
+    getSerializer() {
 
-        RecipeSerializer<?> serializer;
+        RecipeSerializer<?> serializer =
+                switch (operation) {
 
-        switch (operation) {
-            case ACTIVATE ->
-                    serializer =
-                            AtomicRecipeSerializers.ACTIVATE.get();
+                    case ACTIVATE ->
+                            AtomicRecipeSerializers
+                                    .ACTIVATE
+                                    .get();
 
-            case HYDROGEN_CHLORIDE ->
-                    serializer =
-                            AtomicRecipeSerializers.HYDROGEN_CHLORIDE.get();
+                    case HYDROGEN_CHLORIDE ->
+                            AtomicRecipeSerializers
+                                    .HYDROGEN_CHLORIDE
+                                    .get();
 
-            case RHENIUM ->
-                    serializer =
-                            AtomicRecipeSerializers.RHENIUM.get();
-
-            default ->
-                    throw new IllegalStateException(
-                            "Unknown activated crystal operation: "
-                                    + operation
-                    );
-        }
+                    case RHENIUM ->
+                            AtomicRecipeSerializers
+                                    .RHENIUM
+                                    .get();
+                };
 
         return (RecipeSerializer<ItemStackGasToItemStackRecipe>)
                 (RecipeSerializer<?>) serializer;
@@ -95,13 +118,13 @@ public class AtomicActivatedCrystalRecipe
 
     @Override
     public String getGroup() {
-        return MekanismBlocks.CHEMICAL_INJECTION_CHAMBER
-                .getName();
+        return "activated_crystal";
     }
 
     @Override
     public ItemStack getToastSymbol() {
-        return MekanismBlocks.CHEMICAL_INJECTION_CHAMBER
+        return MekanismBlocks
+                .CHEMICAL_INJECTION_CHAMBER
                 .getItemStack();
     }
 
@@ -121,7 +144,7 @@ public class AtomicActivatedCrystalRecipe
         return switch (operation) {
 
             case ACTIVATE ->
-                    isCompatibleCrystal(itemStack);
+                    true;
 
             case HYDROGEN_CHLORIDE,
                  RHENIUM ->
@@ -161,141 +184,26 @@ public class AtomicActivatedCrystalRecipe
     }
 
     @Override
-    public List<@NotNull ItemStack> getOutputDefinition() {
-
-        List<ItemStack> outputs =
-                new ArrayList<>();
-
-        GasStack hcl =
-                new GasStack(
-                        MekanismGases.HYDROGEN_CHLORIDE.get(),
-                        1
-                );
-
-        List<ItemStackGasToItemStackRecipe>
-                injectingRecipes =
-                MekanismRecipeType.INJECTING
-                        .get()
-                        .getRecipes(null);
+    public List<@NotNull ItemStack>
+    getOutputDefinition() {
 
         if (operation ==
                 AtomicRecipeSerializers.Operation.ACTIVATE) {
 
-            for (
-                    ItemStackGasToItemStackRecipe recipe :
-                    injectingRecipes
-            ) {
-
-                if (recipe instanceof
-                        AtomicActivatedCrystalRecipe) {
-                    continue;
-                }
-
-                for (
-                        ItemStack representation :
-                        recipe.getItemInput()
-                                .getRepresentations()
-                ) {
-
-                    if (!representation.is(
-                            CRYSTALS_TAG
-                    )) {
-                        continue;
-                    }
-
-                    if (!recipe.test(
-                            representation,
-                            hcl
-                    )) {
-                        continue;
-                    }
-
-                    ResourceLocation sourceId =
-                            BuiltInRegistries.ITEM.getKey(
-                                    representation.getItem()
-                            );
-
-                    ItemStack activated =
-                            new ItemStack(
-                                    AtomicAdditions
-                                            .ACTIVATED_CRYSTAL
-                                            .get()
-                            );
-
-                    ActivatedCrystalItem.setSourceCrystal(
-                            activated,
-                            sourceId
-                    );
-
-                    outputs.add(activated);
-                }
-            }
-
-        } else {
-
-            int amount =
-                    operation ==
-                            AtomicRecipeSerializers
-                                    .Operation.RHENIUM
-                            ? 16
-                            : 8;
-
-            for (
-                    ItemStackGasToItemStackRecipe recipe :
-                    injectingRecipes
-            ) {
-
-                if (recipe instanceof
-                        AtomicActivatedCrystalRecipe) {
-                    continue;
-                }
-
-                for (
-                        ItemStack representation :
-                        recipe.getItemInput()
-                                .getRepresentations()
-                ) {
-
-                    if (!representation.is(
-                            CRYSTALS_TAG
-                    )) {
-                        continue;
-                    }
-
-                    if (!recipe.test(
-                            representation,
-                            hcl
-                    )) {
-                        continue;
-                    }
-
-                    ItemStack result =
-                            recipe.getOutput(
-                                    representation,
-                                    hcl
-                            );
-
-                    if (result.isEmpty()) {
-                        continue;
-                    }
-
-                    result.setCount(amount);
-
-                    outputs.add(result);
-                }
-            }
+            return Collections.singletonList(
+                    new ItemStack(
+                            AtomicAdditions
+                                    .ACTIVATED_CRYSTAL
+                                    .get()
+                    )
+            );
         }
 
-        if (outputs.isEmpty()) {
-            return super.getOutputDefinition();
-        }
-
-        return Collections.unmodifiableList(
-                outputs
-        );
+        return super.getOutputDefinition();
     }
 
-    private ItemStack createActivatedCrystal(
+    private ItemStack
+    createActivatedCrystal(
             ItemStack sourceCrystal
     ) {
 
@@ -307,19 +215,23 @@ public class AtomicActivatedCrystalRecipe
                 );
 
         ResourceLocation sourceId =
-                BuiltInRegistries.ITEM.getKey(
-                        sourceCrystal.getItem()
-                );
+                net.minecraft.core.registries
+                        .BuiltInRegistries.ITEM
+                        .getKey(
+                                sourceCrystal.getItem()
+                        );
 
-        ActivatedCrystalItem.setSourceCrystal(
-                result,
-                sourceId
-        );
+        ActivatedCrystalItem
+                .setSourceCrystal(
+                        result,
+                        sourceId
+                );
 
         return result;
     }
 
-    private ItemStack createShardOutput(
+    private ItemStack
+    createShardOutput(
             ItemStack activatedCrystal,
             int amount
     ) {
@@ -340,7 +252,9 @@ public class AtomicActivatedCrystalRecipe
                         );
 
         ItemStack source =
-                createSourceStack(sourceId);
+                createSourceStack(
+                        sourceId
+                );
 
         if (source.isEmpty()) {
             return ItemStack.EMPTY;
@@ -348,8 +262,10 @@ public class AtomicActivatedCrystalRecipe
 
         GasStack hcl =
                 new GasStack(
-                        MekanismGases.HYDROGEN_CHLORIDE.get(),
-                        1
+                        MekanismGases
+                                .HYDROGEN_CHLORIDE
+                                .get(),
+                        1_000_000
                 );
 
         ItemStack result =
@@ -367,29 +283,16 @@ public class AtomicActivatedCrystalRecipe
         return result;
     }
 
-    private boolean isActivatedCrystal(
+    private boolean
+    isActivatedCrystal(
             ItemStack stack
     ) {
+
         return stack.getItem()
                 ==
                 AtomicAdditions
                         .ACTIVATED_CRYSTAL
                         .get();
-    }
-
-    private boolean isCompatibleCrystal(
-            ItemStack stack
-    ) {
-
-        if (!stack.is(CRYSTALS_TAG)) {
-            return false;
-        }
-
-        if (!getItemInput().test(stack)) {
-            return false;
-        }
-
-        return findShardRecipe(stack) != null;
     }
 
     private ItemStackGasToItemStackRecipe
@@ -407,28 +310,21 @@ public class AtomicActivatedCrystalRecipe
             return null;
         }
 
-        return findShardRecipe(
-                createSourceStack(sourceId)
-        );
-    }
+        ItemStack source =
+                createSourceStack(
+                        sourceId
+                );
 
-    private ItemStackGasToItemStackRecipe
-    findShardRecipe(
-            ItemStack crystal
-    ) {
-
-        if (crystal.isEmpty()) {
-            return null;
-        }
-
-        if (!crystal.is(CRYSTALS_TAG)) {
+        if (source.isEmpty()) {
             return null;
         }
 
         GasStack hcl =
                 new GasStack(
-                        MekanismGases.HYDROGEN_CHLORIDE.get(),
-                        1
+                        MekanismGases
+                                .HYDROGEN_CHLORIDE
+                                .get(),
+                        1_000_000
                 );
 
         for (
@@ -444,7 +340,7 @@ public class AtomicActivatedCrystalRecipe
             }
 
             if (!recipe.test(
-                    crystal,
+                    source,
                     hcl
             )) {
                 continue;
@@ -452,7 +348,7 @@ public class AtomicActivatedCrystalRecipe
 
             ItemStack result =
                     recipe.getOutput(
-                            crystal,
+                            source,
                             hcl
                     );
 
@@ -464,17 +360,23 @@ public class AtomicActivatedCrystalRecipe
         return null;
     }
 
-    private static ItemStack createSourceStack(
+    private static ItemStack
+    createSourceStack(
             ResourceLocation id
     ) {
 
         if (id == null ||
-                !BuiltInRegistries.ITEM.containsKey(id)) {
+                !net.minecraft.core.registries
+                        .BuiltInRegistries.ITEM
+                        .containsKey(id)) {
+
             return ItemStack.EMPTY;
         }
 
         return new ItemStack(
-                BuiltInRegistries.ITEM.get(id)
+                net.minecraft.core.registries
+                        .BuiltInRegistries.ITEM
+                        .get(id)
         );
     }
 }
