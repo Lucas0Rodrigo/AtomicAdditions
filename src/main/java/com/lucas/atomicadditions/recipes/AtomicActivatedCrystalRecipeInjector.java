@@ -69,20 +69,13 @@ public final class AtomicActivatedCrystalRecipeInjector {
 
         /*
          * =========================================================
-         * 1. OBTÉM TODOS OS OUTPUTS DA CHEMICAL CRYSTALLIZER
+         * 1. DESCOBRE QUAIS ITENS SÃO REALMENTE CRISTAIS
          * =========================================================
          *
-         * Esses são os itens que realmente pertencem à etapa
-         * de cristalização.
+         * Pegamos as saídas da Chemical Crystallizer.
          *
-         * Isso impede que:
-         *
-         * raw_iron
-         * iron_ore
-         * raw_copper
-         * etc.
-         *
-         * sejam tratados como cristais.
+         * Isso é muito mais preciso do que procurar uma tag
+         * genérica de "crystals".
          */
         Set<Item> crystallizerOutputs =
                 new HashSet<>();
@@ -124,20 +117,20 @@ public final class AtomicActivatedCrystalRecipeInjector {
                                 );
 
                 AtomicAdditions.LOGGER.debug(
-                        "[AA DEBUG] CRYSTALLIZING output detectado: {}",
+                        "[AA DEBUG] Cristal produzido por CRYSTALLIZING: {}",
                         outputId
                 );
             }
         }
 
         AtomicAdditions.LOGGER.info(
-                "[AA DEBUG] Itens produzidos por CRYSTALLIZING: {}",
+                "[AA DEBUG] Itens reconhecidos como cristais: {}",
                 crystallizerOutputs.size()
         );
 
         /*
          * =========================================================
-         * 2. OBTÉM INJECTING DIRETAMENTE DO RECIPE MANAGER
+         * 2. PEGA AS RECEITAS INJECTING
          * =========================================================
          */
         List<ItemStackGasToItemStackRecipe>
@@ -151,14 +144,16 @@ public final class AtomicActivatedCrystalRecipeInjector {
                 injectingRecipes.size()
         );
 
+        /*
+         * =========================================================
+         * 3. PRESERVA AS RECEITAS ORIGINAIS
+         * =========================================================
+         */
         List<Recipe<?>> finalRecipes =
                 new ArrayList<>();
 
         int removedGenerated = 0;
 
-        /*
-         * Remove somente nossas receitas geradas anteriormente.
-         */
         for (
                 Recipe<?> recipe :
                 existingRecipes
@@ -189,7 +184,7 @@ public final class AtomicActivatedCrystalRecipeInjector {
 
         /*
          * =========================================================
-         * 3. IDENTIFICA CRISTAIS REAIS
+         * 4. PROCURA AS RECEITAS CRYSTAL -> SHARD
          * =========================================================
          */
         GasStack hcl =
@@ -211,6 +206,9 @@ public final class AtomicActivatedCrystalRecipeInjector {
                 injectingRecipes
         ) {
 
+            /*
+             * Não analisar receitas criadas pelo AA.
+             */
             if (injectingRecipe instanceof
                     AtomicActivatedCrystalRecipe) {
                 continue;
@@ -235,10 +233,21 @@ public final class AtomicActivatedCrystalRecipeInjector {
                 }
 
                 /*
-                 * FILTRO PRINCIPAL:
+                 * =================================================
+                 * FILTRO REAL:
                  *
-                 * O item precisa ser uma saída de uma
+                 * O item PRECISA ser produzido pela
                  * Chemical Crystallizer.
+                 *
+                 * Portanto:
+                 *
+                 * crystal_iron   -> SIM
+                 * crystal_gold   -> SIM
+                 *
+                 * iron_ore       -> NÃO
+                 * raw_iron       -> NÃO
+                 * raw_copper     -> NÃO
+                 * =================================================
                  */
                 if (!crystallizerOutputs.contains(
                         crystal.getItem()
@@ -247,7 +256,7 @@ public final class AtomicActivatedCrystalRecipeInjector {
                 }
 
                 /*
-                 * Agora sim verificamos se existe a etapa:
+                 * Agora verificamos se existe a etapa:
                  *
                  * Crystal + HCl -> Shard
                  */
@@ -305,10 +314,10 @@ public final class AtomicActivatedCrystalRecipeInjector {
 
                 /*
                  * =================================================
-                 * 4. CONFERE A ETAPA DE PURIFICAÇÃO
-                 * =================================================
+                 * 5. CONFERE PURIFICAÇÃO
                  *
                  * Shard + O2 -> Clump
+                 * =================================================
                  */
                 boolean hasPurification =
                         hasPurificationRecipe(
@@ -334,9 +343,9 @@ public final class AtomicActivatedCrystalRecipeInjector {
 
                 /*
                  * =================================================
-                 * 5. CRIA A RECEITA:
+                 * 6. CRIA:
                  *
-                 * 5 Crystal + 1 mB Tantalum
+                 * 5 Crystal + Tantalum
                  * =
                  * 8 Activated Crystal
                  * =================================================
@@ -355,7 +364,7 @@ public final class AtomicActivatedCrystalRecipeInjector {
                                 );
 
                 /*
-                 * Teste com exatamente 5 cristais.
+                 * Faz o teste com EXATAMENTE 5 unidades.
                  */
                 ItemStack activationInput =
                         crystal.copy();
@@ -389,7 +398,7 @@ public final class AtomicActivatedCrystalRecipeInjector {
                 );
 
                 AtomicAdditions.LOGGER.info(
-                        "[AA DEBUG] Tântalo: {}",
+                        "[AA DEBUG] Tântalo recebido: {}",
                         tantalum.getTypeRegistryName()
                 );
 
@@ -420,6 +429,11 @@ public final class AtomicActivatedCrystalRecipeInjector {
             }
         }
 
+        /*
+         * =========================================================
+         * 7. RESULTADO
+         * =========================================================
+         */
         AtomicAdditions.LOGGER.info(
                 "[AA DEBUG] ========================================"
         );
@@ -445,9 +459,7 @@ public final class AtomicActivatedCrystalRecipeInjector {
         );
 
         /*
-         * =========================================================
-         * 6. ATUALIZA O RECIPE MANAGER
-         * =========================================================
+         * Coloca as receitas de volta no RecipeManager.
          */
         recipeManager.replaceRecipes(
                 finalRecipes
@@ -458,7 +470,7 @@ public final class AtomicActivatedCrystalRecipeInjector {
         );
 
         /*
-         * Limpa os caches internos do Mekanism.
+         * Limpa os caches do Mekanism.
          */
         MekanismRecipeType.clearCache();
 
@@ -467,9 +479,7 @@ public final class AtomicActivatedCrystalRecipeInjector {
         );
 
         /*
-         * =========================================================
-         * 7. CONFIRMA O RESULTADO
-         * =========================================================
+         * Confere as receitas INJECTING finais.
          */
         List<ItemStackGasToItemStackRecipe>
                 finalInjectingRecipes =
@@ -574,9 +584,6 @@ public final class AtomicActivatedCrystalRecipeInjector {
                         1_000_000
                 );
 
-        /*
-         * Consulta direta ao RecipeManager.
-         */
         List<ItemStackGasToItemStackRecipe>
                 purificationRecipes =
                 recipeManager.getAllRecipesFor(
@@ -615,8 +622,7 @@ public final class AtomicActivatedCrystalRecipeInjector {
         return false;
     }
 
-    private static ResourceLocation
-    createGeneratedId(
+    private static ResourceLocation createGeneratedId(
             ResourceLocation sourceId
     ) {
 
@@ -629,8 +635,7 @@ public final class AtomicActivatedCrystalRecipeInjector {
         );
     }
 
-    private static boolean
-    isGeneratedRecipe(
+    private static boolean isGeneratedRecipe(
             ResourceLocation id
     ) {
 
