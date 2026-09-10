@@ -42,7 +42,7 @@ public class AtomicAdditions {
 
     public static final String MODID = "atomicadditions";
 
-    private static final Logger LOGGER = LogUtils.getLogger();
+    public static final Logger LOGGER = LogUtils.getLogger();
 
     public static final DeferredRegister<Block> BLOCKS =
             DeferredRegister.create(
