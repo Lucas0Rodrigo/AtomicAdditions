@@ -20,6 +20,6 @@
   "gas.atomicadditions.copper": "Cobre",
   "gas.atomicadditions.rhenium": "Rênio",
 
-  "item.atomicadditions.activated_crystal": "Cristal de %s Ativado",
+  "item.atomicadditions.activated_crystal": "%s Ativado",
   "item.atomicadditions.activated_crystal_fallback": "Cristal Ativado"
 }

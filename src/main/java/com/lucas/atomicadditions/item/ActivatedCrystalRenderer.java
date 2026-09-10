@@ -21,14 +21,6 @@ import org.jetbrains.annotations.NotNull;
 public class ActivatedCrystalRenderer
         extends BlockEntityWithoutLevelRenderer {
 
-    /*
-     * Modelo do overlay.
-     *
-     * Arquivo:
-     *
-     * assets/atomicadditions/models/item/
-     * activated_crystal_overlay.json
-     */
     private static final ModelResourceLocation OVERLAY_MODEL =
             new ModelResourceLocation(
                     ResourceLocation.fromNamespaceAndPath(
@@ -54,6 +46,15 @@ public class ActivatedCrystalRenderer
             int combinedLight,
             int combinedOverlay
     ) {
+
+        Minecraft minecraft =
+                Minecraft.getInstance();
+
+        ItemRenderer itemRenderer =
+                minecraft.getItemRenderer();
+
+        Level level =
+                minecraft.level;
 
         /*
          * =========================================================
@@ -86,20 +87,6 @@ public class ActivatedCrystalRenderer
             return;
         }
 
-        Minecraft minecraft =
-                Minecraft.getInstance();
-
-        ItemRenderer itemRenderer =
-                minecraft.getItemRenderer();
-
-        Level level =
-                minecraft.level;
-
-        /*
-         * =========================================================
-         * 2. STACK DO CRISTAL ORIGINAL
-         * =========================================================
-         */
         ItemStack sourceStack =
                 new ItemStack(
                         net.minecraft.core.registries
@@ -113,8 +100,11 @@ public class ActivatedCrystalRenderer
 
         /*
          * =========================================================
-         * 3. MODELO DO CRISTAL ORIGINAL
+         * 2. MODELO ORIGINAL
          * =========================================================
+         *
+         * Pegamos exatamente o modelo que o ItemRenderer usaria
+         * para o cristal original.
          */
         BakedModel sourceModel =
                 itemRenderer.getModel(
@@ -136,22 +126,13 @@ public class ActivatedCrystalRenderer
 
         /*
          * =========================================================
-         * 4. APLICAR O TRANSFORM DO CONTEXTO
+         * 3. TRANSFORM DO MODELO ORIGINAL
          * =========================================================
          *
-         * Esse é o ponto que estava faltando.
+         * ItemRenderer.render() normalmente faz esta etapa
+         * antes de renderizar as quads.
          *
-         * renderModelLists() apenas desenha o modelo.
-         * Ele não aplica sozinho o transform de:
-         *
-         * GUI
-         * mão direita
-         * mão esquerda
-         * chão
-         * item frame
-         * etc.
-         *
-         * applyTransform() faz exatamente essa parte.
+         * Nós fazemos exatamente uma vez.
          */
         boolean leftHand =
                 displayContext ==
@@ -171,8 +152,14 @@ public class ActivatedCrystalRenderer
 
         /*
          * =========================================================
-         * 5. RENDERIZAR O CRISTAL ORIGINAL
+         * 4. RENDER DO CRISTAL ORIGINAL
          * =========================================================
+         *
+         * renderModelLists() não chama renderStatic() e não
+         * reaplica ItemDisplayContext.
+         *
+         * Portanto o cristal é desenhado exatamente com o modelo
+         * e o transform que acabamos de aplicar.
          */
         renderModel(
                 itemRenderer,
@@ -185,10 +172,16 @@ public class ActivatedCrystalRenderer
                 minecraft
         );
 
+        poseStack.popPose();
+
         /*
          * =========================================================
-         * 6. MODELO DO OVERLAY
+         * 5. OVERLAY
          * =========================================================
+         *
+         * Agora usamos a MESMA transformação do cristal original.
+         *
+         * Não aplicamos applyTransform() novamente.
          */
         BakedModel overlayModel =
                 minecraft.getModelManager()
@@ -203,20 +196,22 @@ public class ActivatedCrystalRenderer
                     OVERLAY_MODEL
             );
 
-            poseStack.popPose();
             return;
         }
 
+        poseStack.pushPose();
+
         /*
-         * =========================================================
-         * 7. RENDERIZAR OVERLAY
-         * =========================================================
+         * O overlay possui modelo "generated".
          *
-         * O overlay é desenhado na MESMA PoseStack que já recebeu
-         * o transform do cristal original.
-         *
-         * Não aplicamos um segundo transform.
+         * Ele deve obedecer ao mesmo transform que o cristal-base.
          */
+        overlayModel.applyTransform(
+                displayContext,
+                poseStack,
+                leftHand
+        );
+
         renderModel(
                 itemRenderer,
                 overlayModel,
@@ -246,10 +241,6 @@ public class ActivatedCrystalRenderer
                 minecraft.options.graphicsMode().get()
                         == net.minecraft.client.GraphicsStatus.FABULOUS;
 
-        /*
-         * O Forge permite que um BakedModel possua diferentes
-         * RenderTypes.
-         */
         for (
                 RenderType renderType :
                 model.getRenderTypes(
