@@ -1,5 +1,6 @@
 package com.lucas.atomicadditions;
 
+import com.lucas.atomicadditions.item.ActivatedCrystalBakedModel;
 import com.lucas.atomicadditions.multiblock.*;
 import com.lucas.atomicadditions.chemical.*;
 import com.lucas.atomicadditions.item.ActivatedCrystalItem;
@@ -22,6 +23,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
@@ -252,7 +254,7 @@ public class AtomicAdditions {
 
         @SubscribeEvent
         public static void registerAdditionalModels(
-                net.minecraftforge.client.event.ModelEvent.RegisterAdditional event
+                ModelEvent.RegisterAdditional event
         ) {
             event.register(
                     new ModelResourceLocation(
@@ -262,6 +264,23 @@ public class AtomicAdditions {
                             ),
                             "inventory"
                     )
+            );
+        }
+
+        @SubscribeEvent
+        public static void modifyBakingResult(
+                ModelEvent.ModifyBakingResult event
+        ) {
+            event.getModels().computeIfPresent(
+                    new ModelResourceLocation(
+                            ResourceLocation.fromNamespaceAndPath(
+                                    MODID,
+                                    "activated_crystal"
+                            ),
+                            "inventory"
+                    ),
+                    (location, model) ->
+                            new ActivatedCrystalBakedModel(model)
             );
         }
     }
