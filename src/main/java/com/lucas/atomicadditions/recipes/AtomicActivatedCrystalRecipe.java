@@ -55,7 +55,7 @@ public class AtomicActivatedCrystalRecipe
                         .item()
                         .from(
                                 sourceCrystal,
-                                1
+                                5
                         ),
 
                 mekanism.api.recipes.ingredients.creator
@@ -70,7 +70,8 @@ public class AtomicActivatedCrystalRecipe
                 new ItemStack(
                         AtomicAdditions
                                 .ACTIVATED_CRYSTAL
-                                .get()
+                                .get(),
+                        8
                 ),
 
                 AtomicRecipeSerializers.Operation.ACTIVATE
@@ -150,9 +151,10 @@ public class AtomicActivatedCrystalRecipe
                  RHENIUM ->
                     isActivatedCrystal(itemStack)
                             &&
-                            findOriginalShardRecipe(
-                                    itemStack
-                            ) != null;
+                            ActivatedCrystalItem
+                                    .getSourceCrystalId(
+                                            itemStack
+                                    ) != null;
         };
     }
 
@@ -172,13 +174,13 @@ public class AtomicActivatedCrystalRecipe
             case HYDROGEN_CHLORIDE ->
                     createShardOutput(
                             inputItem,
-                            8
+                            1
                     );
 
             case RHENIUM ->
                     createShardOutput(
                             inputItem,
-                            16
+                            2
                     );
         };
     }
@@ -211,7 +213,8 @@ public class AtomicActivatedCrystalRecipe
                 new ItemStack(
                         AtomicAdditions
                                 .ACTIVATED_CRYSTAL
-                                .get()
+                                .get(),
+                        8
                 );
 
         ResourceLocation sourceId =
