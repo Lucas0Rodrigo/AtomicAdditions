@@ -6,7 +6,9 @@ import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.recipes.ItemStackGasToItemStackRecipe;
 import mekanism.common.recipe.MekanismRecipeType;
 import mekanism.common.registries.MekanismGases;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -161,10 +163,17 @@ public final class AtomicActivatedCrystalRecipeInjector {
                 continue;
             }
 
-            for (ItemStack crystal :
-                    representations) {
+            for (ItemStack crystal : representations) {
 
-                if (crystal.isEmpty()) {
+                if (!crystal.is(
+                        TagKey.create(
+                                Registries.ITEM,
+                                ResourceLocation.fromNamespaceAndPath(
+                                        "c",
+                                        "crystals"
+                                )
+                        )
+                )) {
                     continue;
                 }
 
