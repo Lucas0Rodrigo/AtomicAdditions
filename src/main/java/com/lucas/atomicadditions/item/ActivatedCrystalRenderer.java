@@ -2,26 +2,19 @@ package com.lucas.atomicadditions.item;
 
 import com.lucas.atomicadditions.AtomicAdditions;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.client.extensions.IForgeVertexConsumer;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
 
 public class ActivatedCrystalRenderer
         extends BlockEntityWithoutLevelRenderer {
@@ -52,12 +45,8 @@ public class ActivatedCrystalRenderer
             int combinedOverlay
     ) {
         Minecraft minecraft = Minecraft.getInstance();
-
-        ItemRenderer itemRenderer =
-                minecraft.getItemRenderer();
-
-        Level level =
-                minecraft.level;
+        ItemRenderer itemRenderer = minecraft.getItemRenderer();
+        Level level = minecraft.level;
 
         ResourceLocation sourceId =
                 ActivatedCrystalItem.getSourceCrystalId(
@@ -84,13 +73,24 @@ public class ActivatedCrystalRenderer
             return;
         }
 
-        BakedModel sourceModel =
-                itemRenderer.getModel(
-                        sourceStack,
-                        level,
-                        null,
-                        0
-                );
+        itemRenderer.renderStatic(
+                sourceStack,
+                displayContext,
+                combinedLight,
+                combinedOverlay,
+                poseStack,
+                bufferSource,
+                level,
+                0
+        );
+
+        BakedModel overlayModel =
+                minecraft.getModelManager()
+                        .getModel(OVERLAY_MODEL);
+
+        if (overlayModel == null) {
+            return;
+        }
 
         boolean leftHand =
                 displayContext ==
@@ -101,132 +101,26 @@ public class ActivatedCrystalRenderer
 
         poseStack.pushPose();
 
-        BakedModel transformedSourceModel =
-                sourceModel.applyTransform(
-                        displayContext,
-                        poseStack,
-                        leftHand
-                );
-
-        renderSourceModel(
-                transformedSourceModel,
-                sourceStack,
-                poseStack,
-                bufferSource,
-                combinedOverlay,
-                minecraft
-        );
-
-        poseStack.popPose();
-
-        BakedModel overlayModel =
-                minecraft.getModelManager()
-                        .getModel(OVERLAY_MODEL);
-
-        if (overlayModel == null) {
-            return;
-        }
-
-        poseStack.pushPose();
-
         overlayModel.applyTransform(
                 displayContext,
                 poseStack,
                 leftHand
         );
 
-        renderOverlayModel(
-                itemRenderer,
+        itemRenderer.renderModelLists(
                 overlayModel,
                 activatedStack,
-                poseStack,
-                bufferSource,
                 combinedLight,
                 combinedOverlay,
-                minecraft
+                poseStack,
+                bufferSource.getBuffer(
+                        overlayModel.getRenderTypes(
+                                activatedStack,
+                                false
+                        ).get(0)
+                )
         );
 
         poseStack.popPose();
-    }
-
-    private void renderSourceModel(
-            BakedModel model,
-            ItemStack stack,
-            PoseStack poseStack,
-            MultiBufferSource bufferSource,
-            int combinedOverlay,
-            Minecraft minecraft
-    ) {
-        boolean fabulous =
-                minecraft.options.graphicsMode().get()
-                        == net.minecraft.client.GraphicsStatus.FABULOUS;
-
-        RandomSource random =
-                RandomSource.create(42L);
-
-        for (RenderType renderType :
-                model.getRenderTypes(
-                        stack,
-                        fabulous
-                )) {
-
-            VertexConsumer vertexConsumer =
-                    bufferSource.getBuffer(renderType);
-
-            List<BakedQuad> quads =
-                    model.getQuads(
-                            null,
-                            null,
-                            random
-                    );
-
-            for (BakedQuad quad : quads) {
-                ((IForgeVertexConsumer) vertexConsumer).putBulkData(
-                        poseStack.last(),
-                        quad,
-                        1.0F,
-                        1.0F,
-                        1.0F,
-                        1.0F,
-                        0xF000F0,
-                        combinedOverlay,
-                        false
-                );
-            }
-        }
-    }
-
-    private void renderOverlayModel(
-            ItemRenderer itemRenderer,
-            BakedModel model,
-            ItemStack stack,
-            PoseStack poseStack,
-            MultiBufferSource bufferSource,
-            int combinedLight,
-            int combinedOverlay,
-            Minecraft minecraft
-    ) {
-        boolean fabulous =
-                minecraft.options.graphicsMode().get()
-                        == net.minecraft.client.GraphicsStatus.FABULOUS;
-
-        for (RenderType renderType :
-                model.getRenderTypes(
-                        stack,
-                        fabulous
-                )) {
-
-            VertexConsumer vertexConsumer =
-                    bufferSource.getBuffer(renderType);
-
-            itemRenderer.renderModelLists(
-                    model,
-                    stack,
-                    combinedLight,
-                    combinedOverlay,
-                    poseStack,
-                    vertexConsumer
-            );
-        }
     }
 }

@@ -30,53 +30,20 @@ public final class AtomicActivatedCrystalRecipeInjector {
     public static void onDatapackSync(
             OnDatapackSyncEvent event
     ) {
-
-        AtomicAdditions.LOGGER.info(
-                "[AA DEBUG] ========================================"
-        );
-
-        AtomicAdditions.LOGGER.info(
-                "[AA DEBUG] OnDatapackSyncEvent disparado"
-        );
-
         RecipeManager recipeManager =
                 event.getPlayerList()
                         .getServer()
                         .getRecipeManager();
 
         injectRecipes(recipeManager);
-
-        AtomicAdditions.LOGGER.info(
-                "[AA DEBUG] ========================================"
-        );
     }
 
     public static void injectRecipes(
             RecipeManager recipeManager
     ) {
-
-        AtomicAdditions.LOGGER.info(
-                "[AA DEBUG] Iniciando análise de receitas..."
-        );
-
         Collection<Recipe<?>> existingRecipes =
                 recipeManager.getRecipes();
 
-        AtomicAdditions.LOGGER.info(
-                "[AA DEBUG] Total de receitas no RecipeManager: {}",
-                existingRecipes.size()
-        );
-
-        /*
-         * =========================================================
-         * 1. DESCOBRE QUAIS ITENS SÃO REALMENTE CRISTAIS
-         * =========================================================
-         *
-         * Pegamos as saídas da Chemical Crystallizer.
-         *
-         * Isso é muito mais preciso do que procurar uma tag
-         * genérica de "crystals".
-         */
         Set<Item> crystallizerOutputs =
                 new HashSet<>();
 
@@ -86,21 +53,14 @@ public final class AtomicActivatedCrystalRecipeInjector {
                         MekanismRecipeType.CRYSTALLIZING.get()
                 );
 
-        AtomicAdditions.LOGGER.info(
-                "[AA DEBUG] Receitas CRYSTALLIZING encontradas: {}",
-                crystallizingRecipes.size()
-        );
-
         for (
                 ChemicalCrystallizerRecipe recipe :
                 crystallizingRecipes
         ) {
-
             for (
                     ItemStack output :
                     recipe.getOutputDefinition()
             ) {
-
                 if (output.isEmpty()) {
                     continue;
                 }
@@ -108,47 +68,15 @@ public final class AtomicActivatedCrystalRecipeInjector {
                 crystallizerOutputs.add(
                         output.getItem()
                 );
-
-                ResourceLocation outputId =
-                        net.minecraft.core.registries
-                                .BuiltInRegistries.ITEM
-                                .getKey(
-                                        output.getItem()
-                                );
-
-                AtomicAdditions.LOGGER.debug(
-                        "[AA DEBUG] Cristal produzido por CRYSTALLIZING: {}",
-                        outputId
-                );
             }
         }
 
-        AtomicAdditions.LOGGER.info(
-                "[AA DEBUG] Itens reconhecidos como cristais: {}",
-                crystallizerOutputs.size()
-        );
-
-        /*
-         * =========================================================
-         * 2. PEGA AS RECEITAS INJECTING
-         * =========================================================
-         */
         List<ItemStackGasToItemStackRecipe>
                 injectingRecipes =
                 recipeManager.getAllRecipesFor(
                         MekanismRecipeType.INJECTING.get()
                 );
 
-        AtomicAdditions.LOGGER.info(
-                "[AA DEBUG] Receitas INJECTING no RecipeManager: {}",
-                injectingRecipes.size()
-        );
-
-        /*
-         * =========================================================
-         * 3. PRESERVA AS RECEITAS ORIGINAIS
-         * =========================================================
-         */
         List<Recipe<?>> finalRecipes =
                 new ArrayList<>();
 
@@ -158,35 +86,17 @@ public final class AtomicActivatedCrystalRecipeInjector {
                 Recipe<?> recipe :
                 existingRecipes
         ) {
-
             ResourceLocation id =
                     recipe.getId();
 
             if (isGeneratedRecipe(id)) {
-
                 removedGenerated++;
-
-                AtomicAdditions.LOGGER.info(
-                        "[AA DEBUG] Removendo receita gerada antiga: {}",
-                        id
-                );
-
                 continue;
             }
 
             finalRecipes.add(recipe);
         }
 
-        AtomicAdditions.LOGGER.info(
-                "[AA DEBUG] Receitas geradas removidas: {}",
-                removedGenerated
-        );
-
-        /*
-         * =========================================================
-         * 4. PROCURA AS RECEITAS CRYSTAL -> SHARD
-         * =========================================================
-         */
         GasStack hcl =
                 new GasStack(
                         MekanismGases
@@ -205,10 +115,6 @@ public final class AtomicActivatedCrystalRecipeInjector {
                         injectingRecipe :
                 injectingRecipes
         ) {
-
-            /*
-             * Não analisar receitas criadas pelo AA.
-             */
             if (injectingRecipe instanceof
                     AtomicActivatedCrystalRecipe) {
                 continue;
@@ -227,39 +133,16 @@ public final class AtomicActivatedCrystalRecipeInjector {
                     ItemStack crystal :
                     representations
             ) {
-
                 if (crystal.isEmpty()) {
                     continue;
                 }
 
-                /*
-                 * =================================================
-                 * FILTRO REAL:
-                 *
-                 * O item PRECISA ser produzido pela
-                 * Chemical Crystallizer.
-                 *
-                 * Portanto:
-                 *
-                 * crystal_iron   -> SIM
-                 * crystal_gold   -> SIM
-                 *
-                 * iron_ore       -> NÃO
-                 * raw_iron       -> NÃO
-                 * raw_copper     -> NÃO
-                 * =================================================
-                 */
                 if (!crystallizerOutputs.contains(
                         crystal.getItem()
                 )) {
                     continue;
                 }
 
-                /*
-                 * Agora verificamos se existe a etapa:
-                 *
-                 * Crystal + HCl -> Shard
-                 */
                 if (!injectingRecipe.test(
                         crystal,
                         hcl
@@ -293,63 +176,18 @@ public final class AtomicActivatedCrystalRecipeInjector {
 
                 crystalsFound++;
 
-                AtomicAdditions.LOGGER.info(
-                        "[AA DEBUG] ----------------------------------------"
-                );
-
-                AtomicAdditions.LOGGER.info(
-                        "[AA DEBUG] Cristal candidato: {}",
-                        crystalId
-                );
-
-                AtomicAdditions.LOGGER.info(
-                        "[AA DEBUG] Shard detectado: {}",
-                        shardId
-                );
-
-                AtomicAdditions.LOGGER.info(
-                        "[AA DEBUG] Receita original: {}",
-                        injectingRecipe.getId()
-                );
-
-                /*
-                 * =================================================
-                 * 5. CONFERE PURIFICAÇÃO
-                 *
-                 * Shard + O2 -> Clump
-                 * =================================================
-                 */
                 boolean hasPurification =
                         hasPurificationRecipe(
                                 recipeManager,
                                 shard
                         );
 
-                AtomicAdditions.LOGGER.info(
-                        "[AA DEBUG] Purificação com O2 encontrada: {}",
-                        hasPurification
-                );
-
                 if (!hasPurification) {
-
-                    AtomicAdditions.LOGGER.info(
-                            "[AA DEBUG] Cristal descartado: sem purificação"
-                    );
-
                     continue;
                 }
 
                 crystalsWithPurification++;
 
-                /*
-                 * =================================================
-                 * 6. CRIA:
-                 *
-                 * 5 Crystal + Tantalum
-                 * =
-                 * 8 Activated Crystal
-                 * =================================================
-                 */
                 ResourceLocation generatedId =
                         createGeneratedId(
                                 crystalId
@@ -363,9 +201,6 @@ public final class AtomicActivatedCrystalRecipeInjector {
                                         crystal
                                 );
 
-                /*
-                 * Faz o teste com EXATAMENTE 5 unidades.
-                 */
                 ItemStack activationInput =
                         crystal.copy();
 
@@ -386,33 +221,7 @@ public final class AtomicActivatedCrystalRecipeInjector {
                                 tantalum
                         );
 
-                AtomicAdditions.LOGGER.info(
-                        "[AA DEBUG] Receita criada: {}",
-                        generatedId
-                );
-
-                AtomicAdditions.LOGGER.info(
-                        "[AA DEBUG] Entrada da ativação: {} x{}",
-                        crystalId,
-                        activationInput.getCount()
-                );
-
-                AtomicAdditions.LOGGER.info(
-                        "[AA DEBUG] Tântalo recebido: {}",
-                        tantalum.getTypeRegistryName()
-                );
-
-                AtomicAdditions.LOGGER.info(
-                        "[AA DEBUG] Aceita Tântalo: {}",
-                        acceptsTantalum
-                );
-
                 if (!acceptsTantalum) {
-
-                    AtomicAdditions.LOGGER.error(
-                            "[AA DEBUG] ERRO: receita gerada não aceita Tântalo!"
-                    );
-
                     continue;
                 }
 
@@ -424,75 +233,20 @@ public final class AtomicActivatedCrystalRecipeInjector {
 
                 crystalsAccepted++;
                 recipesCreated++;
-
-                AtomicAdditions.LOGGER.info(
-                        "[AA DEBUG] Receita adicionada ao RecipeManager."
-                );
             }
         }
 
-        /*
-         * =========================================================
-         * 7. RESULTADO
-         * =========================================================
-         */
-        AtomicAdditions.LOGGER.info(
-                "[AA DEBUG] ========================================"
-        );
-
-        AtomicAdditions.LOGGER.info(
-                "[AA DEBUG] Cristais encontrados: {}",
-                crystalsFound
-        );
-
-        AtomicAdditions.LOGGER.info(
-                "[AA DEBUG] Cristais aceitos: {}",
-                crystalsAccepted
-        );
-
-        AtomicAdditions.LOGGER.info(
-                "[AA DEBUG] Cristais com purificação: {}",
-                crystalsWithPurification
-        );
-
-        AtomicAdditions.LOGGER.info(
-                "[AA DEBUG] Receitas geradas: {}",
-                recipesCreated
-        );
-
-        /*
-         * Coloca as receitas de volta no RecipeManager.
-         */
         recipeManager.replaceRecipes(
                 finalRecipes
         );
 
-        AtomicAdditions.LOGGER.info(
-                "[AA DEBUG] RecipeManager.replaceRecipes() executado."
-        );
-
-        /*
-         * Limpa os caches do Mekanism.
-         */
         MekanismRecipeType.clearCache();
 
-        AtomicAdditions.LOGGER.info(
-                "[AA DEBUG] MekanismRecipeType.clearCache() executado."
-        );
-
-        /*
-         * Confere as receitas INJECTING finais.
-         */
         List<ItemStackGasToItemStackRecipe>
                 finalInjectingRecipes =
                 recipeManager.getAllRecipesFor(
                         MekanismRecipeType.INJECTING.get()
                 );
-
-        AtomicAdditions.LOGGER.info(
-                "[AA DEBUG] Receitas INJECTING após replaceRecipes: {}",
-                finalInjectingRecipes.size()
-        );
 
         int generatedPresent = 0;
 
@@ -500,7 +254,6 @@ public final class AtomicActivatedCrystalRecipeInjector {
                 ItemStackGasToItemStackRecipe recipe :
                 finalInjectingRecipes
         ) {
-
             if (!(recipe instanceof
                     AtomicActivatedCrystalRecipe)) {
                 continue;
@@ -512,11 +265,6 @@ public final class AtomicActivatedCrystalRecipeInjector {
                     activatedRecipe =
                     (AtomicActivatedCrystalRecipe)
                             recipe;
-
-            AtomicAdditions.LOGGER.info(
-                    "[AA DEBUG] RECEITA GERADA PRESENTE: {}",
-                    activatedRecipe.getId()
-            );
 
             List<ItemStack> representations =
                     activatedRecipe
@@ -548,38 +296,13 @@ public final class AtomicActivatedCrystalRecipeInjector {
                             representative,
                             tantalum
                     );
-
-            AtomicAdditions.LOGGER.info(
-                    "[AA DEBUG] Teste pós-registro - entrada: {} x{}",
-                    net.minecraft.core.registries
-                            .BuiltInRegistries.ITEM
-                            .getKey(
-                                    representative.getItem()
-                            ),
-                    representative.getCount()
-            );
-
-            AtomicAdditions.LOGGER.info(
-                    "[AA DEBUG] Teste pós-registro - Tântalo: {}",
-                    acceptsTantalum
-            );
         }
-
-        AtomicAdditions.LOGGER.info(
-                "[AA DEBUG] Receitas geradas presentes no RecipeManager: {}",
-                generatedPresent
-        );
-
-        AtomicAdditions.LOGGER.info(
-                "[AA DEBUG] ========================================"
-        );
     }
 
     private static boolean hasPurificationRecipe(
             RecipeManager recipeManager,
             ItemStack shard
     ) {
-
         GasStack oxygen =
                 new GasStack(
                         MekanismGases.OXYGEN.get(),
@@ -596,7 +319,6 @@ public final class AtomicActivatedCrystalRecipeInjector {
                 ItemStackGasToItemStackRecipe recipe :
                 purificationRecipes
         ) {
-
             if (!recipe.test(
                     shard,
                     oxygen
@@ -611,12 +333,6 @@ public final class AtomicActivatedCrystalRecipeInjector {
                     );
 
             if (!output.isEmpty()) {
-
-                AtomicAdditions.LOGGER.info(
-                        "[AA DEBUG] Purificação encontrada: {}",
-                        recipe.getId()
-                );
-
                 return true;
             }
         }
@@ -627,7 +343,6 @@ public final class AtomicActivatedCrystalRecipeInjector {
     private static ResourceLocation createGeneratedId(
             ResourceLocation sourceId
     ) {
-
         return ResourceLocation.fromNamespaceAndPath(
                 AtomicAdditions.MODID,
                 GENERATED_PATH
@@ -640,7 +355,6 @@ public final class AtomicActivatedCrystalRecipeInjector {
     private static boolean isGeneratedRecipe(
             ResourceLocation id
     ) {
-
         return AtomicAdditions.MODID.equals(
                 id.getNamespace()
         )
