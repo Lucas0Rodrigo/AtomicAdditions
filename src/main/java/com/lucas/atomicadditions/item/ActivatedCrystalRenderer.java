@@ -4,7 +4,6 @@ import com.lucas.atomicadditions.AtomicAdditions;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
@@ -31,7 +30,7 @@ public class ActivatedCrystalRenderer
 
     public ActivatedCrystalRenderer(
             BlockEntityRenderDispatcher dispatcher,
-            EntityModelSet modelSet
+            net.minecraft.client.model.geom.EntityModelSet modelSet
     ) {
         super(dispatcher, modelSet);
     }
@@ -70,33 +69,41 @@ public class ActivatedCrystalRenderer
          * =========================================================
          * CRISTAL ORIGINAL
          * =========================================================
-         *
-         * Deixa o próprio ItemRenderer do Minecraft renderizar
-         * o item original.
-         *
-         * Isso preserva:
-         * - iluminação
-         * - transform
-         * - escala
-         * - rotação
-         * - render type
-         * - tint
-         * - emissividade
-         * - quads
-         *
-         * exatamente como o item original.
          */
+
+        BakedModel sourceModel =
+                itemRenderer.getModel(
+                        sourceStack,
+                        level,
+                        null,
+                        0
+                );
+
+        boolean leftHand =
+                displayContext ==
+                        ItemDisplayContext.FIRST_PERSON_LEFT_HAND
+                        ||
+                        displayContext ==
+                                ItemDisplayContext.THIRD_PERSON_LEFT_HAND;
+
         poseStack.pushPose();
 
-        itemRenderer.renderStatic(
+        BakedModel transformedSource =
+                sourceModel.applyTransform(
+                        displayContext,
+                        poseStack,
+                        leftHand
+                );
+
+        renderModel(
+                itemRenderer,
+                transformedSource,
                 sourceStack,
-                displayContext,
-                combinedLight,
-                combinedOverlay,
                 poseStack,
                 bufferSource,
-                level,
-                0
+                combinedLight,
+                combinedOverlay,
+                minecraft
         );
 
         poseStack.popPose();
@@ -115,13 +122,6 @@ public class ActivatedCrystalRenderer
             return;
         }
 
-        boolean leftHand =
-                displayContext ==
-                        ItemDisplayContext.FIRST_PERSON_LEFT_HAND
-                        ||
-                        displayContext ==
-                                ItemDisplayContext.THIRD_PERSON_LEFT_HAND;
-
         poseStack.pushPose();
 
         BakedModel transformedOverlay =
@@ -131,7 +131,7 @@ public class ActivatedCrystalRenderer
                         leftHand
                 );
 
-        renderOverlay(
+        renderModel(
                 itemRenderer,
                 transformedOverlay,
                 activatedStack,
@@ -145,7 +145,7 @@ public class ActivatedCrystalRenderer
         poseStack.popPose();
     }
 
-    private void renderOverlay(
+    private void renderModel(
             ItemRenderer itemRenderer,
             BakedModel model,
             ItemStack stack,
