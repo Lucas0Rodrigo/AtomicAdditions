@@ -50,23 +50,31 @@ public class AtomicActivatedCrystalRecipe
         return new AtomicActivatedCrystalRecipe(
                 id,
 
-                mekanism.api.recipes.ingredients.creator
-                        .IngredientCreatorAccess
+                /*
+                 * 5 Cristais
+                 */
+                IngredientCreatorAccess
                         .item()
                         .from(
                                 sourceCrystal,
                                 5
                         ),
 
-                mekanism.api.recipes.ingredients.creator
-                        .IngredientCreatorAccess
+                /*
+                 * 1 mB de Tântalo
+                 */
+                IngredientCreatorAccess
                         .gas()
                         .from(
-                                com.lucas.atomicadditions.chemical.AtomicGases
+                                com.lucas.atomicadditions
+                                        .chemical.AtomicGases
                                         .TANTALUM,
                                 1
                         ),
 
+                /*
+                 * 8 Cristais Ativados
+                 */
                 new ItemStack(
                         AtomicAdditions
                                 .ACTIVATED_CRYSTAL
@@ -74,7 +82,9 @@ public class AtomicActivatedCrystalRecipe
                         8
                 ),
 
-                AtomicRecipeSerializers.Operation.ACTIVATE
+                AtomicRecipeSerializers
+                        .Operation
+                        .ACTIVATE
         );
     }
 
@@ -135,27 +145,75 @@ public class AtomicActivatedCrystalRecipe
             GasStack gasStack
     ) {
 
-        if (!super.test(
-                itemStack,
-                gasStack
-        )) {
+        if (itemStack.isEmpty() ||
+                gasStack.isEmpty()) {
             return false;
         }
 
-        return switch (operation) {
+        switch (operation) {
 
-            case ACTIVATE ->
-                    true;
+            /*
+             * 5x Cristal + Tântalo
+             *
+             * NÃO usamos super.test() aqui porque o
+             * ingrediente gerado dinamicamente é validado
+             * diretamente abaixo.
+             */
+            case ACTIVATE:
 
-            case HYDROGEN_CHLORIDE,
-                 RHENIUM ->
-                    isActivatedCrystal(itemStack)
-                            &&
-                            ActivatedCrystalItem
-                                    .getSourceCrystalId(
-                                            itemStack
-                                    ) != null;
-        };
+                if (itemStack.getCount() < 5) {
+                    return false;
+                }
+
+                return gasStack.getType()
+                        ==
+                        com.lucas.atomicadditions
+                                .chemical.AtomicGases
+                                .TANTALUM
+                                .get();
+
+            /*
+             * Cristal Ativado + HCl
+             */
+            case HYDROGEN_CHLORIDE:
+
+                if (!isActivatedCrystal(itemStack)) {
+                    return false;
+                }
+
+                if (itemStack.getCount() < 1) {
+                    return false;
+                }
+
+                return gasStack.getType()
+                        ==
+                        MekanismGases
+                                .HYDROGEN_CHLORIDE
+                                .get();
+
+            /*
+             * Cristal Ativado + Rênio
+             */
+            case RHENIUM:
+
+                if (!isActivatedCrystal(itemStack)) {
+                    return false;
+                }
+
+                if (itemStack.getCount() < 1) {
+                    return false;
+                }
+
+                return gasStack.getType()
+                        ==
+                        com.lucas.atomicadditions
+                                .chemical.AtomicGases
+                                .RHENIUM
+                                .get();
+
+            default:
+                return false;
+        }
     }
 
     @Override
@@ -166,17 +224,32 @@ public class AtomicActivatedCrystalRecipe
 
         return switch (operation) {
 
+            /*
+             * 5 Cristais + Tântalo
+             *       ↓
+             * 8 Cristais Ativados
+             */
             case ACTIVATE ->
                     createActivatedCrystal(
                             inputItem
                     );
 
+            /*
+             * 1 Cristal Ativado + HCl
+             *       ↓
+             * 1 Shard
+             */
             case HYDROGEN_CHLORIDE ->
                     createShardOutput(
                             inputItem,
                             1
                     );
 
+            /*
+             * 1 Cristal Ativado + Rênio
+             *       ↓
+             * 2 Shards
+             */
             case RHENIUM ->
                     createShardOutput(
                             inputItem,
@@ -190,13 +263,16 @@ public class AtomicActivatedCrystalRecipe
     getOutputDefinition() {
 
         if (operation ==
-                AtomicRecipeSerializers.Operation.ACTIVATE) {
+                AtomicRecipeSerializers
+                        .Operation
+                        .ACTIVATE) {
 
             return Collections.singletonList(
                     new ItemStack(
                             AtomicAdditions
                                     .ACTIVATED_CRYSTAL
-                                    .get()
+                                    .get(),
+                            8
                     )
             );
         }
@@ -209,6 +285,11 @@ public class AtomicActivatedCrystalRecipe
             ItemStack sourceCrystal
     ) {
 
+        /*
+         * A quantidade final é 8,
+         * independentemente da quantidade disponível
+         * no slot acima do mínimo de 5.
+         */
         ItemStack result =
                 new ItemStack(
                         AtomicAdditions
@@ -281,6 +362,13 @@ public class AtomicActivatedCrystalRecipe
             return ItemStack.EMPTY;
         }
 
+        /*
+         * Mantém somente a multiplicação definida
+         * pelo caminho escolhido.
+         *
+         * HCl  -> 1x shard
+         * Rênio -> 2x shard
+         */
         result.setCount(amount);
 
         return result;
@@ -330,6 +418,11 @@ public class AtomicActivatedCrystalRecipe
                         1_000_000
                 );
 
+        /*
+         * Aqui usamos as receitas originais do cache do
+         * Mekanism porque estamos procurando a receita que
+         * transforma o cristal original em shard.
+         */
         for (
                 ItemStackGasToItemStackRecipe recipe :
                 MekanismRecipeType.INJECTING
