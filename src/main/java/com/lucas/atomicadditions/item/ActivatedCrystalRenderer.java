@@ -2,7 +2,6 @@ package com.lucas.atomicadditions.item;
 
 import com.lucas.atomicadditions.AtomicAdditions;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
@@ -16,6 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.client.ForgeHooksClient;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -92,41 +92,25 @@ public class ActivatedCrystalRenderer
                         displayContext ==
                                 ItemDisplayContext.THIRD_PERSON_LEFT_HAND;
 
-        boolean hand =
-                displayContext ==
-                        ItemDisplayContext.FIRST_PERSON_RIGHT_HAND
-                        ||
-                        displayContext ==
-                                ItemDisplayContext.THIRD_PERSON_RIGHT_HAND
-                        ||
-                        displayContext ==
-                                ItemDisplayContext.FIRST_PERSON_LEFT_HAND
-                        ||
-                        displayContext ==
-                                ItemDisplayContext.THIRD_PERSON_LEFT_HAND;
-
-        float handAngle =
-                leftHand ? 25.0F : -25.0F;
-
         poseStack.pushPose();
 
-        if (hand) {
-            poseStack.mulPose(
-                    Axis.YP.rotationDegrees(
-                            handAngle
-                    )
-            );
-        }
+        BakedModel transformedSourceModel =
+                ForgeHooksClient.handleCameraTransforms(
+                        poseStack,
+                        sourceModel,
+                        displayContext,
+                        leftHand
+                );
 
         List<RenderType> sourceRenderTypes =
-                sourceModel.getRenderTypes(
+                transformedSourceModel.getRenderTypes(
                         sourceStack,
                         false
                 );
 
         for (RenderType renderType : sourceRenderTypes) {
             itemRenderer.renderModelLists(
-                    sourceModel,
+                    transformedSourceModel,
                     sourceStack,
                     combinedLight,
                     combinedOverlay,
@@ -147,37 +131,23 @@ public class ActivatedCrystalRenderer
 
         poseStack.pushPose();
 
-        if (displayContext == ItemDisplayContext.GUI) {
-            overlayModel.applyTransform(
-                    displayContext,
-                    poseStack,
-                    leftHand
-            );
-        }
-
-        if (hand) {
-            poseStack.mulPose(
-                    Axis.YP.rotationDegrees(
-                            handAngle
-                    )
-            );
-
-            poseStack.scale(
-                    leftHand ? -1.0F : 1.0F,
-                    1.0F,
-                    1.0F
-            );
-        }
+        BakedModel transformedOverlayModel =
+                ForgeHooksClient.handleCameraTransforms(
+                        poseStack,
+                        overlayModel,
+                        displayContext,
+                        leftHand
+                );
 
         List<RenderType> overlayRenderTypes =
-                overlayModel.getRenderTypes(
+                transformedOverlayModel.getRenderTypes(
                         activatedStack,
                         false
                 );
 
         for (RenderType renderType : overlayRenderTypes) {
             itemRenderer.renderModelLists(
-                    overlayModel,
+                    transformedOverlayModel,
                     activatedStack,
                     combinedLight,
                     combinedOverlay,
