@@ -3,6 +3,7 @@ package com.lucas.atomicadditions.recipes;
 import com.lucas.atomicadditions.AtomicAdditions;
 import com.lucas.atomicadditions.chemical.AtomicGases;
 import com.lucas.atomicadditions.item.ActivatedCrystalItem;
+import java.util.ArrayList;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.recipes.ItemStackGasToItemStackRecipe;
 import mekanism.api.recipes.ingredients.ChemicalStackIngredient.GasStackIngredient;
@@ -24,6 +25,24 @@ public class AtomicActivatedCrystalRecipe
         extends ItemStackGasToItemStackRecipe {
 
     private final AtomicRecipeSerializers.Operation operation;
+
+    private static final List<AtomicActivatedCrystalRecipe>
+            GENERATED_RECIPES = new ArrayList<>();
+
+    public static void clearGeneratedRecipes() {
+        GENERATED_RECIPES.clear();
+    }
+
+    public static void registerGeneratedRecipe(
+            AtomicActivatedCrystalRecipe recipe
+    ) {
+        GENERATED_RECIPES.add(recipe);
+    }
+
+    public static List<AtomicActivatedCrystalRecipe>
+    getGeneratedRecipes() {
+        return List.copyOf(GENERATED_RECIPES);
+    }
 
     public AtomicActivatedCrystalRecipe(
             ResourceLocation id,

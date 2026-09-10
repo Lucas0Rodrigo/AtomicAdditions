@@ -420,6 +420,8 @@ public final class AtomicActivatedCrystalRecipeInjector {
                         activatedRecipe
                 );
 
+                AtomicActivatedCrystalRecipe.clearGeneratedRecipes();
+
                 crystalsAccepted++;
                 recipesCreated++;
 
