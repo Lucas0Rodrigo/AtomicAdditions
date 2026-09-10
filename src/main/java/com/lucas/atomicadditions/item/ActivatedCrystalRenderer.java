@@ -16,6 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.client.renderer.LightTexture;
 import org.jetbrains.annotations.NotNull;
 
 public class ActivatedCrystalRenderer
@@ -103,17 +104,16 @@ public class ActivatedCrystalRenderer
                         leftHand
                 );
 
-        int crystalLight = 0xF000F0;
-
         renderModel(
                 itemRenderer,
                 transformedSourceModel,
                 sourceStack,
                 poseStack,
                 bufferSource,
-                crystalLight,
+                LightTexture.FULL_BRIGHT,
                 combinedOverlay,
-                minecraft
+                minecraft,
+                true
         );
 
         poseStack.popPose();
@@ -142,7 +142,8 @@ public class ActivatedCrystalRenderer
                 bufferSource,
                 combinedLight,
                 combinedOverlay,
-                minecraft
+                minecraft,
+                false
         );
 
         poseStack.popPose();
@@ -156,7 +157,8 @@ public class ActivatedCrystalRenderer
             MultiBufferSource bufferSource,
             int combinedLight,
             int combinedOverlay,
-            Minecraft minecraft
+            Minecraft minecraft,
+            boolean fullBright
     ) {
         boolean fabulous =
                 minecraft.options.graphicsMode().get()
