@@ -23,7 +23,7 @@ public class ActivatedCrystalRenderer
             new ModelResourceLocation(
                     ResourceLocation.fromNamespaceAndPath(
                             AtomicAdditions.MODID,
-                            "item/activated_crystal_overlay"
+                            "activated_crystal_overlay"
                     ),
                     "inventory"
             );

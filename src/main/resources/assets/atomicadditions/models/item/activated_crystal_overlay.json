@@ -1,5 +1,5 @@
 {
-  "parent": "minecraf:item/generated",
+  "parent": "minecraft:item/generated",
   "textures": {
     "layer0": "atomicadditions:item/crystal_overlay"
   }
