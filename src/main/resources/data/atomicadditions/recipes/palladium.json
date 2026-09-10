@@ -2,7 +2,7 @@
   "type": "mekanism:reaction",
   "itemInput": {
     "ingredient": {
-      "item": "mekanism:sulfur_dust"
+      "item": "mekanism:dust_sulfur"
     },
     "amount": 10
   },
