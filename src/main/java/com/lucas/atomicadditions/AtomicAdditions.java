@@ -258,7 +258,7 @@ public class AtomicAdditions {
                     new ModelResourceLocation(
                             ResourceLocation.fromNamespaceAndPath(
                                     MODID,
-                                    "item/activated_crystal_overlay"
+                                    "activated_crystal_overlay"
                             ),
                             "inventory"
                     )
