@@ -8,16 +8,19 @@ import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
-import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class ActivatedCrystalRenderer
         extends BlockEntityWithoutLevelRenderer {
@@ -71,8 +74,7 @@ public class ActivatedCrystalRenderer
 
         ItemStack sourceStack =
                 new ItemStack(
-                        net.minecraft.core.registries
-                                .BuiltInRegistries.ITEM
+                        net.minecraft.core.registries.BuiltInRegistries.ITEM
                                 .get(sourceId)
                 );
 
@@ -104,16 +106,12 @@ public class ActivatedCrystalRenderer
                         leftHand
                 );
 
-        renderModel(
-                itemRenderer,
+        renderSourceModel(
                 transformedSourceModel,
                 sourceStack,
                 poseStack,
                 bufferSource,
-                LightTexture.FULL_BRIGHT,
-                combinedOverlay,
-                minecraft,
-                true
+                combinedOverlay
         );
 
         poseStack.popPose();
@@ -142,11 +140,78 @@ public class ActivatedCrystalRenderer
                 bufferSource,
                 combinedLight,
                 combinedOverlay,
-                minecraft,
-                false
+                minecraft
         );
 
         poseStack.popPose();
+    }
+
+    private void renderSourceModel(
+            BakedModel model,
+            ItemStack stack,
+            PoseStack poseStack,
+            MultiBufferSource bufferSource,
+            int combinedOverlay
+    ) {
+        Minecraft minecraft = Minecraft.getInstance();
+
+        boolean fabulous =
+                minecraft.options.graphicsMode().get()
+                        == net.minecraft.client.GraphicsStatus.FABULOUS;
+
+        int fullBright = 0xF000F0;
+
+        RandomSource random =
+                RandomSource.create(42L);
+
+        List<RenderType> renderTypes =
+                model.getRenderTypes(
+                        stack,
+                        fabulous
+                );
+
+        for (RenderType renderType : renderTypes) {
+            VertexConsumer vertexConsumer =
+                    bufferSource.getBuffer(renderType);
+
+            List<BakedQuad> generalQuads =
+                    model.getQuads(
+                            null,
+                            null,
+                            random
+                    );
+
+            renderQuads(
+                    poseStack,
+                    vertexConsumer,
+                    generalQuads,
+                    fullBright,
+                    combinedOverlay
+            );
+        }
+    }
+
+    private void renderQuads(
+            PoseStack poseStack,
+            VertexConsumer vertexConsumer,
+            List<BakedQuad> quads,
+            int light,
+            int overlay
+    ) {
+        PoseStack.Pose pose =
+                poseStack.last();
+
+        for (BakedQuad quad : quads) {
+            vertexConsumer.putBulkData(
+                    pose,
+                    quad,
+                    1.0F,
+                    1.0F,
+                    1.0F,
+                    light,
+                    overlay
+            );
+        }
     }
 
     private void renderModel(
@@ -157,8 +222,7 @@ public class ActivatedCrystalRenderer
             MultiBufferSource bufferSource,
             int combinedLight,
             int combinedOverlay,
-            Minecraft minecraft,
-            boolean fullBright
+            Minecraft minecraft
     ) {
         boolean fabulous =
                 minecraft.options.graphicsMode().get()
