@@ -1,0 +1,15 @@
+{
+  "type": "atomicadditions:activated_crystal",
+  "chemical_input": {
+    "amount": 1,
+    "chemical": "atomicadditions:tantalum"
+  },
+  "item_input": {
+    "tag": "c:crystals"
+  },
+  "output": {
+    "count": 1,
+    "id": "atomicadditions:activated_crystal"
+  },
+  "per_tick_usage": true
+}

@@ -2,12 +2,16 @@ package com.lucas.atomicadditions;
 
 import com.lucas.atomicadditions.multiblock.*;
 import com.lucas.atomicadditions.chemical.*;
+import com.lucas.atomicadditions.item.ActivatedCrystalItem;
 import com.lucas.atomicadditions.recipes.AtomicRecipes;
+import com.lucas.atomicadditions.recipes.AtomicRecipeSerializers;
 import com.mojang.logging.LogUtils;
 import mekanism.common.lib.multiblock.MultiblockCache;
 import mekanism.common.lib.multiblock.MultiblockManager;
 import mekanism.common.registration.impl.TileEntityTypeRegistryObject;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -120,6 +124,14 @@ public class AtomicAdditions {
                     )
             );
 
+    public static final RegistryObject<Item> ACTIVATED_CRYSTAL =
+            ITEMS.register(
+                    "activated_crystal",
+                    () -> new ActivatedCrystalItem(
+                            new Item.Properties()
+                    )
+            );
+
     private static AtomicCasingBlock<AtomicCasingBlockEntity> createCasing() {
         return new AtomicCasingBlock<>(
                 BlockBehaviour.Properties.of()
@@ -159,13 +171,13 @@ public class AtomicAdditions {
         ITEMS.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
 
+        AtomicRecipeSerializers.RECIPE_SERIALIZERS.register(modEventBus);
+
         AtomicContainerTypes.CONTAINER_TYPES.register(modEventBus);
 
         AtomicGases.GASES.register(modEventBus);
 
-        MinecraftForge.EVENT_BUS.addListener(
-                AtomicRecipes::addReloadListener
-        );
+        MinecraftForge.EVENT_BUS.addListener(AtomicRecipes::addReloadListener);
 
         MinecraftForge.EVENT_BUS.register(this);
 
@@ -234,5 +246,20 @@ public class AtomicAdditions {
             value = Dist.CLIENT
     )
     public static class ClientModEvents {
+
+        @SubscribeEvent
+        public static void registerAdditionalModels(
+                net.minecraftforge.client.event.ModelEvent.RegisterAdditional event
+        ) {
+            event.register(
+                    new ModelResourceLocation(
+                            ResourceLocation.fromNamespaceAndPath(
+                                    MODID,
+                                    "item/activated_crystal_overlay"
+                            ),
+                            "inventory"
+                    )
+            );
+        }
     }
 }

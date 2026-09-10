@@ -18,5 +18,8 @@
   "gas.atomicadditions.tantalum": "Tantalum",
   "gas.atomicadditions.palladium": "Palladium",
   "gas.atomicadditions.copper": "Copper",
-  "gas.atomicadditions.rhenium": "Rhenium"
+  "gas.atomicadditions.rhenium": "Rhenium",
+
+  "item.atomicadditions.activated_crystal": "Cristal de %s Ativado",
+  "item.atomicadditions.activated_crystal_fallback": "Cristal Ativado"
 }

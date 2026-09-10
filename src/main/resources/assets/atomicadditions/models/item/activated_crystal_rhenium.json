@@ -1,0 +1,15 @@
+{
+  "type": "atomicadditions:activated_crystal_rhenium",
+  "chemical_input": {
+    "amount": 1,
+    "chemical": "atomicadditions:rhenium"
+  },
+  "item_input": {
+    "item": "atomicadditions:activated_crystal"
+  },
+  "output": {
+    "count": 1,
+    "id": "mekanism:shard_iron"
+  },
+  "per_tick_usage": true
+}

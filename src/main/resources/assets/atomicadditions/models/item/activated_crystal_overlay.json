@@ -1,0 +1,6 @@
+{
+  "parent": "minecraf:item/generated",
+  "textures": {
+    "layer0": "atomicadditions:item/crystal_overlay"
+  }
+}
