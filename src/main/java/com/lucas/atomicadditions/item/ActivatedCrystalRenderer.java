@@ -2,6 +2,7 @@ package com.lucas.atomicadditions.item;
 
 import com.lucas.atomicadditions.AtomicAdditions;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
@@ -91,13 +92,29 @@ public class ActivatedCrystalRenderer
                         displayContext ==
                                 ItemDisplayContext.THIRD_PERSON_LEFT_HAND;
 
+        boolean hand =
+                displayContext ==
+                        ItemDisplayContext.FIRST_PERSON_RIGHT_HAND
+                        ||
+                        displayContext ==
+                                ItemDisplayContext.THIRD_PERSON_RIGHT_HAND
+                        ||
+                        displayContext ==
+                                ItemDisplayContext.FIRST_PERSON_LEFT_HAND
+                        ||
+                        displayContext ==
+                                ItemDisplayContext.THIRD_PERSON_LEFT_HAND;
+
+        float handAngle =
+                leftHand ? 25.0F : -25.0F;
+
         poseStack.pushPose();
 
-        if (displayContext == ItemDisplayContext.GUI) {
-            sourceModel.applyTransform(
-                    displayContext,
-                    poseStack,
-                    leftHand
+        if (hand) {
+            poseStack.mulPose(
+                    Axis.YP.rotationDegrees(
+                            handAngle
+                    )
             );
         }
 
@@ -135,6 +152,20 @@ public class ActivatedCrystalRenderer
                     displayContext,
                     poseStack,
                     leftHand
+            );
+        }
+
+        if (hand) {
+            poseStack.mulPose(
+                    Axis.YP.rotationDegrees(
+                            handAngle
+                    )
+            );
+
+            poseStack.scale(
+                    leftHand ? -1.0F : 1.0F,
+                    1.0F,
+                    1.0F
             );
         }
 
