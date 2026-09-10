@@ -145,71 +145,41 @@ public class AtomicActivatedCrystalRecipe
             GasStack gasStack
     ) {
 
-        if (itemStack.isEmpty() ||
-                gasStack.isEmpty()) {
+        if (itemStack.isEmpty() || gasStack.isEmpty()) {
             return false;
         }
 
+        ResourceLocation gasId =
+                gasStack.getType().getRegistryName();
+
         switch (operation) {
 
-            /*
-             * 5x Cristal + Tântalo
-             *
-             * NÃO usamos super.test() aqui porque o
-             * ingrediente gerado dinamicamente é validado
-             * diretamente abaixo.
-             */
             case ACTIVATE:
 
-                if (itemStack.getCount() < 5) {
-                    return false;
-                }
+                return itemStack.getCount() >= 5
+                        &&
+                        ResourceLocation.fromNamespaceAndPath(
+                                AtomicAdditions.MODID,
+                                "tantalum"
+                        ).equals(gasId);
 
-                return gasStack.getType()
-                        ==
-                        com.lucas.atomicadditions
-                                .chemical.AtomicGases
-                                .TANTALUM
-                                .get();
-
-            /*
-             * Cristal Ativado + HCl
-             */
             case HYDROGEN_CHLORIDE:
 
-                if (!isActivatedCrystal(itemStack)) {
-                    return false;
-                }
+                return isActivatedCrystal(itemStack)
+                        &&
+                        ResourceLocation.fromNamespaceAndPath(
+                                "mekanism",
+                                "hydrogen_chloride"
+                        ).equals(gasId);
 
-                if (itemStack.getCount() < 1) {
-                    return false;
-                }
-
-                return gasStack.getType()
-                        ==
-                        MekanismGases
-                                .HYDROGEN_CHLORIDE
-                                .get();
-
-            /*
-             * Cristal Ativado + Rênio
-             */
             case RHENIUM:
 
-                if (!isActivatedCrystal(itemStack)) {
-                    return false;
-                }
-
-                if (itemStack.getCount() < 1) {
-                    return false;
-                }
-
-                return gasStack.getType()
-                        ==
-                        com.lucas.atomicadditions
-                                .chemical.AtomicGases
-                                .RHENIUM
-                                .get();
+                return isActivatedCrystal(itemStack)
+                        &&
+                        ResourceLocation.fromNamespaceAndPath(
+                                AtomicAdditions.MODID,
+                                "rhenium"
+                        ).equals(gasId);
 
             default:
                 return false;
