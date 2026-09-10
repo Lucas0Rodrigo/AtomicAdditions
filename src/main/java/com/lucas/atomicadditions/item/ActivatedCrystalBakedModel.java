@@ -1,6 +1,7 @@
 package com.lucas.atomicadditions.item;
 
 import com.lucas.atomicadditions.AtomicAdditions;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
@@ -8,6 +9,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.model.BakedModelWrapper;
 import org.jetbrains.annotations.NotNull;
@@ -44,9 +46,7 @@ public class ActivatedCrystalBakedModel
                     int seed
             ) {
                 ResourceLocation sourceId =
-                        ActivatedCrystalItem.getSourceCrystalId(
-                                stack
-                        );
+                        ActivatedCrystalItem.getSourceCrystalId(stack);
 
                 if (sourceId == null ||
                         !net.minecraft.core.registries.BuiltInRegistries.ITEM
@@ -89,6 +89,21 @@ public class ActivatedCrystalBakedModel
         return overrides;
     }
 
+    @Override
+    public BakedModel applyTransform(
+            ItemDisplayContext displayContext,
+            PoseStack poseStack,
+            boolean applyLeftHandTransform
+    ) {
+        originalModel.applyTransform(
+                displayContext,
+                poseStack,
+                applyLeftHandTransform
+        );
+
+        return this;
+    }
+
     private static class CompositeModel
             extends BakedModelWrapper<BakedModel> {
 
@@ -103,14 +118,61 @@ public class ActivatedCrystalBakedModel
         }
 
         @Override
+        public BakedModel applyTransform(
+                ItemDisplayContext displayContext,
+                PoseStack poseStack,
+                boolean applyLeftHandTransform
+        ) {
+            originalModel.applyTransform(
+                    displayContext,
+                    poseStack,
+                    applyLeftHandTransform
+            );
+
+            return this;
+        }
+
+        @Override
         public List<BakedModel> getRenderPasses(
                 ItemStack stack,
                 boolean fabulous
         ) {
             return List.of(
                     originalModel,
-                    overlayModel
+                    new OverlayModel(
+                            overlayModel
+                    )
             );
+        }
+    }
+
+    private static class OverlayModel
+            extends BakedModelWrapper<BakedModel> {
+
+        private OverlayModel(
+                BakedModel originalModel
+        ) {
+            super(originalModel);
+        }
+
+        @Override
+        public BakedModel applyTransform(
+                ItemDisplayContext displayContext,
+                PoseStack poseStack,
+                boolean applyLeftHandTransform
+        ) {
+            originalModel.applyTransform(
+                    displayContext,
+                    poseStack,
+                    applyLeftHandTransform
+            );
+
+            poseStack.translate(
+                    0.0F,
+                    0.0F,
+                    -0.001F
+            );
+            return null;
         }
     }
 }
