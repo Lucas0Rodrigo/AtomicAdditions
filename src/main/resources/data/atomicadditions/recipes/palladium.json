@@ -1,8 +1,10 @@
 {
   "type": "mekanism:reaction",
   "itemInput": {
-    "item": "mekanism:sulfur_dust",
-    "count": 10
+    "ingredient": {
+      "item": "mekanism:sulfur_dust"
+    },
+    "amount": 10
   },
   "fluidInput": {
     "fluid": "minecraft:water",

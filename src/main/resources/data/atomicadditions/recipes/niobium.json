@@ -1,8 +1,10 @@
 {
   "type": "mekanism:reaction",
   "itemInput": {
-    "item": "minecraft:iron_ingot",
-    "count": 10
+    "ingredient": {
+      "item": "minecraft:iron_ingot"
+    },
+    "amount": 10
   },
   "fluidInput": {
     "fluid": "minecraft:water",

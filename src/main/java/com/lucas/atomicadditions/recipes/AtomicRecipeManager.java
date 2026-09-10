@@ -69,11 +69,6 @@ public class AtomicRecipeManager extends SimpleJsonResourceReloadListener {
 
                 recipes.add(recipe);
 
-                System.out.println(
-                        "[Atomic Additions] AMR recipe carregada: "
-                                + id
-                );
-
             } catch (Exception exception) {
 
                 System.err.println(
@@ -84,14 +79,6 @@ public class AtomicRecipeManager extends SimpleJsonResourceReloadListener {
         }
     }
 
-    /*
-     * Carrega as mesmas recipes JSON utilizadas pelo AMR
-     * diretamente dos recursos do mod para o JEI.
-     *
-     * O JEI inicializa antes do carregamento normal dos
-     * datapacks, portanto não utilizamos o ResourceManager
-     * do cliente aqui.
-     */
     public List<AtomicAMRRecipe> getRecipesForJEI() {
 
         List<AtomicAMRRecipe> jeiRecipes =
