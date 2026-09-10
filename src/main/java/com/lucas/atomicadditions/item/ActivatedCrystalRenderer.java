@@ -69,11 +69,6 @@ public class ActivatedCrystalRenderer
          * =========================================================
          * CRISTAL ORIGINAL
          * =========================================================
-         *
-         * NÃO aplicamos applyTransform manualmente.
-         *
-         * O próprio ItemRenderer.render() cuida do caminho normal
-         * de renderização do ItemStack.
          */
 
         BakedModel sourceModel =
@@ -93,15 +88,22 @@ public class ActivatedCrystalRenderer
 
         poseStack.pushPose();
 
-        itemRenderer.render(
+        BakedModel transformedSource =
+                sourceModel.applyTransform(
+                        displayContext,
+                        poseStack,
+                        leftHand
+                );
+
+        renderModel(
+                itemRenderer,
+                transformedSource,
                 sourceStack,
-                displayContext,
-                leftHand,
                 poseStack,
                 bufferSource,
                 combinedLight,
                 combinedOverlay,
-                sourceModel
+                minecraft
         );
 
         poseStack.popPose();
@@ -129,7 +131,7 @@ public class ActivatedCrystalRenderer
                         leftHand
                 );
 
-        renderOverlay(
+        renderModel(
                 itemRenderer,
                 transformedOverlay,
                 activatedStack,
@@ -143,7 +145,7 @@ public class ActivatedCrystalRenderer
         poseStack.popPose();
     }
 
-    private void renderOverlay(
+    private void renderModel(
             ItemRenderer itemRenderer,
             BakedModel model,
             ItemStack stack,
