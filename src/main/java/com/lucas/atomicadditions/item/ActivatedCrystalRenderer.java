@@ -6,10 +6,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -73,15 +73,30 @@ public class ActivatedCrystalRenderer
             return;
         }
 
-        itemRenderer.renderStatic(
+        BakedModel sourceModel =
+                itemRenderer.getModel(
+                        sourceStack,
+                        level,
+                        null,
+                        0
+                );
+
+        boolean leftHand =
+                displayContext ==
+                        ItemDisplayContext.FIRST_PERSON_LEFT_HAND
+                        ||
+                        displayContext ==
+                                ItemDisplayContext.THIRD_PERSON_LEFT_HAND;
+
+        itemRenderer.render(
                 sourceStack,
                 displayContext,
-                combinedLight,
-                combinedOverlay,
+                leftHand,
                 poseStack,
                 bufferSource,
-                level,
-                0
+                combinedLight,
+                combinedOverlay,
+                sourceModel
         );
 
         BakedModel overlayModel =
@@ -91,13 +106,6 @@ public class ActivatedCrystalRenderer
         if (overlayModel == null) {
             return;
         }
-
-        boolean leftHand =
-                displayContext ==
-                        ItemDisplayContext.FIRST_PERSON_LEFT_HAND
-                        ||
-                        displayContext ==
-                                ItemDisplayContext.THIRD_PERSON_LEFT_HAND;
 
         poseStack.pushPose();
 
@@ -117,7 +125,7 @@ public class ActivatedCrystalRenderer
                         overlayModel.getRenderTypes(
                                 activatedStack,
                                 false
-                        ).get(0)
+                        ).iterator().next()
                 )
         );
 
