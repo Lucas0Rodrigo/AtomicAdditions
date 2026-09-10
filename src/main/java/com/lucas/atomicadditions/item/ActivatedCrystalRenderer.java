@@ -9,6 +9,8 @@ import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
@@ -16,8 +18,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
-import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraftforge.client.extensions.IForgeVertexConsumer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -74,7 +75,8 @@ public class ActivatedCrystalRenderer
 
         ItemStack sourceStack =
                 new ItemStack(
-                        net.minecraft.core.registries.BuiltInRegistries.ITEM
+                        net.minecraft.core.registries
+                                .BuiltInRegistries.ITEM
                                 .get(sourceId)
                 );
 
@@ -111,7 +113,8 @@ public class ActivatedCrystalRenderer
                 sourceStack,
                 poseStack,
                 bufferSource,
-                combinedOverlay
+                combinedOverlay,
+                minecraft
         );
 
         poseStack.popPose();
@@ -132,7 +135,7 @@ public class ActivatedCrystalRenderer
                 leftHand
         );
 
-        renderModel(
+        renderOverlayModel(
                 itemRenderer,
                 overlayModel,
                 activatedStack,
@@ -151,70 +154,49 @@ public class ActivatedCrystalRenderer
             ItemStack stack,
             PoseStack poseStack,
             MultiBufferSource bufferSource,
-            int combinedOverlay
+            int combinedOverlay,
+            Minecraft minecraft
     ) {
-        Minecraft minecraft = Minecraft.getInstance();
-
         boolean fabulous =
                 minecraft.options.graphicsMode().get()
                         == net.minecraft.client.GraphicsStatus.FABULOUS;
 
-        int fullBright = 0xF000F0;
-
         RandomSource random =
                 RandomSource.create(42L);
 
-        List<RenderType> renderTypes =
+        for (RenderType renderType :
                 model.getRenderTypes(
                         stack,
                         fabulous
-                );
+                )) {
 
-        for (RenderType renderType : renderTypes) {
             VertexConsumer vertexConsumer =
                     bufferSource.getBuffer(renderType);
 
-            List<BakedQuad> generalQuads =
+            List<BakedQuad> quads =
                     model.getQuads(
                             null,
                             null,
                             random
                     );
 
-            renderQuads(
-                    poseStack,
-                    vertexConsumer,
-                    generalQuads,
-                    fullBright,
-                    combinedOverlay
-            );
+            for (BakedQuad quad : quads) {
+                ((IForgeVertexConsumer) vertexConsumer).putBulkData(
+                        poseStack.last(),
+                        quad,
+                        1.0F,
+                        1.0F,
+                        1.0F,
+                        1.0F,
+                        0xF000F0,
+                        combinedOverlay,
+                        false
+                );
+            }
         }
     }
 
-    private void renderQuads(
-            PoseStack poseStack,
-            VertexConsumer vertexConsumer,
-            List<BakedQuad> quads,
-            int light,
-            int overlay
-    ) {
-        PoseStack.Pose pose =
-                poseStack.last();
-
-        for (BakedQuad quad : quads) {
-            vertexConsumer.putBulkData(
-                    pose,
-                    quad,
-                    1.0F,
-                    1.0F,
-                    1.0F,
-                    light,
-                    overlay
-            );
-        }
-    }
-
-    private void renderModel(
+    private void renderOverlayModel(
             ItemRenderer itemRenderer,
             BakedModel model,
             ItemStack stack,
@@ -235,9 +217,7 @@ public class ActivatedCrystalRenderer
                 )) {
 
             VertexConsumer vertexConsumer =
-                    bufferSource.getBuffer(
-                            renderType
-                    );
+                    bufferSource.getBuffer(renderType);
 
             itemRenderer.renderModelLists(
                     model,
