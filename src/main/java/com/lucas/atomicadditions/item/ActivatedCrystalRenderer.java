@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
@@ -14,10 +15,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
+import java.util.List;
 
 public class ActivatedCrystalRenderer
         extends BlockEntityWithoutLevelRenderer {
@@ -60,14 +60,16 @@ public class ActivatedCrystalRenderer
             return;
         }
 
-        if (!net.minecraftforge.registries.ForgeRegistries.ITEMS
+        if (!net.minecraft.core.registries.BuiltInRegistries.ITEM
                 .containsKey(sourceId)) {
             return;
         }
 
         ItemStack sourceStack =
                 new ItemStack(
-                        Objects.requireNonNull(ForgeRegistries.ITEMS.getValue(sourceId))
+                        net.minecraft.core.registries
+                                .BuiltInRegistries.ITEM
+                                .get(sourceId)
                 );
 
         if (sourceStack.isEmpty()) {
@@ -89,42 +91,69 @@ public class ActivatedCrystalRenderer
                         displayContext ==
                                 ItemDisplayContext.THIRD_PERSON_LEFT_HAND;
 
-        itemRenderer.render(
-                sourceStack,
-                displayContext,
-                leftHand,
-                poseStack,
-                bufferSource,
-                combinedLight,
-                combinedOverlay,
-                sourceModel
-        );
+        poseStack.pushPose();
+
+        if (displayContext == ItemDisplayContext.GUI) {
+            sourceModel.applyTransform(
+                    displayContext,
+                    poseStack,
+                    leftHand
+            );
+        }
+
+        List<RenderType> sourceRenderTypes =
+                sourceModel.getRenderTypes(
+                        sourceStack,
+                        false
+                );
+
+        for (RenderType renderType : sourceRenderTypes) {
+            itemRenderer.renderModelLists(
+                    sourceModel,
+                    sourceStack,
+                    combinedLight,
+                    combinedOverlay,
+                    poseStack,
+                    bufferSource.getBuffer(renderType)
+            );
+        }
+
+        poseStack.popPose();
 
         BakedModel overlayModel =
                 minecraft.getModelManager()
                         .getModel(OVERLAY_MODEL);
 
+        if (overlayModel == null) {
+            return;
+        }
+
         poseStack.pushPose();
 
-        overlayModel.applyTransform(
-                displayContext,
-                poseStack,
-                leftHand
-        );
+        if (displayContext == ItemDisplayContext.GUI) {
+            overlayModel.applyTransform(
+                    displayContext,
+                    poseStack,
+                    leftHand
+            );
+        }
 
-        itemRenderer.renderModelLists(
-                overlayModel,
-                activatedStack,
-                combinedLight,
-                combinedOverlay,
-                poseStack,
-                bufferSource.getBuffer(
-                        overlayModel.getRenderTypes(
-                                activatedStack,
-                                false
-                        ).iterator().next()
-                )
-        );
+        List<RenderType> overlayRenderTypes =
+                overlayModel.getRenderTypes(
+                        activatedStack,
+                        false
+                );
+
+        for (RenderType renderType : overlayRenderTypes) {
+            itemRenderer.renderModelLists(
+                    overlayModel,
+                    activatedStack,
+                    combinedLight,
+                    combinedOverlay,
+                    poseStack,
+                    bufferSource.getBuffer(renderType)
+            );
+        }
 
         poseStack.popPose();
     }
