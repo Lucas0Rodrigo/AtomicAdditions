@@ -4,15 +4,19 @@ import com.lucas.atomicadditions.AtomicAdditions;
 import com.lucas.atomicadditions.item.ActivatedCrystalItem;
 import com.lucas.atomicadditions.recipes.AtomicActivatedCrystalRecipe;
 import com.lucas.atomicadditions.recipes.AtomicRecipeSerializers;
+import mekanism.client.MekanismClient;
 import mekanism.client.jei.BaseRecipeCategory;
 import mekanism.client.jei.MekanismJEI;
 import mekanism.client.jei.MekanismJEIRecipeType;
 import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
-import mezz.jei.api.gui.drawable.IDrawable;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -25,8 +29,6 @@ public class AtomicActivatedCrystalRecipeCategory
                     AtomicAdditions.MODID,
                     "textures/item/crystal_overlay.png"
             );
-
-    private final IDrawable auraDrawable;
 
     public static final MekanismJEIRecipeType<AtomicActivatedCrystalRecipe> TYPE =
             new MekanismJEIRecipeType<>(
@@ -43,7 +45,7 @@ public class AtomicActivatedCrystalRecipeCategory
         super(
                 helper,
                 TYPE,
-                net.minecraft.network.chat.Component.translatable(
+                Component.translatable(
                         "jei.atomicadditions.activated_crystal"
                 ),
                 helper.createDrawableIngredient(
@@ -57,15 +59,6 @@ public class AtomicActivatedCrystalRecipeCategory
                 176,
                 86
         );
-
-        auraDrawable =
-                helper.createDrawable(
-                        AURA_TEXTURE,
-                        0,
-                        0,
-                        16,
-                        16
-                );
     }
 
     @Override
@@ -138,42 +131,54 @@ public class AtomicActivatedCrystalRecipeCategory
                         output,
                         sourceId
                 );
-
-                ItemStack sourceStack =
-                        recipe.getItemInput()
-                                .getRepresentations()
-                                .get(0)
-                                .copy();
-
-                sourceStack.setCount(1);
-
-                builder.addSlot(
-                        RecipeIngredientRole.OUTPUT,
-                        128,
-                        34
-                ).addItemStack(
-                        sourceStack
-                ).setOverlay(
-                        auraDrawable,
-                        0,
-                        0
-                );
-
-                builder.addInvisibleIngredients(
-                        RecipeIngredientRole.OUTPUT
-                ).addItemStack(
-                        output
-                );
-
-                return;
             }
         }
 
         builder.addSlot(
-                        RecipeIngredientRole.OUTPUT,
-                        128,
-                        34
-                )
-                .addItemStack(output);
+                RecipeIngredientRole.OUTPUT,
+                128,
+                34
+        ).addItemStack(output);
+    }
+
+    @Override
+    public void draw(
+            @NotNull AtomicActivatedCrystalRecipe recipe,
+            @NotNull IRecipeSlotsView recipeSlotsView,
+            @NotNull GuiGraphics guiGraphics,
+            double mouseX,
+            double mouseY
+    ) {
+        if (recipe.getItemInput()
+                .getRepresentations()
+                .isEmpty()) {
+            return;
+        }
+
+        ItemStack sourceStack =
+                recipe.getItemInput()
+                        .getRepresentations()
+                        .get(0)
+                        .copy();
+
+        sourceStack.setCount(1);
+
+        guiGraphics.renderFakeItem(
+                sourceStack,
+                128,
+                34
+        );
+
+        guiGraphics.blit(
+                AURA_TEXTURE,
+                128,
+                34,
+                0,
+                0,
+                16,
+                16,
+                16,
+                16
+        );
     }
 }
