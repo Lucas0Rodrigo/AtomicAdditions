@@ -132,7 +132,7 @@ public class AtomicActivatedCrystalRecipeCategory
                 .addItemStack(output)
                 .setCustomRenderer(
                         VanillaTypes.ITEM_STACK,
-                        new ActivatedCrystalJEIRenderer()
+                        new ActivatedCrystalJEIRenderer(output)
                 );
     }
 }

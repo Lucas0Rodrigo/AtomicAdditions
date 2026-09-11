@@ -23,6 +23,9 @@ public class ActivatedCrystalJEIRenderer
                     "textures/item/crystal_overlay.png"
             );
 
+    public ActivatedCrystalJEIRenderer(ItemStack output) {
+    }
+
     @Override
     public void render(
             @NotNull GuiGraphics guiGraphics,
