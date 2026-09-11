@@ -7,16 +7,20 @@ import com.lucas.atomicadditions.recipes.AtomicRecipes;
 import mekanism.client.jei.MekanismJEI;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
+import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.ingredients.subtypes.IIngredientSubtypeInterpreter;
 import mezz.jei.api.ingredients.subtypes.UidContext;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
+import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @JeiPlugin
@@ -38,11 +42,16 @@ public class AtomicAdditionsJEIPlugin implements IModPlugin {
             ISubtypeRegistration registration
     ) {
         registration.registerSubtypeInterpreter(
+                VanillaTypes.ITEM_STACK,
                 AtomicAdditions.ACTIVATED_CRYSTAL.get(),
                 new IIngredientSubtypeInterpreter<ItemStack>() {
 
                     @Override
-                    public String apply(
+                    public String apply(ItemStack ingredient, UidContext context) {
+                        return "";
+                    }
+
+                    public @Nullable Object getSubtypeData(
                             ItemStack ingredient,
                             UidContext context
                     ) {
@@ -54,7 +63,28 @@ public class AtomicAdditionsJEIPlugin implements IModPlugin {
                                         ActivatedCrystalItem
                                                 .SOURCE_CRYSTAL_TAG
                                 )) {
-                            return IIngredientSubtypeInterpreter.NONE;
+                            return null;
+                        }
+
+                        return tag.getString(
+                                ActivatedCrystalItem
+                                        .SOURCE_CRYSTAL_TAG
+                        );
+                    }
+
+                    public String getLegacyStringSubtypeInfo(
+                            ItemStack ingredient,
+                            UidContext context
+                    ) {
+                        CompoundTag tag =
+                                ingredient.getTag();
+
+                        if (tag == null ||
+                                !tag.contains(
+                                        ActivatedCrystalItem
+                                                .SOURCE_CRYSTAL_TAG
+                                )) {
+                            return "";
                         }
 
                         return tag.getString(
@@ -108,5 +138,61 @@ public class AtomicAdditionsJEIPlugin implements IModPlugin {
                 ),
                 activatedRecipes
         );
+    }
+
+    @Override
+    public void onRuntimeAvailable(
+            IJeiRuntime runtime
+    ) {
+        List<ItemStack> activatedCrystals =
+                new ArrayList<>();
+
+        for (
+                AtomicActivatedCrystalRecipe recipe :
+                AtomicActivatedCrystalRecipe
+                        .getGeneratedRecipes()
+        ) {
+            if (recipe.getOperation() !=
+                    com.lucas.atomicadditions.recipes.AtomicRecipeSerializers
+                            .Operation.ACTIVATE) {
+                continue;
+            }
+
+            if (recipe.getItemInput()
+                    .getRepresentations()
+                    .isEmpty()) {
+                continue;
+            }
+
+            ItemStack output =
+                    recipe.getOutputDefinition()
+                            .get(0)
+                            .copy();
+
+            ResourceLocation sourceId =
+                    net.minecraft.core.registries
+                            .BuiltInRegistries.ITEM
+                            .getKey(
+                                    recipe.getItemInput()
+                                            .getRepresentations()
+                                            .get(0)
+                                            .getItem()
+                            );
+
+            ActivatedCrystalItem.setSourceCrystal(
+                    output,
+                    sourceId
+            );
+
+            activatedCrystals.add(output);
+        }
+
+        if (!activatedCrystals.isEmpty()) {
+            runtime.getIngredientManager()
+                    .addIngredientsAtRuntime(
+                            VanillaTypes.ITEM_STACK,
+                            activatedCrystals
+                    );
+        }
     }
 }

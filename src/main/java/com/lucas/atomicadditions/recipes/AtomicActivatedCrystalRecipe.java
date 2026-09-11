@@ -61,17 +61,6 @@ public class AtomicActivatedCrystalRecipe
         this.operation = operation;
     }
 
-    /**
-     * 5x Cristal
-     *
-     * +
-     *
-     * 1 mB Tântalo
-     *
-     * =
-     *
-     * 8x Cristal Ativado
-     */
     public static AtomicActivatedCrystalRecipe createActivationRecipe(
             ResourceLocation id,
             ItemStack sourceCrystal
@@ -167,25 +156,12 @@ public class AtomicActivatedCrystalRecipe
 
         switch (operation) {
 
-            /*
-             * =====================================================
-             * ATIVAÇÃO
-             *
-             * 5x Crystal + 1mB Tantalum
-             *         ↓
-             * 8x Activated Crystal
-             * =====================================================
-             */
             case ACTIVATE:
 
                 if (itemStack.getCount() < 5) {
                     return false;
                 }
 
-                /*
-                 * O item precisa ser exatamente o cristal
-                 * para o qual esta receita foi criada.
-                 */
                 boolean correctCrystal = false;
 
                 for (ItemStack representation :
@@ -208,12 +184,6 @@ public class AtomicActivatedCrystalRecipe
                     return false;
                 }
 
-                /*
-                 * Comparação pelo ID registrado do gás.
-                 *
-                 * Exemplo:
-                 * atomicadditions:tantalum
-                 */
                 ResourceLocation gasId =
                         gasStack.getTypeRegistryName();
 
@@ -240,15 +210,6 @@ public class AtomicActivatedCrystalRecipe
 
                 return correctTantalum;
 
-            /*
-             * =====================================================
-             * CAMINHO NORMAL
-             *
-             * 1x Activated Crystal + HCl
-             *         ↓
-             * 1x Shard
-             * =====================================================
-             */
             case HYDROGEN_CHLORIDE:
 
                 if (!isActivatedCrystal(itemStack)) {
@@ -264,15 +225,6 @@ public class AtomicActivatedCrystalRecipe
                                         )
                         );
 
-            /*
-             * =====================================================
-             * CAMINHO AVANÇADO
-             *
-             * 1x Activated Crystal + Rhenium
-             *         ↓
-             * 2x Shards
-             * =====================================================
-             */
             case RHENIUM:
 
                 if (!isActivatedCrystal(itemStack)) {
@@ -343,9 +295,6 @@ public class AtomicActivatedCrystalRecipe
             ItemStack sourceCrystal
     ) {
 
-        /*
-         * 5 Crystal -> 8 Activated Crystal
-         */
         ItemStack result =
                 new ItemStack(
                         AtomicAdditions
@@ -416,10 +365,6 @@ public class AtomicActivatedCrystalRecipe
             return ItemStack.EMPTY;
         }
 
-        /*
-         * HCl  -> 1 Shard
-         * Rênio -> 2 Shards
-         */
         result.setCount(amount);
 
         return result;
