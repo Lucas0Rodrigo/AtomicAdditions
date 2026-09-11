@@ -1,13 +1,11 @@
 package com.lucas.atomicadditions.integrations.jei;
 
-import com.lucas.atomicadditions.item.ActivatedCrystalItem;
 import mezz.jei.api.gui.builder.ITooltipBuilder;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.NotNull;
@@ -17,12 +15,6 @@ import java.util.List;
 public class ActivatedCrystalJEIRenderer
         implements IIngredientRenderer<ItemStack> {
 
-    private static final ResourceLocation AURA_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(
-                    "atomicadditions",
-                    "textures/item/crystal_overlay.png"
-            );
-
     public ActivatedCrystalJEIRenderer(ItemStack output) {
     }
 
@@ -31,44 +23,8 @@ public class ActivatedCrystalJEIRenderer
             @NotNull GuiGraphics guiGraphics,
             @NotNull ItemStack ingredient
     ) {
-        ResourceLocation sourceId =
-                ActivatedCrystalItem.getSourceCrystalId(
-                        ingredient
-                );
-
-        if (sourceId == null ||
-                !net.minecraft.core.registries.BuiltInRegistries.ITEM
-                        .containsKey(sourceId)) {
-            return;
-        }
-
-        ItemStack sourceStack =
-                new ItemStack(
-                        net.minecraft.core.registries
-                                .BuiltInRegistries.ITEM
-                                .get(sourceId)
-                );
-
-        if (sourceStack.isEmpty()) {
-            return;
-        }
-
-        guiGraphics.renderFakeItem(
-                sourceStack,
-                0,
-                0
-        );
-
-        guiGraphics.blit(
-                AURA_TEXTURE,
-                0,
-                0,
-                0,
-                0,
-                16,
-                16,
-                16,
-                16
+        guiGraphics.renderItem(
+                ingredient, 0, 0
         );
     }
 
