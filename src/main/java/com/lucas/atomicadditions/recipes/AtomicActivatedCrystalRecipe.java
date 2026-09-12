@@ -3,7 +3,6 @@ package com.lucas.atomicadditions.recipes;
 import com.lucas.atomicadditions.AtomicAdditions;
 import com.lucas.atomicadditions.chemical.AtomicGases;
 import com.lucas.atomicadditions.item.ActivatedCrystalItem;
-import java.util.ArrayList;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.recipes.ItemStackGasToItemStackRecipe;
 import mekanism.api.recipes.ingredients.ChemicalStackIngredient.GasStackIngredient;
@@ -12,13 +11,14 @@ import mekanism.api.recipes.ingredients.creator.IngredientCreatorAccess;
 import mekanism.common.recipe.MekanismRecipeType;
 import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.registries.MekanismGases;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 public class AtomicActivatedCrystalRecipe extends ItemStackGasToItemStackRecipe {
@@ -54,11 +54,16 @@ public class AtomicActivatedCrystalRecipe extends ItemStackGasToItemStackRecipe 
             ResourceLocation id,
             ItemStack sourceCrystal
     ) {
+        ResourceLocation sourceId = BuiltInRegistries.ITEM.getKey(sourceCrystal.getItem());
+
+        ItemStack output = new ItemStack(AtomicAdditions.ACTIVATED_CRYSTAL.get(), 8);
+        ActivatedCrystalItem.setSourceCrystal(output, sourceId);
+
         return new AtomicActivatedCrystalRecipe(
                 id,
                 IngredientCreatorAccess.item().from(sourceCrystal, 5),
                 IngredientCreatorAccess.gas().from(AtomicGases.TANTALUM, 1),
-                new ItemStack(AtomicAdditions.ACTIVATED_CRYSTAL.get(), 8),
+                output,
                 AtomicRecipeSerializers.Operation.ACTIVATE
         );
     }
@@ -164,20 +169,13 @@ public class AtomicActivatedCrystalRecipe extends ItemStackGasToItemStackRecipe 
 
     @Override
     public List<@NotNull ItemStack> getOutputDefinition() {
-        if (operation == AtomicRecipeSerializers.Operation.ACTIVATE) {
-            return Collections.singletonList(
-                    new ItemStack(AtomicAdditions.ACTIVATED_CRYSTAL.get(), 8)
-            );
-        }
-
         return super.getOutputDefinition();
     }
 
     private ItemStack createActivatedCrystal(ItemStack sourceCrystal) {
         ItemStack result = new ItemStack(AtomicAdditions.ACTIVATED_CRYSTAL.get(), 8);
 
-        ResourceLocation sourceId = net.minecraft.core.registries.BuiltInRegistries.ITEM
-                .getKey(sourceCrystal.getItem());
+        ResourceLocation sourceId = BuiltInRegistries.ITEM.getKey(sourceCrystal.getItem());
 
         ActivatedCrystalItem.setSourceCrystal(result, sourceId);
 
@@ -248,10 +246,10 @@ public class AtomicActivatedCrystalRecipe extends ItemStackGasToItemStackRecipe 
     }
 
     private static ItemStack createSourceStack(ResourceLocation id) {
-        if (id == null || !net.minecraft.core.registries.BuiltInRegistries.ITEM.containsKey(id)) {
+        if (id == null || !BuiltInRegistries.ITEM.containsKey(id)) {
             return ItemStack.EMPTY;
         }
 
-        return new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.get(id));
+        return new ItemStack(BuiltInRegistries.ITEM.get(id));
     }
 }
