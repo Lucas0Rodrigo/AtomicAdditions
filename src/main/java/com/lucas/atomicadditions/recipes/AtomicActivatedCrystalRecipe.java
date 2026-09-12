@@ -16,7 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +24,8 @@ import java.util.List;
 public class AtomicActivatedCrystalRecipe extends ItemStackGasToItemStackRecipe {
 
     private final AtomicRecipeSerializers.Operation operation;
+    private final ItemStackIngredient itemInput;
+    private final GasStackIngredient gasInput;
 
     private static final List<AtomicActivatedCrystalRecipe> GENERATED_RECIPES = new ArrayList<>();
 
@@ -47,6 +49,8 @@ public class AtomicActivatedCrystalRecipe extends ItemStackGasToItemStackRecipe 
             AtomicRecipeSerializers.Operation operation
     ) {
         super(id, itemInput, gasInput, output);
+        this.itemInput = itemInput;
+        this.gasInput = gasInput;
         this.operation = operation;
     }
 
@@ -65,6 +69,50 @@ public class AtomicActivatedCrystalRecipe extends ItemStackGasToItemStackRecipe 
                 IngredientCreatorAccess.gas().from(AtomicGases.TANTALUM, 1),
                 output,
                 AtomicRecipeSerializers.Operation.ACTIVATE
+        );
+    }
+
+    public static AtomicActivatedCrystalRecipe createHclRecipe(
+            ResourceLocation id,
+            ItemStack sourceCrystal,
+            ItemStack shardOutput
+    ) {
+        ResourceLocation sourceId = BuiltInRegistries.ITEM.getKey(sourceCrystal.getItem());
+
+        ItemStack activatedInput = new ItemStack(AtomicAdditions.ACTIVATED_CRYSTAL.get(), 1);
+        ActivatedCrystalItem.setSourceCrystal(activatedInput, sourceId);
+
+        ItemStack output = shardOutput.copy();
+        output.setCount(1);
+
+        return new AtomicActivatedCrystalRecipe(
+                id,
+                IngredientCreatorAccess.item().from(activatedInput),
+                IngredientCreatorAccess.gas().from(MekanismGases.HYDROGEN_CHLORIDE, 1),
+                output,
+                AtomicRecipeSerializers.Operation.HYDROGEN_CHLORIDE
+        );
+    }
+
+    public static AtomicActivatedCrystalRecipe createRheniumRecipe(
+            ResourceLocation id,
+            ItemStack sourceCrystal,
+            ItemStack shardOutput
+    ) {
+        ResourceLocation sourceId = BuiltInRegistries.ITEM.getKey(sourceCrystal.getItem());
+
+        ItemStack activatedInput = new ItemStack(AtomicAdditions.ACTIVATED_CRYSTAL.get(), 1);
+        ActivatedCrystalItem.setSourceCrystal(activatedInput, sourceId);
+
+        ItemStack output = shardOutput.copy();
+        output.setCount(2);
+
+        return new AtomicActivatedCrystalRecipe(
+                id,
+                IngredientCreatorAccess.item().from(activatedInput),
+                IngredientCreatorAccess.gas().from(AtomicGases.RHENIUM, 1),
+                output,
+                AtomicRecipeSerializers.Operation.RHENIUM
         );
     }
 
@@ -104,152 +152,38 @@ public class AtomicActivatedCrystalRecipe extends ItemStackGasToItemStackRecipe 
         if (itemStack.isEmpty() || gasStack.isEmpty()) {
             return false;
         }
-
-        switch (operation) {
-            case ACTIVATE:
-                if (itemStack.getCount() < 5) {
-                    return false;
-                }
-
-                boolean correctCrystal = false;
-                for (ItemStack representation : getItemInput().getRepresentations()) {
-                    if (representation.isEmpty()) {
-                        continue;
-                    }
-
-                    if (ItemStack.isSameItem(representation, itemStack)) {
-                        correctCrystal = true;
-                        break;
-                    }
-                }
-
-                if (!correctCrystal) {
-                    return false;
-                }
-
-                ResourceLocation gasId = gasStack.getTypeRegistryName();
-                ResourceLocation tantalumId = ResourceLocation.fromNamespaceAndPath(
-                        AtomicAdditions.MODID,
-                        "tantalum"
-                );
-
-                return tantalumId.equals(gasId);
-
-            case HYDROGEN_CHLORIDE:
-                if (!isActivatedCrystal(itemStack)) {
-                    return false;
-                }
-
-                return gasStack.getTypeRegistryName().equals(
-                        ResourceLocation.fromNamespaceAndPath("mekanism", "hydrogen_chloride")
-                );
-
-            case RHENIUM:
-                if (!isActivatedCrystal(itemStack)) {
-                    return false;
-                }
-
-                return gasStack.getTypeRegistryName().equals(
-                        ResourceLocation.fromNamespaceAndPath(AtomicAdditions.MODID, "rhenium")
-                );
-
-            default:
-                return false;
-        }
+        return this.itemInput.test(itemStack) && this.gasInput.test(gasStack);
     }
 
     @Override
     public ItemStack getOutput(ItemStack inputItem, GasStack inputGas) {
-        return switch (operation) {
-            case ACTIVATE -> createActivatedCrystal(inputItem);
-            case HYDROGEN_CHLORIDE -> createShardOutput(inputItem, 1);
-            case RHENIUM -> createShardOutput(inputItem, 2);
-        };
-    }
-
-    @Override
-    public List<@NotNull ItemStack> getOutputDefinition() {
-        return super.getOutputDefinition();
-    }
-
-    private ItemStack createActivatedCrystal(ItemStack sourceCrystal) {
-        ItemStack result = new ItemStack(AtomicAdditions.ACTIVATED_CRYSTAL.get(), 8);
-
-        ResourceLocation sourceId = BuiltInRegistries.ITEM.getKey(sourceCrystal.getItem());
-
-        ActivatedCrystalItem.setSourceCrystal(result, sourceId);
-
-        return result;
-    }
-
-    private ItemStack createShardOutput(ItemStack activatedCrystal, int amount) {
-        ItemStackGasToItemStackRecipe recipe = findOriginalShardRecipe(activatedCrystal);
-
-        if (recipe == null) {
+        List<ItemStack> outputs = getOutputDefinition();
+        if (outputs.isEmpty()) {
             return ItemStack.EMPTY;
         }
+        return outputs.get(0).copy();
+    }
 
-        ResourceLocation sourceId = ActivatedCrystalItem.getSourceCrystalId(activatedCrystal);
-        ItemStack source = createSourceStack(sourceId);
-
-        if (source.isEmpty()) {
+    public static ItemStack findOriginalShardOutput(Level level, ItemStack sourceCrystal) {
+        if (level == null || sourceCrystal.isEmpty()) {
             return ItemStack.EMPTY;
         }
 
         GasStack hcl = new GasStack(MekanismGases.HYDROGEN_CHLORIDE.get(), 1_000_000);
-        ItemStack result = recipe.getOutput(source, hcl);
 
-        if (result.isEmpty()) {
-            return ItemStack.EMPTY;
-        }
-
-        result.setCount(amount);
-        return result;
-    }
-
-    private boolean isActivatedCrystal(ItemStack stack) {
-        return stack.getItem() == AtomicAdditions.ACTIVATED_CRYSTAL.get();
-    }
-
-    private ItemStackGasToItemStackRecipe findOriginalShardRecipe(ItemStack activatedStack) {
-        ResourceLocation sourceId = ActivatedCrystalItem.getSourceCrystalId(activatedStack);
-
-        if (sourceId == null) {
-            return null;
-        }
-
-        ItemStack source = createSourceStack(sourceId);
-
-        if (source.isEmpty()) {
-            return null;
-        }
-
-        GasStack hcl = new GasStack(MekanismGases.HYDROGEN_CHLORIDE.get(), 1_000_000);
-
-        for (ItemStackGasToItemStackRecipe recipe : MekanismRecipeType.INJECTING.get().getRecipes(null)) {
+        for (ItemStackGasToItemStackRecipe recipe : MekanismRecipeType.INJECTING.get().getRecipes(level)) {
             if (recipe instanceof AtomicActivatedCrystalRecipe) {
                 continue;
             }
 
-            if (!recipe.test(source, hcl)) {
-                continue;
-            }
-
-            ItemStack result = recipe.getOutput(source, hcl);
-
-            if (!result.isEmpty()) {
-                return recipe;
+            if (recipe.test(sourceCrystal, hcl)) {
+                ItemStack result = recipe.getOutput(sourceCrystal, hcl);
+                if (!result.isEmpty()) {
+                    return result;
+                }
             }
         }
 
-        return null;
-    }
-
-    private static ItemStack createSourceStack(ResourceLocation id) {
-        if (id == null || !BuiltInRegistries.ITEM.containsKey(id)) {
-            return ItemStack.EMPTY;
-        }
-
-        return new ItemStack(BuiltInRegistries.ITEM.get(id));
+        return ItemStack.EMPTY;
     }
 }
