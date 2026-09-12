@@ -107,11 +107,11 @@ public class AtomicActivatedCrystalRecipe extends ItemStackGasToItemStackRecipe 
     ) {
         ResourceLocation sourceId = BuiltInRegistries.ITEM.getKey(sourceCrystal.getItem());
 
-        ItemStack activatedInput = new ItemStack(AtomicAdditions.ACTIVATED_CRYSTAL.get(), 1);
+        ItemStack activatedInput = new ItemStack(AtomicAdditions.ACTIVATED_CRYSTAL.get(), 8);
         ActivatedCrystalItem.setSourceCrystal(activatedInput, sourceId);
 
         ItemStack output = shardOutput.copy();
-        output.setCount(2);
+        output.setCount(16);
 
         AtomicAdditions.LOGGER.info("[AA DEBUG] Criando receita RHENIUM para fonte: {} -> Output: {} x{}",
                 sourceId, BuiltInRegistries.ITEM.getKey(output.getItem()), output.getCount());
