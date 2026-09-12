@@ -1,6 +1,7 @@
 package com.lucas.atomicadditions.recipes;
 
 import com.lucas.atomicadditions.AtomicAdditions;
+import com.lucas.atomicadditions.chemical.AtomicGases;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.recipes.ChemicalCrystallizerRecipe;
 import mekanism.api.recipes.ItemStackGasToItemStackRecipe;
@@ -80,8 +81,6 @@ public final class AtomicActivatedCrystalRecipeInjector {
         List<Recipe<?>> finalRecipes =
                 new ArrayList<>();
 
-        int removedGenerated = 0;
-
         for (
                 Recipe<?> recipe :
                 existingRecipes
@@ -90,12 +89,14 @@ public final class AtomicActivatedCrystalRecipeInjector {
                     recipe.getId();
 
             if (isGeneratedRecipe(id)) {
-                removedGenerated++;
                 continue;
             }
 
             finalRecipes.add(recipe);
         }
+
+        AtomicActivatedCrystalRecipe
+                .clearGeneratedRecipes();
 
         GasStack hcl =
                 new GasStack(
@@ -105,10 +106,17 @@ public final class AtomicActivatedCrystalRecipeInjector {
                         1_000_000
                 );
 
-        int crystalsFound = 0;
-        int crystalsAccepted = 0;
-        int crystalsWithPurification = 0;
-        int recipesCreated = 0;
+        GasStack tantalum =
+                new GasStack(
+                        AtomicGases.TANTALUM.get(),
+                        1
+                );
+
+        GasStack rhenium =
+                new GasStack(
+                        AtomicGases.RHENIUM.get(),
+                        1
+                );
 
         for (
                 ItemStackGasToItemStackRecipe
@@ -167,15 +175,6 @@ public final class AtomicActivatedCrystalRecipeInjector {
                                         crystal.getItem()
                                 );
 
-                ResourceLocation shardId =
-                        net.minecraft.core.registries
-                                .BuiltInRegistries.ITEM
-                                .getKey(
-                                        shard.getItem()
-                                );
-
-                crystalsFound++;
-
                 boolean hasPurification =
                         hasPurificationRecipe(
                                 recipeManager,
@@ -186,18 +185,16 @@ public final class AtomicActivatedCrystalRecipeInjector {
                     continue;
                 }
 
-                crystalsWithPurification++;
-
-                ResourceLocation generatedId =
+                ResourceLocation activationId =
                         createGeneratedId(
                                 crystalId
                         );
 
                 AtomicActivatedCrystalRecipe
-                        activatedRecipe =
+                        activationRecipe =
                         AtomicActivatedCrystalRecipe
                                 .createActivationRecipe(
-                                        generatedId,
+                                        activationId,
                                         crystal
                                 );
 
@@ -206,33 +203,83 @@ public final class AtomicActivatedCrystalRecipeInjector {
 
                 activationInput.setCount(5);
 
-                GasStack tantalum =
-                        new GasStack(
-                                com.lucas.atomicadditions
-                                        .chemical.AtomicGases
-                                        .TANTALUM
-                                        .get(),
-                                1
-                        );
-
-                boolean acceptsTantalum =
-                        activatedRecipe.test(
-                                activationInput,
-                                tantalum
-                        );
-
-                if (!acceptsTantalum) {
+                if (!activationRecipe.test(
+                        activationInput,
+                        tantalum
+                )) {
                     continue;
                 }
 
                 finalRecipes.add(
-                        activatedRecipe
+                        activationRecipe
                 );
 
-                AtomicActivatedCrystalRecipe.clearGeneratedRecipes();
+                AtomicActivatedCrystalRecipe
+                        .registerGeneratedRecipe(
+                                activationRecipe
+                        );
 
-                crystalsAccepted++;
-                recipesCreated++;
+                ResourceLocation hclId =
+                        createHclRecipeId(
+                                crystalId
+                        );
+
+                AtomicActivatedCrystalRecipe
+                        hclRecipe =
+                        AtomicActivatedCrystalRecipe
+                                .createHclRecipe(
+                                        hclId,
+                                        crystal,
+                                        shard
+                                );
+
+                if (hclRecipe.test(
+                        hclRecipe
+                                .getItemInput()
+                                .getRepresentations()
+                                .get(0),
+                        hcl
+                )) {
+                    finalRecipes.add(
+                            hclRecipe
+                    );
+
+                    AtomicActivatedCrystalRecipe
+                            .registerGeneratedRecipe(
+                                    hclRecipe
+                            );
+                }
+
+                ResourceLocation rheniumId =
+                        createRheniumRecipeId(
+                                crystalId
+                        );
+
+                AtomicActivatedCrystalRecipe
+                        rheniumRecipe =
+                        AtomicActivatedCrystalRecipe
+                                .createRheniumRecipe(
+                                        rheniumId,
+                                        crystal,
+                                        shard
+                                );
+
+                if (rheniumRecipe.test(
+                        rheniumRecipe
+                                .getItemInput()
+                                .getRepresentations()
+                                .get(0),
+                        rhenium
+                )) {
+                    finalRecipes.add(
+                            rheniumRecipe
+                    );
+
+                    AtomicActivatedCrystalRecipe
+                            .registerGeneratedRecipe(
+                                    rheniumRecipe
+                            );
+                }
             }
         }
 
@@ -241,62 +288,6 @@ public final class AtomicActivatedCrystalRecipeInjector {
         );
 
         MekanismRecipeType.clearCache();
-
-        List<ItemStackGasToItemStackRecipe>
-                finalInjectingRecipes =
-                recipeManager.getAllRecipesFor(
-                        MekanismRecipeType.INJECTING.get()
-                );
-
-        int generatedPresent = 0;
-
-        for (
-                ItemStackGasToItemStackRecipe recipe :
-                finalInjectingRecipes
-        ) {
-            if (!(recipe instanceof
-                    AtomicActivatedCrystalRecipe)) {
-                continue;
-            }
-
-            generatedPresent++;
-
-            AtomicActivatedCrystalRecipe
-                    activatedRecipe =
-                    (AtomicActivatedCrystalRecipe)
-                            recipe;
-
-            List<ItemStack> representations =
-                    activatedRecipe
-                            .getItemInput()
-                            .getRepresentations();
-
-            if (representations.isEmpty()) {
-                continue;
-            }
-
-            ItemStack representative =
-                    representations
-                            .get(0)
-                            .copy();
-
-            representative.setCount(5);
-
-            GasStack tantalum =
-                    new GasStack(
-                            com.lucas.atomicadditions
-                                    .chemical.AtomicGases
-                                    .TANTALUM
-                                    .get(),
-                            1
-                    );
-
-            boolean acceptsTantalum =
-                    activatedRecipe.test(
-                            representative,
-                            tantalum
-                    );
-        }
     }
 
     private static boolean hasPurificationRecipe(
@@ -349,6 +340,33 @@ public final class AtomicActivatedCrystalRecipeInjector {
                         + sourceId.getNamespace()
                         + "/"
                         + sourceId.getPath()
+                        + "/activate"
+        );
+    }
+
+    private static ResourceLocation createHclRecipeId(
+            ResourceLocation sourceId
+    ) {
+        return ResourceLocation.fromNamespaceAndPath(
+                AtomicAdditions.MODID,
+                GENERATED_PATH
+                        + sourceId.getNamespace()
+                        + "/"
+                        + sourceId.getPath()
+                        + "/hydrogen_chloride"
+        );
+    }
+
+    private static ResourceLocation createRheniumRecipeId(
+            ResourceLocation sourceId
+    ) {
+        return ResourceLocation.fromNamespaceAndPath(
+                AtomicAdditions.MODID,
+                GENERATED_PATH
+                        + sourceId.getNamespace()
+                        + "/"
+                        + sourceId.getPath()
+                        + "/rhenium"
         );
     }
 
