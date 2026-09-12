@@ -69,7 +69,7 @@ public class AtomicActivatedCrystalRecipe extends ItemStackGasToItemStackRecipe 
         return new AtomicActivatedCrystalRecipe(
                 id,
                 IngredientCreatorAccess.item().from(sourceCrystal, 5),
-                IngredientCreatorAccess.gas().from(AtomicGases.TANTALUM, 2000),
+                IngredientCreatorAccess.gas().from(AtomicGases.TANTALUM, 1),
                 output,
                 AtomicRecipeSerializers.Operation.ACTIVATE
         );
@@ -107,11 +107,11 @@ public class AtomicActivatedCrystalRecipe extends ItemStackGasToItemStackRecipe 
     ) {
         ResourceLocation sourceId = BuiltInRegistries.ITEM.getKey(sourceCrystal.getItem());
 
-        ItemStack activatedInput = new ItemStack(AtomicAdditions.ACTIVATED_CRYSTAL.get(), 8);
+        ItemStack activatedInput = new ItemStack(AtomicAdditions.ACTIVATED_CRYSTAL.get(), 1);
         ActivatedCrystalItem.setSourceCrystal(activatedInput, sourceId);
 
         ItemStack output = shardOutput.copy();
-        output.setCount(16);
+        output.setCount(2);
 
         AtomicAdditions.LOGGER.info("[AA DEBUG] Criando receita RHENIUM para fonte: {} -> Output: {} x{}",
                 sourceId, BuiltInRegistries.ITEM.getKey(output.getItem()), output.getCount());
@@ -119,7 +119,7 @@ public class AtomicActivatedCrystalRecipe extends ItemStackGasToItemStackRecipe 
         return new AtomicActivatedCrystalRecipe(
                 id,
                 IngredientCreatorAccess.item().from(activatedInput),
-                IngredientCreatorAccess.gas().from(AtomicGases.RHENIUM, 2000),
+                IngredientCreatorAccess.gas().from(AtomicGases.RHENIUM, 1),
                 output,
                 AtomicRecipeSerializers.Operation.RHENIUM
         );
