@@ -26,10 +26,11 @@ import java.util.List;
 @JeiPlugin
 public class AtomicAdditionsJEIPlugin implements IModPlugin {
 
-    private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(
-            AtomicAdditions.MODID,
-            "jei_plugin"
-    );
+    private static final ResourceLocation UID =
+            ResourceLocation.fromNamespaceAndPath(
+                    AtomicAdditions.MODID,
+                    "jei_plugin"
+            );
 
     @Override
     public ResourceLocation getPluginUid() {
@@ -37,71 +38,119 @@ public class AtomicAdditionsJEIPlugin implements IModPlugin {
     }
 
     @Override
-    public void registerItemSubtypes(ISubtypeRegistration registration) {
+    public void registerItemSubtypes(
+            ISubtypeRegistration registration
+    ) {
         registration.registerSubtypeInterpreter(
                 VanillaTypes.ITEM_STACK,
                 AtomicAdditions.ACTIVATED_CRYSTAL.get(),
                 (ingredient, context) -> {
-                    CompoundTag tag = ingredient.getTag();
-                    if (tag != null && tag.contains(ActivatedCrystalItem.SOURCE_CRYSTAL_TAG)) {
-                        return tag.getString(ActivatedCrystalItem.SOURCE_CRYSTAL_TAG);
+                    CompoundTag tag =
+                            ingredient.getTag();
+
+                    if (tag != null &&
+                            tag.contains(
+                                    ActivatedCrystalItem
+                                            .SOURCE_CRYSTAL_TAG
+                            )) {
+                        return tag.getString(
+                                ActivatedCrystalItem
+                                        .SOURCE_CRYSTAL_TAG
+                        );
                     }
+
                     return IIngredientSubtypeInterpreter.NONE;
                 }
         );
     }
 
     @Override
-    public void registerCategories(IRecipeCategoryRegistration registration) {
-        IGuiHelper guiHelper = registration.getJeiHelpers().getGuiHelper();
+    public void registerCategories(
+            IRecipeCategoryRegistration registration
+    ) {
+        IGuiHelper guiHelper =
+                registration
+                        .getJeiHelpers()
+                        .getGuiHelper();
 
         registration.addRecipeCategories(
-                new AtomicAMRRecipeCategory(guiHelper),
-                new AtomicActivatedCrystalRecipeCategory(guiHelper)
+                new AtomicAMRRecipeCategory(
+                        guiHelper
+                )
         );
     }
 
     @Override
-    public void registerRecipes(IRecipeRegistration registration) {
+    public void registerRecipes(
+            IRecipeRegistration registration
+    ) {
         registration.addRecipes(
-                MekanismJEI.recipeType(AtomicAMRRecipeCategory.TYPE),
-                AtomicRecipes.AMR_RECIPES.getRecipesForJEI()
+                MekanismJEI.recipeType(
+                        AtomicAMRRecipeCategory.TYPE
+                ),
+                AtomicRecipes.AMR_RECIPES
+                        .getRecipesForJEI()
         );
 
         registration.addRecipes(
-                MekanismJEI.recipeType(AtomicActivatedCrystalRecipeCategory.TYPE),
-                AtomicActivatedCrystalRecipe.getGeneratedRecipes()
+                MekanismJEI.recipeType(
+                        AtomicActivatedCrystalRecipeCategory.TYPE
+                ),
+                AtomicActivatedCrystalRecipe
+                        .getGeneratedRecipes()
         );
     }
 
     @Override
-    public void onRuntimeAvailable(IJeiRuntime runtime) {
-        List<ItemStack> activatedCrystals = new ArrayList<>();
+    public void onRuntimeAvailable(
+            IJeiRuntime runtime
+    ) {
+        List<ItemStack> activatedCrystals =
+                new ArrayList<>();
 
-        for (AtomicActivatedCrystalRecipe recipe : AtomicActivatedCrystalRecipe.getGeneratedRecipes()) {
-            if (recipe.getOperation() != AtomicRecipeSerializers.Operation.ACTIVATE) {
+        for (
+                AtomicActivatedCrystalRecipe recipe :
+                AtomicActivatedCrystalRecipe
+                        .getGeneratedRecipes()
+        ) {
+            if (recipe.getOperation() !=
+                    AtomicRecipeSerializers.Operation.ACTIVATE) {
                 continue;
             }
 
-            if (recipe.getItemInput().getRepresentations().isEmpty()) {
+            if (recipe.getItemInput()
+                    .getRepresentations()
+                    .isEmpty()) {
                 continue;
             }
 
-            ItemStack output = recipe.getOutputDefinition().get(0).copy();
+            ItemStack output =
+                    recipe.getOutputDefinition()
+                            .get(0)
+                            .copy();
 
-            ResourceLocation sourceId = BuiltInRegistries.ITEM.getKey(
-                    recipe.getItemInput().getRepresentations().get(0).getItem()
+            ResourceLocation sourceId =
+                    BuiltInRegistries.ITEM.getKey(
+                            recipe.getItemInput()
+                                    .getRepresentations()
+                                    .get(0)
+                                    .getItem()
+                    );
+
+            ActivatedCrystalItem.setSourceCrystal(
+                    output,
+                    sourceId
             );
 
-            ActivatedCrystalItem.setSourceCrystal(output, sourceId);
             activatedCrystals.add(output);
         }
 
         if (!activatedCrystals.isEmpty()) {
-            runtime.getIngredientManager().addIngredientsAtRuntime(
-                    VanillaTypes.ITEM_STACK,
-                    activatedCrystals
-            );
+            runtime.getIngredientManager()
+                    .addIngredientsAtRuntime(
+                            VanillaTypes.ITEM_STACK,
+                            activatedCrystals
+                    );
         }
     }
 }
