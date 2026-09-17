@@ -37,18 +37,12 @@ public class AtomicScreen extends GuiMekanismTile<
                 )
         );
 
-        /*
-         * Igual ao SPS.
-         */
         dynamicSlots = true;
         imageHeight += 16;
     }
 
     @Override
     protected void init() {
-        /*
-         * Igual ao SPS.
-         */
         inventoryLabelY =
                 imageHeight - 92;
 
@@ -58,14 +52,8 @@ public class AtomicScreen extends GuiMekanismTile<
     @Override
     protected void addGuiElements() {
 
-        /*
-         * Adiciona os slots do inventário.
-         */
         super.addGuiElements();
 
-        /*
-         * Primeiro tanque de entrada.
-         */
         addRenderableWidget(
                 new GuiGasGauge(
                         () ->
@@ -79,9 +67,6 @@ public class AtomicScreen extends GuiMekanismTile<
                 )
         );
 
-        /*
-         * Segundo tanque de entrada.
-         */
         addRenderableWidget(
                 new GuiGasGauge(
                         () ->
@@ -95,11 +80,6 @@ public class AtomicScreen extends GuiMekanismTile<
                 )
         );
 
-        /*
-         * Tanque de saída.
-         *
-         * Mesma posição do SPS.
-         */
         addRenderableWidget(
                 new GuiGasGauge(
                         () ->
@@ -113,13 +93,6 @@ public class AtomicScreen extends GuiMekanismTile<
                 )
         );
 
-        /*
-         * Painel central.
-         *
-         * O SPS usa 122 px.
-         * Como o AMR possui um tanque adicional de 18 px
-         * à esquerda, o painel fica com 104 px.
-         */
         addRenderableWidget(
                 new GuiInnerScreen(
                         this,
@@ -168,11 +141,6 @@ public class AtomicScreen extends GuiMekanismTile<
                 )
         );
 
-        /*
-         * Barra de progresso.
-         *
-         * Mesma largura do SPS.
-         */
         addRenderableWidget(
                 new GuiDynamicHorizontalRateBar(
                         this,

@@ -43,13 +43,6 @@ public class AtomicCasingBlockEntity
     }
 
     @Override
-    protected void structureChanged(
-            AtomicMultiblockData multiblock
-    ) {
-        super.structureChanged(multiblock);
-    }
-
-    @Override
     public void addContainerTrackers(MekanismContainer container) {
         super.addContainerTrackers(container);
 

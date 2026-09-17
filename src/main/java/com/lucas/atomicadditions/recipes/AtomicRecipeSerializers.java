@@ -65,8 +65,6 @@ public final class AtomicRecipeSerializers {
             AtomicActivatedCrystalRecipe
             > {
 
-        private final Operation operation;
-
         private Serializer(
                 Operation operation
         ) {
@@ -85,8 +83,6 @@ public final class AtomicRecipeSerializers {
                                     operation
                             )
             );
-
-            this.operation = operation;
         }
 
         @Override

@@ -60,15 +60,6 @@ public class AtomicAMRRecipeCategory
                 96
         );
 
-        /*
-         * MESMA posição da GUI REAL do AMR.
-         *
-         * AtomicScreen:
-         * input 1 -> 7,17
-         * input 2 -> 25,17
-         * output  -> 169,17
-         */
-
         input1 = addElement(
                 GuiGasGauge.getDummy(
                         GaugeType.STANDARD,
@@ -96,9 +87,6 @@ public class AtomicAMRRecipeCategory
                 )
         );
 
-        /*
-         * MESMO painel central da GUI REAL do AMR.
-         */
         addElement(
                 new GuiInnerScreen(
                         this,
@@ -154,9 +142,6 @@ public class AtomicAMRRecipeCategory
                 )
         );
 
-        /*
-         * MESMA barra de progresso da GUI REAL do AMR.
-         */
         addElement(
                 new GuiDynamicHorizontalRateBar(
                         this,
@@ -197,15 +182,6 @@ public class AtomicAMRRecipeCategory
             @NotNull AtomicAMRRecipe recipe,
             @NotNull IFocusGroup focuses
     ) {
-
-        /*
-         * EXATAMENTE como o SPS do Mekanism:
-         *
-         * initChemical(...)
-         *
-         * Isso conecta o ingrediente do JEI
-         * diretamente à GuiGasGauge.
-         */
 
         initChemical(
                 builder,

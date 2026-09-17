@@ -63,8 +63,7 @@ public class AtomicRecipeManager extends SimpleJsonResourceReloadListener {
             try {
                 AtomicAMRRecipe recipe =
                         parseRecipe(
-                                entry.getValue(),
-                                id
+                                entry.getValue()
                         );
 
                 recipes.add(recipe);
@@ -129,8 +128,7 @@ public class AtomicRecipeManager extends SimpleJsonResourceReloadListener {
 
                     jeiRecipes.add(
                             parseRecipe(
-                                    json,
-                                    id
+                                    json
                             )
                     );
                 }
@@ -151,8 +149,7 @@ public class AtomicRecipeManager extends SimpleJsonResourceReloadListener {
     }
 
     private AtomicAMRRecipe parseRecipe(
-            JsonElement element,
-            ResourceLocation id
+            JsonElement element
     ) {
         JsonObject json =
                 GsonHelper.convertToJsonObject(
