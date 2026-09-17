@@ -12,24 +12,19 @@ base {
     archivesName = mod_id
 }
 
-// O Minecraft 1.20.1 utiliza Java 17.
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 
 minecraft {
-    // Utiliza os mapeamentos oficiais da Mojang definidos no gradle.properties.
     mappings channel: mapping_channel, version: mapping_version
 
-    // Copia os recursos diretamente para o diretório usado durante o desenvolvimento.
     copyIdeResources = true
 
     runs {
         configureEach {
-            // Diretório onde o Minecraft de desenvolvimento será executado.
             workingDirectory project.file('run')
 
-            // Logs úteis para desenvolvimento.
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
 
@@ -55,8 +50,6 @@ minecraft {
 
         data {
             workingDirectory project.file('run-data')
-
-            // Diretório onde os recursos gerados serão salvos.
             args '--mod', mod_id,
                     '--all',
                     '--output', file('src/generated/resources/'),
@@ -65,7 +58,6 @@ minecraft {
     }
 }
 
-// Recursos gerados pelo sistema de Data Generation.
 sourceSets.main.resources {
     srcDir 'src/generated/resources'
 }
@@ -79,6 +71,10 @@ repositories {
         name = "JEI"
         url = "https://maven.blamejared.com/"
     }
+    maven {
+        name = "CurseForge"
+        url = "https://www.cursemaven.com"
+    }
 }
 
 dependencies {
@@ -90,9 +86,10 @@ dependencies {
     compileOnly fg.deobf("mezz.jei:jei-1.20.1-forge-api:15.20.0.126")
 
     runtimeOnly fg.deobf("mezz.jei:jei-1.20.1-forge:15.20.0.126")
+
+    implementation fg.deobf("curse.maven:fusion-connected-textures-854949:7471518")
 }
 
-// Substitui automaticamente as propriedades do mod nos arquivos de recursos.
 tasks.named('processResources', ProcessResources).configure {
     var replaceProperties = [
             minecraft_version: minecraft_version,
@@ -115,7 +112,6 @@ tasks.named('processResources', ProcessResources).configure {
     }
 }
 
-// Configuração do arquivo .jar final do mod.
 tasks.named('jar', Jar).configure {
     manifest {
         attributes([
@@ -129,11 +125,9 @@ tasks.named('jar', Jar).configure {
         ])
     }
 
-    // Reobfusca o mod para a versão final.
     finalizedBy 'reobfJar'
 }
 
-// Publicação local do mod, caso seja necessária no futuro.
 publishing {
     publications {
         register('mavenJava', MavenPublication) {
@@ -148,7 +142,6 @@ publishing {
     }
 }
 
-// Mantém os arquivos Java utilizando UTF-8.
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }

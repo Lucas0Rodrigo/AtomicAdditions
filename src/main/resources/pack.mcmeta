@@ -4,5 +4,9 @@
       "text": "${mod_id} resources"
     },
     "pack_format": 15
+  },
+  "fusion": {
+    "min_version": "1.2.0",
+    "overrides_folder": "fusion-overwrites"
   }
 }
