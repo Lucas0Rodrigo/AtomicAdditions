@@ -11,6 +11,7 @@ import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.ingredients.subtypes.IIngredientSubtypeInterpreter;
+import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
@@ -152,5 +153,24 @@ public class AtomicAdditionsJEIPlugin implements IModPlugin {
                             activatedCrystals
                     );
         }
+    }
+
+    @Override
+    public void registerRecipeCatalysts(
+            IRecipeCatalystRegistration registration
+    ) {
+        registration.addRecipeCatalyst(
+                AtomicAdditions.CASING_ITEM.get(),
+                MekanismJEI.recipeType(
+                        AtomicAMRRecipeCategory.TYPE
+                )
+        );
+
+        registration.addRecipeCatalyst(
+                AtomicAdditions.CASING_PORT_ITEM.get(),
+                MekanismJEI.recipeType(
+                        AtomicAMRRecipeCategory.TYPE
+                )
+        );
     }
 }
