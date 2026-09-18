@@ -12,6 +12,6 @@
     ],
     "parent": "minecraft:block/cube_all",
     "textures": {
-        "all": "atomicadditions:block/CasingIN"
+        "all": "atomicadditions:block/casingin"
     }
 }
