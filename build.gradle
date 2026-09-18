@@ -3,6 +3,7 @@ plugins {
     id 'idea'
     id 'maven-publish'
     id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'org.spongepowered.mixin' version '0.7.+'
 }
 
 version = mod_version
@@ -30,6 +31,7 @@ minecraft {
 
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            property 'mixin.env.refMapRemappingEnv', 'searge'
 
             mods {
                 "${mod_id}" {
@@ -70,27 +72,32 @@ repositories {
         name = "CurseForge"
         url = "https://www.cursemaven.com"
     }
-    maven{
+
+    maven {
         name = "JEI"
         url = "https://maven.blamejared.com/"
-    }
-    maven {
-        name = "CurseForge"
-        url = "https://www.cursemaven.com"
     }
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    implementation fg.deobf("curse.maven:mekanism-268560:6552911")
+    compileOnly fg.deobf("curse.maven:mekanism-268560:6552911")
+    runtimeOnly fg.deobf("curse.maven:mekanism-268560:6552911")
 
     compileOnly fg.deobf("mezz.jei:jei-1.20.1-common-api:15.20.0.126")
     compileOnly fg.deobf("mezz.jei:jei-1.20.1-forge-api:15.20.0.126")
-
     runtimeOnly fg.deobf("mezz.jei:jei-1.20.1-forge:15.20.0.126")
 
-    implementation fg.deobf("curse.maven:fusion-connected-textures-854949:7471518")
+    compileOnly fg.deobf("curse.maven:fusion-connected-textures-854949:7471518")
+    runtimeOnly fg.deobf("curse.maven:fusion-connected-textures-854949:7471518")
+}
+
+afterEvaluate {
+    def deps = (configurations.runtimeClasspath - configurations.minecraft).join(';')
+    minecraft.runs.each { run ->
+        run.token 'minecraft_classpath', deps
+    }
 }
 
 tasks.named('processResources', ProcessResources).configure {

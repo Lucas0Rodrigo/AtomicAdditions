@@ -7,11 +7,11 @@
         },
         {
             "type": "match_block",
-            "block": "atomicadditions:casing_port"
+            "block": "atomicadditions:casing"
         }
     ],
     "parent": "minecraft:block/cube_all",
     "textures": {
-        "all": "atomicadditions:block/Casing"
+        "all": "atomicadditions:block/CasingOUT"
     }
 }
