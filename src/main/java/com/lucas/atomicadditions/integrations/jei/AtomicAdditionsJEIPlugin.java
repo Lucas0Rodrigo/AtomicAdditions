@@ -129,6 +129,7 @@ public class AtomicAdditionsJEIPlugin implements IModPlugin {
                     recipe.getOutputDefinition()
                             .get(0)
                             .copy();
+            output.setCount(1);
 
             ResourceLocation sourceId =
                     BuiltInRegistries.ITEM.getKey(
