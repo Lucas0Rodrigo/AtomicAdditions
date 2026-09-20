@@ -20,6 +20,7 @@ import net.minecraftforge.fml.common.Mod;
 public final class AtomicSoundHandler {
 
     private static final int FADE_TICKS = 40;
+    private static final int PITCH_FADE_TICKS = 20;
 
     private static final Long2ObjectMap<AtomicReactorSound> SOUND_MAP =
             new Long2ObjectOpenHashMap<>();
@@ -87,23 +88,6 @@ public final class AtomicSoundHandler {
             return 1.0F;
         }
 
-        /*
-         * The AMR has different maximum rates depending on the recipe.
-         *
-         * Tantalum:
-         * 1000 mB per recipe / 200 ticks
-         * with the current energy capacity:
-         * 800 mB/t maximum
-         *
-         * Rhenium:
-         * 1000 mB per recipe / 400 ticks
-         * with the current energy capacity:
-         * 400 mB/t maximum
-         *
-         * We therefore use the current rate itself to select
-         * three practical audio bands.
-         */
-
         if (processRate < 200) {
             return 1.0F;
         }
@@ -123,6 +107,10 @@ public final class AtomicSoundHandler {
         private final float baseVolume;
 
         private float fadeProgress;
+
+        private float currentPitch;
+
+        private float targetPitch;
 
         private double processRate;
 
@@ -146,6 +134,12 @@ public final class AtomicSoundHandler {
 
             this.fadeProgress =
                     0.0F;
+
+            this.currentPitch =
+                    1.0F;
+
+            this.targetPitch =
+                    1.0F;
 
             this.processRate =
                     0.0D;
@@ -183,6 +177,11 @@ public final class AtomicSoundHandler {
                             0.0D,
                             processRate
                     );
+
+            this.targetPitch =
+                    getPitchForRate(
+                            this.processRate
+                    );
         }
 
         private void fadeIn() {
@@ -211,7 +210,7 @@ public final class AtomicSoundHandler {
                             1.0F
                     );
 
-            float smoothProgress =
+            float smoothVolumeProgress =
                     fadeProgress
                             * fadeProgress
                             * (
@@ -222,12 +221,27 @@ public final class AtomicSoundHandler {
 
             volume =
                     baseVolume
-                            * smoothProgress;
+                            * smoothVolumeProgress;
+
+            float pitchDifference =
+                    targetPitch
+                            - currentPitch;
+
+            currentPitch +=
+                    pitchDifference
+                            / PITCH_FADE_TICKS;
+
+            if (Math.abs(
+                    targetPitch
+                            - currentPitch
+            ) < 0.001F) {
+
+                currentPitch =
+                        targetPitch;
+            }
 
             pitch =
-                    getPitchForRate(
-                            processRate
-                    );
+                    currentPitch;
 
             if (fadingOut
                     && fadeProgress <= 0.0F) {
