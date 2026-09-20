@@ -53,7 +53,7 @@ public class AtomicAdditions {
             new SoundEventDeferredRegister(MODID);
 
     public static final SoundEventRegistryObject<SoundEvent> AMR_SOUND =
-            SOUND_EVENTS.register("amr");
+            SOUND_EVENTS.register("tile.machine.amr");
 
     public static final DeferredRegister<Block> BLOCKS =
             DeferredRegister.create(

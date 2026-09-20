@@ -60,6 +60,17 @@ public class AtomicCasingBlockEntity
     }
 
     @Override
+    protected void onUpdateClient() {
+        super.onUpdateClient();
+
+        if (!handleSound) {
+            AtomicSoundHandler.stopTileSound(
+                    getBlockPos()
+            );
+        }
+    }
+
+    @Override
     protected boolean canPlaySound() {
         AtomicMultiblockData multiblock =
                 getMultiblock();
@@ -98,6 +109,17 @@ public class AtomicCasingBlockEntity
                 NBTConstants.HANDLE_SOUND,
                 value -> handleSound = value
         );
+    }
+
+    @Override
+    public void setRemoved() {
+        if (isRemote()) {
+            AtomicSoundHandler.stopTileSound(
+                    getBlockPos()
+            );
+        }
+
+        super.setRemoved();
     }
 
     @Override
