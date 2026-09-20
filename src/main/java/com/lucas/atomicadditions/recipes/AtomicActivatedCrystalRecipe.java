@@ -12,11 +12,13 @@ import mekanism.common.recipe.MekanismRecipeType;
 import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.registries.MekanismGases;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.common.crafting.PartialNBTIngredient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,11 +80,6 @@ public class AtomicActivatedCrystalRecipe
             ResourceLocation id,
             ItemStack sourceCrystal
     ) {
-        ResourceLocation sourceId =
-                BuiltInRegistries.ITEM.getKey(
-                        sourceCrystal.getItem()
-                );
-
         ItemStack output =
                 new ItemStack(
                         AtomicAdditions.ACTIVATED_CRYSTAL.get(),
@@ -120,16 +117,22 @@ public class AtomicActivatedCrystalRecipe
                         sourceCrystal.getItem()
                 );
 
-        ItemStack activatedInput =
-                new ItemStack(
-                        AtomicAdditions.ACTIVATED_CRYSTAL.get(),
+        CompoundTag requiredTag =
+                new CompoundTag();
+
+        requiredTag.putString(
+                ActivatedCrystalItem.SOURCE_CRYSTAL_TAG,
+                sourceId.toString()
+        );
+
+        ItemStackIngredient activatedInput =
+                IngredientCreatorAccess.item().from(
+                        PartialNBTIngredient.of(
+                                AtomicAdditions.ACTIVATED_CRYSTAL.get(),
+                                requiredTag
+                        ),
                         1
                 );
-
-        ActivatedCrystalItem.setSourceCrystal(
-                activatedInput,
-                sourceId
-        );
 
         ItemStack output =
                 shardOutput.copy();
@@ -138,9 +141,7 @@ public class AtomicActivatedCrystalRecipe
 
         return new AtomicActivatedCrystalRecipe(
                 id,
-                IngredientCreatorAccess.item().from(
-                        activatedInput
-                ),
+                activatedInput,
                 IngredientCreatorAccess.gas().from(
                         MekanismGases.HYDROGEN_CHLORIDE,
                         1
@@ -161,16 +162,22 @@ public class AtomicActivatedCrystalRecipe
                         sourceCrystal.getItem()
                 );
 
-        ItemStack activatedInput =
-                new ItemStack(
-                        AtomicAdditions.ACTIVATED_CRYSTAL.get(),
+        CompoundTag requiredTag =
+                new CompoundTag();
+
+        requiredTag.putString(
+                ActivatedCrystalItem.SOURCE_CRYSTAL_TAG,
+                sourceId.toString()
+        );
+
+        ItemStackIngredient activatedInput =
+                IngredientCreatorAccess.item().from(
+                        PartialNBTIngredient.of(
+                                AtomicAdditions.ACTIVATED_CRYSTAL.get(),
+                                requiredTag
+                        ),
                         8
                 );
-
-        ActivatedCrystalItem.setSourceCrystal(
-                activatedInput,
-                sourceId
-        );
 
         ItemStack output =
                 shardOutput.copy();
@@ -179,9 +186,7 @@ public class AtomicActivatedCrystalRecipe
 
         return new AtomicActivatedCrystalRecipe(
                 id,
-                IngredientCreatorAccess.item().from(
-                        activatedInput
-                ),
+                activatedInput,
                 IngredientCreatorAccess.gas().from(
                         AtomicGases.RHENIUM,
                         1
