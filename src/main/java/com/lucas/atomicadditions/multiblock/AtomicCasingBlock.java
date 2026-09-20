@@ -1,6 +1,8 @@
 package com.lucas.atomicadditions.multiblock;
 
+import com.lucas.atomicadditions.AtomicAdditions;
 import mekanism.common.block.attribute.AttributeGui;
+import mekanism.common.block.attribute.AttributeSound;
 import mekanism.common.block.interfaces.IHasTileEntity;
 import mekanism.common.block.interfaces.ITypeBlock;
 import mekanism.common.content.blocktype.BlockType;
@@ -40,10 +42,17 @@ public class AtomicCasingBlock<BE extends AtomicCasingBlockEntity>
         this.tileType = tileType;
 
         this.type = new BlockType(null);
+
         this.type.add(
                 new AttributeGui(
                         () -> AtomicContainerTypes.ATOMIC,
                         null
+                )
+        );
+
+        this.type.add(
+                new AttributeSound(
+                        AtomicAdditions.AMR_SOUND
                 )
         );
     }

@@ -9,8 +9,6 @@ import mekanism.common.lib.multiblock.MultiblockManager;
 import mekanism.common.tile.prefab.TileEntityMultiblock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
 
 public class AtomicCasingBlockEntity
         extends TileEntityMultiblock<AtomicMultiblockData> {
@@ -35,13 +33,10 @@ public class AtomicCasingBlockEntity
     }
 
     @Override
-    protected void onUpdateClient() {
-        super.onUpdateClient();
-
-        DistExecutor.unsafeRunWhenOn(
-                Dist.CLIENT,
-                () -> () -> AtomicReactorSound.update(this)
-        );
+    protected boolean canPlaySound() {
+        return isMaster()
+                && getMultiblock().isFormed()
+                && getMultiblock().renderEnergy > 0;
     }
 
     @Override

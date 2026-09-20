@@ -22,13 +22,12 @@ public class AtomicSoundProvider
     @Override
     public void registerSounds() {
         add(
-                AtomicAdditions.AMR_SOUND.get(),
-                definition()
-                        .with(
-                                sound("amr")
-                                        .stream()
-                                        .attenuationDistance(16)
-                        )
+                AtomicAdditions.AMR_SOUND,
+                definition().with(
+                        sound("amr")
+                                .stream()
+                                .attenuationDistance(16)
+                )
         );
     }
 }

@@ -1,21 +1,22 @@
 package com.lucas.atomicadditions;
 
+import com.lucas.atomicadditions.chemical.*;
 import com.lucas.atomicadditions.datagen.AtomicSoundProvider;
 import com.lucas.atomicadditions.item.ActivatedCrystalBakedModel;
-import com.lucas.atomicadditions.multiblock.*;
-import com.lucas.atomicadditions.chemical.*;
 import com.lucas.atomicadditions.item.ActivatedCrystalItem;
+import com.lucas.atomicadditions.multiblock.*;
 import com.lucas.atomicadditions.recipes.AtomicActivatedCrystalRecipeInjector;
-import com.lucas.atomicadditions.recipes.AtomicRecipes;
 import com.lucas.atomicadditions.recipes.AtomicRecipeSerializers;
+import com.lucas.atomicadditions.recipes.AtomicRecipes;
 import com.mojang.logging.LogUtils;
 import mekanism.common.lib.multiblock.MultiblockCache;
 import mekanism.common.lib.multiblock.MultiblockManager;
 import mekanism.common.registration.impl.TileEntityTypeRegistryObject;
+import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -33,13 +34,12 @@ import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
-import net.minecraft.client.gui.screens.MenuScreens;
 import org.slf4j.Logger;
 
 @Mod(AtomicAdditions.MODID)
@@ -48,6 +48,23 @@ public class AtomicAdditions {
     public static final String MODID = "atomicadditions";
 
     public static final Logger LOGGER = LogUtils.getLogger();
+
+    public static final DeferredRegister<SoundEvent> SOUND_EVENTS =
+            DeferredRegister.create(
+                    ForgeRegistries.SOUND_EVENTS,
+                    MODID
+            );
+
+    public static final RegistryObject<SoundEvent> AMR_SOUND =
+            SOUND_EVENTS.register(
+                    "amr",
+                    () -> SoundEvent.createVariableRangeEvent(
+                            ResourceLocation.fromNamespaceAndPath(
+                                    MODID,
+                                    "amr"
+                            )
+                    )
+            );
 
     public static final DeferredRegister<Block> BLOCKS =
             DeferredRegister.create(
@@ -71,23 +88,6 @@ public class AtomicAdditions {
             DeferredRegister.create(
                     Registries.CREATIVE_MODE_TAB,
                     MODID
-            );
-
-    public static final DeferredRegister<SoundEvent> SOUND_EVENTS =
-            DeferredRegister.create(
-                    ForgeRegistries.SOUND_EVENTS,
-                    MODID
-            );
-
-    public static final RegistryObject<SoundEvent> AMR_SOUND =
-            SOUND_EVENTS.register(
-                    "amr",
-                    () -> SoundEvent.createVariableRangeEvent(
-                            ResourceLocation.fromNamespaceAndPath(
-                                    MODID,
-                                    "amr"
-                            )
-                    )
             );
 
     public static final MultiblockManager<AtomicMultiblockData> ATOMIC_MANAGER =
@@ -205,9 +205,13 @@ public class AtomicAdditions {
 
         AtomicGases.GASES.register(modEventBus);
 
-        MinecraftForge.EVENT_BUS.addListener(AtomicRecipes::addReloadListener);
+        MinecraftForge.EVENT_BUS.addListener(
+                AtomicRecipes::addReloadListener
+        );
 
-        MinecraftForge.EVENT_BUS.addListener(AtomicActivatedCrystalRecipeInjector::onDatapackSync);
+        MinecraftForge.EVENT_BUS.addListener(
+                AtomicActivatedCrystalRecipeInjector::onDatapackSync
+        );
 
         MinecraftForge.EVENT_BUS.register(this);
 
