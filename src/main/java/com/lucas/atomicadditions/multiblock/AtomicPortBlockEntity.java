@@ -55,13 +55,21 @@ public class AtomicPortBlockEntity
                         this::getDirection
                 );
 
-        builder.addContainer(
-                energyContainer =
-                        MachineEnergyContainer.input(
-                                this,
-                                listener
-                        )
-        );
+        if (getBlockState().getValue(
+                AtomicPortBlock.MODE
+        ) == PortMode.INPUT) {
+
+            builder.addContainer(
+                    energyContainer =
+                            MachineEnergyContainer.input(
+                                    this,
+                                    listener
+                            )
+            );
+
+        } else {
+            energyContainer = null;
+        }
 
         return builder.build();
     }
@@ -95,10 +103,6 @@ public class AtomicPortBlockEntity
     public boolean persists(
             SubstanceType type
     ) {
-        /*
-         * O gás pertence ao MultiblockData, não ao
-         * BlockEntity individual do Port.
-         */
         if (type == SubstanceType.GAS) {
             return false;
         }
@@ -117,18 +121,6 @@ public class AtomicPortBlockEntity
             return needsPacket;
         }
 
-        /*
-         * INPUT:
-         * Não fazemos transferência manual.
-         *
-         * O Pressurized Tube acessa a capability
-         * química deste Port e o GasHandlerManager
-         * usa os tanques do MultiblockData.
-         *
-         * OUTPUT:
-         * O Port ejeta o conteúdo do outputTank
-         * para as conexões definidas pelo multiblock.
-         */
         if (isOutputMode()) {
             ChemicalUtil.emit(
                     outputDirections,
@@ -137,18 +129,9 @@ public class AtomicPortBlockEntity
             );
         }
 
-        /*
-         * Entrada de energia pelo Universal Cable.
-         *
-         * A energia é extraída do container do Port
-         * usando AutomationType.INTERNAL e entregue ao
-         * container do multiblock como energia externa.
-         *
-         * O AtomicMultiblockData aceita EXTERNAL para
-         * inserção e rejeita INTERNAL, então usar
-         * INTERNAL aqui faria a energia ser recusada.
-         */
-        if (!energyContainer.isEmpty()) {
+        if (isInputMode()
+                && energyContainer != null
+                && !energyContainer.isEmpty()) {
 
             var energy =
                     energyContainer.getEnergy();
@@ -176,6 +159,12 @@ public class AtomicPortBlockEntity
         }
 
         return needsPacket;
+    }
+
+    private boolean isInputMode() {
+        return getBlockState().getValue(
+                AtomicPortBlock.MODE
+        ) == PortMode.INPUT;
     }
 
     private boolean isOutputMode() {
@@ -210,9 +199,6 @@ public class AtomicPortBlockEntity
                             ? PortMode.OUTPUT
                             : PortMode.INPUT;
 
-            /*
-             * O modo é uma propriedade do BlockState.
-             */
             level.setBlockAndUpdate(
                     worldPosition,
                     state.setValue(
@@ -221,12 +207,6 @@ public class AtomicPortBlockEntity
                     )
             );
 
-            /*
-             * Como getInitialGasTanks() depende do
-             * comportamento do Port, invalidamos os
-             * handlers em cache para que a capability
-             * seja reavaliada imediatamente.
-             */
             invalidateCachedCapabilities();
         }
 
