@@ -18,8 +18,10 @@ import mekanism.common.lib.multiblock.IValveHandler.ValveData;
 import mekanism.common.lib.multiblock.IMultiblockEjector;
 import mekanism.common.tile.base.SubstanceType;
 import mekanism.common.util.ChemicalUtil;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
@@ -233,6 +235,29 @@ public class AtomicPortBlockEntity
             );
 
             invalidateCachedCapabilities();
+
+            boolean input =
+                    newMode == PortMode.INPUT;
+
+            Component message =
+                    Component.translatable(
+                            "message.atomicadditions.port_changed"
+                    ).append(
+                            Component.translatable(
+                                    input
+                                            ? "message.atomicadditions.port_input"
+                                            : "message.atomicadditions.port_output"
+                            ).withStyle(
+                                    input
+                                            ? ChatFormatting.GREEN
+                                            : ChatFormatting.RED
+                            )
+                    );
+
+            player.displayClientMessage(
+                    message,
+                    true
+            );
         }
 
         return InteractionResult.SUCCESS;
