@@ -1,17 +1,24 @@
 package com.lucas.atomicadditions.multiblock;
 
 import com.lucas.atomicadditions.AtomicAdditions;
+import mekanism.api.NBTConstants;
 import mekanism.api.chemical.gas.IGasTank;
 import mekanism.api.providers.IBlockProvider;
 import mekanism.common.inventory.container.MekanismContainer;
 import mekanism.common.inventory.container.sync.chemical.SyncableGasStack;
 import mekanism.common.lib.multiblock.MultiblockManager;
 import mekanism.common.tile.prefab.TileEntityMultiblock;
+import mekanism.common.util.NBTUtils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
 
 public class AtomicCasingBlockEntity
         extends TileEntityMultiblock<AtomicMultiblockData> {
+
+    private boolean handleSound;
+    private boolean prevActive;
 
     public AtomicCasingBlockEntity(
             BlockPos pos,
@@ -33,10 +40,64 @@ public class AtomicCasingBlockEntity
     }
 
     @Override
+    protected boolean onUpdateServer(
+            AtomicMultiblockData multiblock
+    ) {
+        boolean needsPacket =
+                super.onUpdateServer(multiblock);
+
+        boolean active =
+                isMaster()
+                        && multiblock.isFormed()
+                        && multiblock.lastProcessed > 0;
+
+        if (active != prevActive) {
+            prevActive = active;
+            needsPacket = true;
+        }
+
+        return needsPacket;
+    }
+
+    @Override
     protected boolean canPlaySound() {
-        return isMaster()
-                && getMultiblock().isFormed()
-                && getMultiblock().renderEnergy > 0;
+        AtomicMultiblockData multiblock =
+                getMultiblock();
+
+        return multiblock.isFormed()
+                && handleSound;
+    }
+
+    @NotNull
+    @Override
+    public CompoundTag getReducedUpdateTag() {
+        CompoundTag updateTag =
+                super.getReducedUpdateTag();
+
+        AtomicMultiblockData multiblock =
+                getMultiblock();
+
+        updateTag.putBoolean(
+                NBTConstants.HANDLE_SOUND,
+                isMaster()
+                        && multiblock.isFormed()
+                        && multiblock.lastProcessed > 0
+        );
+
+        return updateTag;
+    }
+
+    @Override
+    public void handleUpdateTag(
+            @NotNull CompoundTag tag
+    ) {
+        super.handleUpdateTag(tag);
+
+        NBTUtils.setBooleanIfPresent(
+                tag,
+                NBTConstants.HANDLE_SOUND,
+                value -> handleSound = value
+        );
     }
 
     @Override
@@ -50,13 +111,17 @@ public class AtomicCasingBlockEntity
     }
 
     @Override
-    public void addContainerTrackers(MekanismContainer container) {
+    public void addContainerTrackers(
+            MekanismContainer container
+    ) {
         super.addContainerTrackers(container);
 
         if (!(this instanceof AtomicPortBlockEntity)) {
             boolean isClient = isRemote();
 
-            for (IGasTank gasTank : getMultiblock().getGasTanks(null)) {
+            for (IGasTank gasTank :
+                    getMultiblock().getGasTanks(null)) {
+
                 container.track(
                         SyncableGasStack.create(
                                 gasTank,

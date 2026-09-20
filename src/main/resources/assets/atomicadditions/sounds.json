@@ -1,0 +1,11 @@
+{
+  "amr": {
+    "sounds": [
+      {
+        "name": "atomicadditions:amr",
+        "stream": true,
+        "attenuation_distance": 16
+      }
+    ]
+  }
+}

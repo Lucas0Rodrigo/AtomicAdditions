@@ -1,7 +1,6 @@
 package com.lucas.atomicadditions;
 
 import com.lucas.atomicadditions.chemical.*;
-import com.lucas.atomicadditions.datagen.AtomicSoundProvider;
 import com.lucas.atomicadditions.item.ActivatedCrystalBakedModel;
 import com.lucas.atomicadditions.item.ActivatedCrystalItem;
 import com.lucas.atomicadditions.multiblock.*;
@@ -30,7 +29,6 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -180,10 +178,6 @@ public class AtomicAdditions {
                 this::clientSetup
         );
 
-        modEventBus.addListener(
-                this::gatherData
-        );
-
         SOUND_EVENTS.register(modEventBus);
         BLOCKS.register(modEventBus);
         BLOCK_ENTITIES.register(modEventBus);
@@ -254,19 +248,6 @@ public class AtomicAdditions {
                     CASING_PORT_ITEM.get()
             );
         }
-    }
-
-    private void gatherData(
-            final GatherDataEvent event
-    ) {
-        event.getGenerator().addProvider(
-                event.includeClient(),
-                (net.minecraft.data.DataProvider.Factory<AtomicSoundProvider>) output ->
-                        new AtomicSoundProvider(
-                                output,
-                                event.getExistingFileHelper()
-                        )
-        );
     }
 
     @SubscribeEvent
