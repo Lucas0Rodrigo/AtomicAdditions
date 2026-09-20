@@ -13,21 +13,25 @@ import mekanism.common.lib.multiblock.MultiblockManager;
 import mekanism.common.registration.impl.SoundEventDeferredRegister;
 import mekanism.common.registration.impl.SoundEventRegistryObject;
 import mekanism.common.registration.impl.TileEntityTypeRegistryObject;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ModelEvent;
+import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
@@ -47,13 +51,16 @@ public class AtomicAdditions {
 
     public static final String MODID = "atomicadditions";
 
-    public static final Logger LOGGER = LogUtils.getLogger();
+    public static final Logger LOGGER =
+            LogUtils.getLogger();
 
     public static final SoundEventDeferredRegister SOUND_EVENTS =
             new SoundEventDeferredRegister(MODID);
 
     public static final SoundEventRegistryObject<SoundEvent> AMR_SOUND =
-            SOUND_EVENTS.register("tile.machine.amr");
+            SOUND_EVENTS.register(
+                    "tile.machine.amr"
+            );
 
     public static final DeferredRegister<Block> BLOCKS =
             DeferredRegister.create(
@@ -61,7 +68,8 @@ public class AtomicAdditions {
                     MODID
             );
 
-    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =
+    public static final DeferredRegister<BlockEntityType<?>>
+            BLOCK_ENTITIES =
             DeferredRegister.create(
                     ForgeRegistries.BLOCK_ENTITY_TYPES,
                     MODID
@@ -73,13 +81,15 @@ public class AtomicAdditions {
                     MODID
             );
 
-    public static final DeferredRegister<net.minecraft.world.item.CreativeModeTab> CREATIVE_MODE_TABS =
+    public static final DeferredRegister<net.minecraft.world.item.CreativeModeTab>
+            CREATIVE_MODE_TABS =
             DeferredRegister.create(
                     Registries.CREATIVE_MODE_TAB,
                     MODID
             );
 
-    public static final MultiblockManager<AtomicMultiblockData> ATOMIC_MANAGER =
+    public static final MultiblockManager<AtomicMultiblockData>
+            ATOMIC_MANAGER =
             new MultiblockManager<>(
                     "atomic",
                     MultiblockCache::new,
@@ -144,7 +154,8 @@ public class AtomicAdditions {
                     )
             );
 
-    private static AtomicCasingBlock<AtomicCasingBlockEntity> createCasing() {
+    private static AtomicCasingBlock<AtomicCasingBlockEntity>
+    createCasing() {
         return new AtomicCasingBlock<>(
                 BlockBehaviour.Properties.of()
                         .mapColor(MapColor.METAL),
@@ -154,7 +165,8 @@ public class AtomicAdditions {
         );
     }
 
-    private static AtomicPortBlock createCasingPort() {
+    private static AtomicPortBlock
+    createCasingPort() {
         return new AtomicPortBlock(
                 BlockBehaviour.Properties.of()
                         .mapColor(MapColor.METAL),
@@ -178,17 +190,39 @@ public class AtomicAdditions {
                 this::clientSetup
         );
 
-        SOUND_EVENTS.register(modEventBus);
-        BLOCKS.register(modEventBus);
-        BLOCK_ENTITIES.register(modEventBus);
-        ITEMS.register(modEventBus);
-        CREATIVE_MODE_TABS.register(modEventBus);
+        SOUND_EVENTS.register(
+                modEventBus
+        );
 
-        AtomicRecipeSerializers.RECIPE_SERIALIZERS.register(modEventBus);
+        BLOCKS.register(
+                modEventBus
+        );
 
-        AtomicContainerTypes.CONTAINER_TYPES.register(modEventBus);
+        BLOCK_ENTITIES.register(
+                modEventBus
+        );
 
-        AtomicGases.GASES.register(modEventBus);
+        ITEMS.register(
+                modEventBus
+        );
+
+        CREATIVE_MODE_TABS.register(
+                modEventBus
+        );
+
+        AtomicRecipeSerializers.RECIPE_SERIALIZERS
+                .register(
+                        modEventBus
+                );
+
+        AtomicContainerTypes.CONTAINER_TYPES
+                .register(
+                        modEventBus
+                );
+
+        AtomicGases.GASES.register(
+                modEventBus
+        );
 
         MinecraftForge.EVENT_BUS.addListener(
                 AtomicRecipes::addReloadListener
@@ -198,7 +232,9 @@ public class AtomicAdditions {
                 AtomicActivatedCrystalRecipeInjector::onDatapackSync
         );
 
-        MinecraftForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.register(
+                this
+        );
 
         modEventBus.addListener(
                 this::addCreative
@@ -294,7 +330,56 @@ public class AtomicAdditions {
                             "inventory"
                     ),
                     (location, model) ->
-                            new ActivatedCrystalBakedModel(model)
+                            new ActivatedCrystalBakedModel(
+                                    model
+                            )
+            );
+        }
+
+        @SubscribeEvent
+        public static void registerItemColors(
+                RegisterColorHandlersEvent.Item event
+        ) {
+            event.register(
+                    (stack, tintIndex) -> {
+
+                        ResourceLocation sourceId =
+                                ActivatedCrystalItem
+                                        .getSourceCrystalId(
+                                                stack
+                                        );
+
+                        if (sourceId == null
+                                || sourceId.equals(
+                                ResourceLocation.fromNamespaceAndPath(
+                                        MODID,
+                                        "activated_crystal"
+                                )
+                        )
+                                || !BuiltInRegistries.ITEM.containsKey(
+                                sourceId
+                        )) {
+
+                            return -1;
+                        }
+
+                        ItemStack sourceStack =
+                                ActivatedCrystalItem
+                                        .getSourceCrystalStack(
+                                                stack
+                                        );
+
+                        if (sourceStack.isEmpty()) {
+                            return -1;
+                        }
+
+                        return event.getItemColors()
+                                .getColor(
+                                        sourceStack,
+                                        tintIndex
+                                );
+                    },
+                    ACTIVATED_CRYSTAL.get()
             );
         }
     }

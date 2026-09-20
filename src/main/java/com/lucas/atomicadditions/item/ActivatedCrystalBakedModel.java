@@ -4,17 +4,22 @@ import com.lucas.atomicadditions.AtomicAdditions;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.BakedModelWrapper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ActivatedCrystalBakedModel
@@ -55,11 +60,11 @@ public class ActivatedCrystalBakedModel
                 }
 
                 ItemStack sourceStack =
-                        new ItemStack(
-                                net.minecraft.core.registries
-                                        .BuiltInRegistries.ITEM
-                                        .get(sourceId)
-                        );
+                        ActivatedCrystalItem.getSourceCrystalStack(stack);
+
+                if (sourceStack.isEmpty()) {
+                    return model;
+                }
 
                 BakedModel sourceModel =
                         Minecraft.getInstance()
@@ -78,7 +83,8 @@ public class ActivatedCrystalBakedModel
 
                 return new CompositeModel(
                         sourceModel,
-                        overlayModel
+                        overlayModel,
+                        sourceStack
                 );
             }
         };
@@ -108,13 +114,40 @@ public class ActivatedCrystalBakedModel
             extends BakedModelWrapper<BakedModel> {
 
         private final BakedModel overlayModel;
+        private final ItemStack sourceStack;
 
         private CompositeModel(
                 BakedModel sourceModel,
-                BakedModel overlayModel
+                BakedModel overlayModel,
+                ItemStack sourceStack
         ) {
             super(sourceModel);
+
             this.overlayModel = overlayModel;
+            this.sourceStack =
+                    sourceStack.copy();
+        }
+
+        @Override
+        public List<BakedModel> getRenderPasses(
+                ItemStack stack,
+                boolean fabulous
+        ) {
+            List<BakedModel> passes =
+                    new ArrayList<>(
+                            originalModel.getRenderPasses(
+                                    sourceStack,
+                                    fabulous
+                            )
+                    );
+
+            passes.add(
+                    new OverlayModel(
+                            overlayModel
+                    )
+            );
+
+            return passes;
         }
 
         @Override
@@ -131,19 +164,6 @@ public class ActivatedCrystalBakedModel
 
             return this;
         }
-
-        @Override
-        public List<BakedModel> getRenderPasses(
-                ItemStack stack,
-                boolean fabulous
-        ) {
-            return List.of(
-                    originalModel,
-                    new OverlayModel(
-                            overlayModel
-                    )
-            );
-        }
     }
 
     private static class OverlayModel
@@ -153,6 +173,41 @@ public class ActivatedCrystalBakedModel
                 BakedModel originalModel
         ) {
             super(originalModel);
+        }
+
+        @Override
+        public List<BakedQuad> getQuads(
+                @Nullable BlockState state,
+                @Nullable Direction side,
+                @NotNull RandomSource rand
+        ) {
+            List<BakedQuad> originalQuads =
+                    originalModel.getQuads(
+                            state,
+                            side,
+                            rand
+                    );
+
+            List<BakedQuad> quads =
+                    new ArrayList<>(
+                            originalQuads.size()
+                    );
+
+            for (BakedQuad quad :
+                    originalQuads) {
+
+                quads.add(
+                        new BakedQuad(
+                                quad.getVertices().clone(),
+                                -1,
+                                quad.getDirection(),
+                                quad.getSprite(),
+                                quad.isShade()
+                        )
+                );
+            }
+
+            return quads;
         }
 
         @Override
@@ -172,6 +227,7 @@ public class ActivatedCrystalBakedModel
                     0.0F,
                     -0.001F
             );
+
             return null;
         }
     }
