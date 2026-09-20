@@ -17,11 +17,11 @@ import mekanism.common.capabilities.chemical.multiblock.MultiblockChemicalTankBu
 import mekanism.common.capabilities.energy.VariableCapacityEnergyContainer;
 import mekanism.common.inventory.container.sync.dynamic.ContainerSync;
 import mekanism.common.lib.multiblock.MultiblockData;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
@@ -43,6 +43,7 @@ public class AtomicMultiblockData
     public double renderEnergy = 0;
     public double renderProcessed = 0;
     public double renderProgress = 0;
+    public double renderProcessRate = 0;
 
     public final Set<BlockPos> coils =
             new HashSet<>();
@@ -435,6 +436,9 @@ public class AtomicMultiblockData
         renderProcessed =
                 lastProcessed;
 
+        renderProcessRate =
+                getProcessRate();
+
         renderProgress =
                 getScaledProgress();
     }
@@ -473,6 +477,11 @@ public class AtomicMultiblockData
         tag.putDouble(
                 "amr_render_processed",
                 renderProcessed
+        );
+
+        tag.putDouble(
+                "amr_render_process_rate",
+                renderProcessRate
         );
 
         tag.putDouble(
@@ -533,6 +542,11 @@ public class AtomicMultiblockData
         renderProcessed =
                 tag.getDouble(
                         "amr_render_processed"
+                );
+
+        renderProcessRate =
+                tag.getDouble(
+                        "amr_render_process_rate"
                 );
 
         renderProgress =

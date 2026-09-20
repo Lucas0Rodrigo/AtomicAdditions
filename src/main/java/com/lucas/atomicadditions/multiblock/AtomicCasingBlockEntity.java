@@ -65,7 +65,8 @@ public class AtomicCasingBlockEntity
 
         AtomicSoundHandler.updateTileSound(
                 getBlockPos(),
-                handleSound
+                handleSound,
+                getMultiblock().renderProcessRate
         );
     }
 

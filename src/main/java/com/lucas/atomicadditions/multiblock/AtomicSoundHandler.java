@@ -29,7 +29,8 @@ public final class AtomicSoundHandler {
 
     public static void updateTileSound(
             BlockPos pos,
-            boolean shouldPlay
+            boolean shouldPlay,
+            double processRate
     ) {
         long key =
                 pos.asLong();
@@ -41,6 +42,7 @@ public final class AtomicSoundHandler {
             if (sound == null || sound.isStopped()) {
                 sound =
                         new AtomicReactorSound(
+                                key,
                                 pos
                         );
 
@@ -53,6 +55,10 @@ public final class AtomicSoundHandler {
                         .getSoundManager()
                         .play(sound);
             }
+
+            sound.updateProcessRate(
+                    processRate
+            );
 
             sound.fadeIn();
 
@@ -74,16 +80,56 @@ public final class AtomicSoundHandler {
         }
     }
 
+    private static float getPitchForRate(
+            double processRate
+    ) {
+        if (processRate <= 0) {
+            return 1.0F;
+        }
+
+        /*
+         * The AMR has different maximum rates depending on the recipe.
+         *
+         * Tantalum:
+         * 1000 mB per recipe / 200 ticks
+         * with the current energy capacity:
+         * 800 mB/t maximum
+         *
+         * Rhenium:
+         * 1000 mB per recipe / 400 ticks
+         * with the current energy capacity:
+         * 400 mB/t maximum
+         *
+         * We therefore use the current rate itself to select
+         * three practical audio bands.
+         */
+
+        if (processRate < 200) {
+            return 1.0F;
+        }
+
+        if (processRate < 500) {
+            return 1.5F;
+        }
+
+        return 2.0F;
+    }
+
     private static class AtomicReactorSound
             extends AbstractTickableSoundInstance {
+
+        private final long mapKey;
 
         private final float baseVolume;
 
         private float fadeProgress;
 
+        private double processRate;
+
         private boolean fadingOut;
 
         private AtomicReactorSound(
+                long mapKey,
                 BlockPos pos
         ) {
             super(
@@ -92,16 +138,26 @@ public final class AtomicSoundHandler {
                     RandomSource.create()
             );
 
+            this.mapKey =
+                    mapKey;
+
             this.baseVolume =
                     MekanismConfig.client.baseSoundVolume.get();
 
-            this.fadeProgress = 0.0F;
+            this.fadeProgress =
+                    0.0F;
 
-            this.fadingOut = false;
+            this.processRate =
+                    0.0D;
 
-            this.looping = true;
+            this.fadingOut =
+                    false;
 
-            this.delay = 0;
+            this.looping =
+                    true;
+
+            this.delay =
+                    0;
 
             this.x =
                     pos.getX() + 0.5F;
@@ -112,7 +168,21 @@ public final class AtomicSoundHandler {
             this.z =
                     pos.getZ() + 0.5F;
 
-            this.volume = 0.0F;
+            this.volume =
+                    0.0F;
+
+            this.pitch =
+                    1.0F;
+        }
+
+        private void updateProcessRate(
+                double processRate
+        ) {
+            this.processRate =
+                    Math.max(
+                            0.0D,
+                            processRate
+                    );
         }
 
         private void fadeIn() {
@@ -125,6 +195,7 @@ public final class AtomicSoundHandler {
 
         @Override
         public void tick() {
+
             if (fadingOut) {
                 fadeProgress -=
                         1.0F / FADE_TICKS;
@@ -143,18 +214,32 @@ public final class AtomicSoundHandler {
             float smoothProgress =
                     fadeProgress
                             * fadeProgress
-                            * (3.0F - 2.0F * fadeProgress);
+                            * (
+                            3.0F
+                                    - 2.0F
+                                    * fadeProgress
+                    );
 
             volume =
                     baseVolume
                             * smoothProgress;
 
+            pitch =
+                    getPitchForRate(
+                            processRate
+                    );
+
             if (fadingOut
                     && fadeProgress <= 0.0F) {
 
-                volume = 0.0F;
+                volume =
+                        0.0F;
 
                 stop();
+
+                SOUND_MAP.remove(
+                        mapKey
+                );
             }
         }
 
