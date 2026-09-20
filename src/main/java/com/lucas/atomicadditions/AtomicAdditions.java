@@ -11,6 +11,8 @@ import com.lucas.atomicadditions.recipes.AtomicRecipes;
 import com.mojang.logging.LogUtils;
 import mekanism.common.lib.multiblock.MultiblockCache;
 import mekanism.common.lib.multiblock.MultiblockManager;
+import mekanism.common.registration.impl.SoundEventDeferredRegister;
+import mekanism.common.registration.impl.SoundEventRegistryObject;
 import mekanism.common.registration.impl.TileEntityTypeRegistryObject;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
@@ -49,22 +51,11 @@ public class AtomicAdditions {
 
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    public static final DeferredRegister<SoundEvent> SOUND_EVENTS =
-            DeferredRegister.create(
-                    ForgeRegistries.SOUND_EVENTS,
-                    MODID
-            );
+    public static final SoundEventDeferredRegister SOUND_EVENTS =
+            new SoundEventDeferredRegister(MODID);
 
-    public static final RegistryObject<SoundEvent> AMR_SOUND =
-            SOUND_EVENTS.register(
-                    "amr",
-                    () -> SoundEvent.createVariableRangeEvent(
-                            ResourceLocation.fromNamespaceAndPath(
-                                    MODID,
-                                    "amr"
-                            )
-                    )
-            );
+    public static final SoundEventRegistryObject<SoundEvent> AMR_SOUND =
+            SOUND_EVENTS.register("amr");
 
     public static final DeferredRegister<Block> BLOCKS =
             DeferredRegister.create(

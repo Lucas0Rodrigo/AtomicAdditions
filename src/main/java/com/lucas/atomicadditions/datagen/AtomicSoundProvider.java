@@ -22,7 +22,7 @@ public class AtomicSoundProvider
     @Override
     public void registerSounds() {
         add(
-                AtomicAdditions.AMR_SOUND,
+                AtomicAdditions.AMR_SOUND.get(),
                 definition().with(
                         sound("amr")
                                 .stream()
