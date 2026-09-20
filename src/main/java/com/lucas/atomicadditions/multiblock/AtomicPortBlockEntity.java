@@ -14,6 +14,7 @@ import mekanism.common.capabilities.energy.MachineEnergyContainer;
 import mekanism.common.capabilities.holder.chemical.IChemicalTankHolder;
 import mekanism.common.capabilities.holder.energy.EnergyContainerHelper;
 import mekanism.common.capabilities.holder.energy.IEnergyContainerHolder;
+import mekanism.common.lib.multiblock.IValveHandler.ValveData;
 import mekanism.common.lib.multiblock.IMultiblockEjector;
 import mekanism.common.tile.base.SubstanceType;
 import mekanism.common.util.ChemicalUtil;
@@ -131,6 +132,7 @@ public class AtomicPortBlockEntity
 
         if (isInputMode()
                 && energyContainer != null
+                && hasAttachedCoil()
                 && !energyContainer.isEmpty()) {
 
             var energy =
@@ -159,6 +161,29 @@ public class AtomicPortBlockEntity
         }
 
         return needsPacket;
+    }
+
+    private boolean hasAttachedCoil() {
+        for (ValveData valve :
+                getMultiblock().valves) {
+
+            if (!valve.location.equals(
+                    worldPosition
+            )) {
+                continue;
+            }
+
+            BlockPos coilPos =
+                    valve.location.relative(
+                            valve.side.getOpposite()
+                    );
+
+            return getMultiblock()
+                    .coils
+                    .contains(coilPos);
+        }
+
+        return false;
     }
 
     private boolean isInputMode() {
