@@ -63,20 +63,15 @@ public class AtomicCasingBlockEntity
     protected void onUpdateClient() {
         super.onUpdateClient();
 
-        if (!handleSound) {
-            AtomicSoundHandler.stopTileSound(
-                    getBlockPos()
-            );
-        }
+        AtomicSoundHandler.updateTileSound(
+                getBlockPos(),
+                handleSound
+        );
     }
 
     @Override
     protected boolean canPlaySound() {
-        AtomicMultiblockData multiblock =
-                getMultiblock();
-
-        return multiblock.isFormed()
-                && handleSound;
+        return false;
     }
 
     @NotNull
