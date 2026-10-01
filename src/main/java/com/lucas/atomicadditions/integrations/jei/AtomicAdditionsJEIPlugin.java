@@ -109,6 +109,11 @@ public class AtomicAdditionsJEIPlugin implements IModPlugin {
     public void onRuntimeAvailable(
             IJeiRuntime runtime
     ) {
+        runtime.getRecipeManager().hideRecipeCategory(
+                MekanismJEI.recipeType(
+                        AtomicActivatedCrystalRecipeCategory.TYPE
+                )
+        );
         List<ItemStack> activatedCrystals =
                 new ArrayList<>();
 
