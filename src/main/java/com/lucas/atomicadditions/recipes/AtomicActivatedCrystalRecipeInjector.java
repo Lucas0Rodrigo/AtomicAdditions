@@ -98,6 +98,10 @@ public final class AtomicActivatedCrystalRecipeInjector {
         AtomicActivatedCrystalRecipe
                 .clearGeneratedRecipes();
 
+        Set<ResourceLocation>
+                generatedCrystalIds =
+                new HashSet<>();
+
         GasStack hcl =
                 new GasStack(
                         MekanismGases
@@ -185,6 +189,12 @@ public final class AtomicActivatedCrystalRecipeInjector {
                     continue;
                 }
 
+                if (!generatedCrystalIds.add(
+                        crystalId
+                )) {
+                    continue;
+                }
+
                 ResourceLocation activationId =
                         createGeneratedId(
                                 crystalId
@@ -207,6 +217,9 @@ public final class AtomicActivatedCrystalRecipeInjector {
                         activationInput,
                         tantalum
                 )) {
+                    generatedCrystalIds.remove(
+                            crystalId
+                    );
                     continue;
                 }
 

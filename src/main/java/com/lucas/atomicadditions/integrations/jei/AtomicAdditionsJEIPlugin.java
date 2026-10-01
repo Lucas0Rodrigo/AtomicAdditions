@@ -77,6 +77,9 @@ public class AtomicAdditionsJEIPlugin implements IModPlugin {
         registration.addRecipeCategories(
                 new AtomicAMRRecipeCategory(
                         guiHelper
+                ),
+                new AtomicActivatedCrystalRecipeCategory(
+                        guiHelper
                 )
         );
     }
@@ -129,6 +132,7 @@ public class AtomicAdditionsJEIPlugin implements IModPlugin {
                     recipe.getOutputDefinition()
                             .get(0)
                             .copy();
+
             output.setCount(1);
 
             ResourceLocation sourceId =
