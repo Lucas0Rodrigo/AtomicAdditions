@@ -1,0 +1,26 @@
+Atomic Additions -> NeoForge 21.1.194 / Minecraft 1.21.1 / Mekanism 10.7.19.85 (nao compilado, nao testado)
+
+Referencias usadas: Mekanism-1.21.1-10.7.19.85.jar e -api.jar (assinaturas lidas dos .class; recipes/tags de exemplo em data/ do jar).
+
+Build: ModDevGradle 2.0.141, NeoForge 21.1.194, Gradle 8.13, Java 21; dependencias Mekanism/JEI 19.21.2.313/Fusion 8536618 ativas.
+
+Mekanism 10.7 - mudancas aplicadas
+- Gas/GasStack/IGasTank -> Chemical/ChemicalStack/IChemicalTank (ChemicalDeferredRegister, DeferredChemical); quantidades e energia em long (sem FloatingLong).
+- Gases continuam gasosos via data/mekanism/tags/mekanism/chemical/gaseous.json; lang gas.* -> chemical.*.
+- Tanques: VariableCapacityChemicalTank.input/output; energia: VariableCapacityEnergyContainer.create(long).
+- Ejecao de quimicos: padrao do TileEntitySPSPort (updateEjectors + CapabilityOutputTarget + ChemicalUtil.emit).
+- Block entities: TileEntityTypeDeferredRegister.mekBuilder (registra capabilities do Mekanism); ctor com Holder<Block>.
+- Blocos: useItemOn/ItemInteractionResult/WrenchResult; classe estende Block (BaseEntityBlock exigiria codec()).
+- Receitas: BasicItemStackChemicalToItemStackRecipe + MekanismRecipeSerializer.itemChemicalToItem; RecipeHolder; PartialNBTIngredient
+  -> PartialCustomDataIngredient (ICustomIngredient, casamento parcial de CUSTOM_DATA via CustomData.matchedBy, mesma semantica).
+- JEI: BaseRecipeCategory (recipe_viewer.jei), getRegistryName/getCodec, MekanismJEI.TYPE_CHEMICAL; categoria do cristal agora registrada.
+- JSON: receitas mekanism:reaction convertidas (item_input/fluid_input/chemical_input/chemical_output/item_output).
+
+Desvios documentados
+- IDs dos block entities mudam de atomic_casing/atomic_port para casing/casing_port: o builder do Mekanism 10.7 nomeia o tipo pelo
+  id do bloco (necessario para registrar as capabilities). Blocos, itens, gases e receitas mantem os IDs.
+- Energia agora inteira (long): perde fracoes que FloatingLong guardava.
+
+Verificado contra fontes do NeoForge 21.1.194: IngredientType, INGREDIENT_TYPES, ModelEvent.RegisterAdditional, getRenderPasses,
+RegisterMenuScreensEvent, HolderSetCodec. compileJava (Gradle do usuario) reportou apenas o erro de RegistryCodecs, ja corrigido.
+Ainda nao verificados: JEI (RecipeType.createRecipeHolderType, ICodecHelper.getRecipeHolderCodec) e a chave "fluid" em fluid_input.

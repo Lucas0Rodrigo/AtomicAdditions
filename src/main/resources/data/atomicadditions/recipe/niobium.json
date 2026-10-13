@@ -1,0 +1,24 @@
+{
+  "type": "mekanism:reaction",
+  "item_input": {
+    "count": 10,
+    "item": "minecraft:iron_ingot"
+  },
+  "fluid_input": {
+    "amount": 1000,
+    "fluid": "minecraft:water"
+  },
+  "chemical_input": {
+    "amount": 1000,
+    "chemical": "mekanism:chlorine"
+  },
+  "duration": 100,
+  "item_output": {
+    "count": 1,
+    "id": "mekanism:dirty_dust_iron"
+  },
+  "chemical_output": {
+    "amount": 1000,
+    "id": "atomicadditions:niobium"
+  }
+}

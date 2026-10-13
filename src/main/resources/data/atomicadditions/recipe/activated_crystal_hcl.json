@@ -1,0 +1,15 @@
+{
+  "type": "atomicadditions:activated_crystal_hydrogen_chloride",
+  "chemical_input": {
+    "amount": 1,
+    "chemical": "mekanism:hydrogen_chloride"
+  },
+  "item_input": {
+    "item": "atomicadditions:activated_crystal"
+  },
+  "output": {
+    "count": 8,
+    "id": "mekanism:shard_iron"
+  },
+  "per_tick_usage": true
+}

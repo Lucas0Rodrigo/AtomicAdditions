@@ -1,0 +1,25 @@
+{
+  "block.atomicadditions.casing": "§dRevestimento do RMA",
+  "block.atomicadditions.casing_port": "§dPorta do RMA",
+
+  "message.atomicadditions.port_changed": "Porta RMA alterada para: ",
+  "message.atomicadditions.port_input": "Entrada",
+  "message.atomicadditions.port_output": "Saída",
+
+  "container.atomicadditions.atomic": "Reprocessador Material Atômico",
+
+  "jei.atomicadditions.amr": "Reprocessador Material Atômico",
+  "jei.atomicadditions.energy": "Energia: %s FE/t",
+  "jei.atomicadditions.duration": "Duração: %s ticks",
+  "jei.atomicadditions.rate": "Produção: %s mB/t",
+
+  "chemical.atomicadditions.niobium": "Nióbio",
+  "chemical.atomicadditions.germanium": "Germânio",
+  "chemical.atomicadditions.tantalum": "Tântalo",
+  "chemical.atomicadditions.palladium": "Paládio",
+  "chemical.atomicadditions.copper": "Cobre",
+  "chemical.atomicadditions.rhenium": "Rênio",
+
+  "item.atomicadditions.activated_crystal": "%s Ativado",
+  "item.atomicadditions.activated_crystal_fallback": "Cristal Ativado"
+}

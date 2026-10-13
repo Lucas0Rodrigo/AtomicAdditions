@@ -1,0 +1,25 @@
+{
+  "block.atomicadditions.casing": "§dAMR Casing",
+  "block.atomicadditions.casing_port": "§dAMR Port",
+
+  "message.atomicadditions.port_changed": "AMR Port changed to: ",
+  "message.atomicadditions.port_input": "Input",
+  "message.atomicadditions.port_output": "Output",
+
+  "container.atomicadditions.atomic": "Atomic Material Reprocessor",
+
+  "jei.atomicadditions.amr": "Atomic Material Reprocessor",
+  "jei.atomicadditions.energy": "Energy: %s FE/t",
+  "jei.atomicadditions.duration": "Duration: %s ticks",
+  "jei.atomicadditions.rate": "Production: %s mB/t",
+
+  "chemical.atomicadditions.niobium": "Niobium",
+  "chemical.atomicadditions.germanium": "Germanium",
+  "chemical.atomicadditions.tantalum": "Tantalum",
+  "chemical.atomicadditions.palladium": "Palladium",
+  "chemical.atomicadditions.copper": "Copper",
+  "chemical.atomicadditions.rhenium": "Rhenium",
+
+  "item.atomicadditions.activated_crystal": "%s Activated",
+  "item.atomicadditions.activated_crystal_fallback": "Activated Crystal"
+}

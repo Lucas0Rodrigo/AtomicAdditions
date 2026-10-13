@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "atomicadditions:item/crystal_overlay"
+  },
+  "render_type": "minecraft:translucent"
+}
