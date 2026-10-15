@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 import mekanism.api.Action;
 import mekanism.api.AutomationType;
+import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalHandler;
@@ -202,6 +203,15 @@ public class AtomicMultiblockData
             updateRenderData();
 
             return true;
+        }
+
+        if (!outputTank.isEmpty()) {
+            ChemicalUtil.emit(
+                    getActiveOutputs(
+                            chemicalOutputTargets
+                    ),
+                    outputTank
+            );
         }
 
         ChemicalStack stack1 =
@@ -404,8 +414,15 @@ public class AtomicMultiblockData
                     AutomationType.INTERNAL
             );
 
+            /*
+             * Create the output stack from a registry Holder.
+             * This avoids the deprecated IChemicalProvider API.
+             */
             outputTank.insert(
-                    recipe.getOutput().getStack(
+                    new ChemicalStack(
+                            MekanismAPI.CHEMICAL_REGISTRY.wrapAsHolder(
+                                    recipe.getOutput()
+                            ),
                             recipe.getOutputAmount()
                     ),
                     Action.EXECUTE,
@@ -460,7 +477,8 @@ public class AtomicMultiblockData
                     gas.getColorRepresentation();
 
             renderInput1Name =
-                    gas.getRegistryName()
+                    MekanismAPI.CHEMICAL_REGISTRY
+                            .getKey(gas)
                             .toString();
         }
 
@@ -478,7 +496,8 @@ public class AtomicMultiblockData
                     gas.getColorRepresentation();
 
             renderInput2Name =
-                    gas.getRegistryName()
+                    MekanismAPI.CHEMICAL_REGISTRY
+                            .getKey(gas)
                             .toString();
         }
 

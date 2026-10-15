@@ -5,6 +5,8 @@ import com.lucas.atomicadditions.recipes.AtomicAMRRecipe;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import mekanism.api.MekanismAPI;
+import mekanism.api.chemical.ChemicalStack;
 import mekanism.client.gui.element.GuiInnerScreen;
 import mekanism.client.gui.element.bar.GuiDynamicHorizontalRateBar;
 import mekanism.client.gui.element.gauge.GaugeType;
@@ -205,7 +207,10 @@ public class AtomicAMRRecipeCategory
                 RecipeIngredientRole.INPUT,
                 input1,
                 Collections.singletonList(
-                        recipe.getInput1().getStack(
+                        new ChemicalStack(
+                                MekanismAPI.CHEMICAL_REGISTRY.wrapAsHolder(
+                                        recipe.getInput1()
+                                ),
                                 recipe.getInput1Amount()
                         )
                 )
@@ -216,7 +221,10 @@ public class AtomicAMRRecipeCategory
                 RecipeIngredientRole.INPUT,
                 input2,
                 Collections.singletonList(
-                        recipe.getInput2().getStack(
+                        new ChemicalStack(
+                                MekanismAPI.CHEMICAL_REGISTRY.wrapAsHolder(
+                                        recipe.getInput2()
+                                ),
                                 recipe.getInput2Amount()
                         )
                 )
@@ -227,7 +235,10 @@ public class AtomicAMRRecipeCategory
                 RecipeIngredientRole.OUTPUT,
                 output,
                 Collections.singletonList(
-                        recipe.getOutput().getStack(
+                        new ChemicalStack(
+                                MekanismAPI.CHEMICAL_REGISTRY.wrapAsHolder(
+                                        recipe.getOutput()
+                                ),
                                 recipe.getOutputAmount()
                         )
                 )

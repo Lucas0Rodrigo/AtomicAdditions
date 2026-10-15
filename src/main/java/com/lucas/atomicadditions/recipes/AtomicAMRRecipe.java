@@ -3,27 +3,37 @@ package com.lucas.atomicadditions.recipes;
 import com.lucas.atomicadditions.AtomicAdditions;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.Chemical;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 
 public class AtomicAMRRecipe {
 
+    private static final Codec<Chemical> CHEMICAL_CODEC =
+            Chemical.HOLDER_CODEC.xmap(
+                    Holder::value,
+                    chemical ->
+                            MekanismAPI.CHEMICAL_REGISTRY
+                                    .wrapAsHolder(chemical)
+            );
+
     public static final Codec<AtomicAMRRecipe> CODEC =
             RecordCodecBuilder.create(
                     instance -> instance.group(
-                            Chemical.CODEC.fieldOf("input1").forGetter(
+                            CHEMICAL_CODEC.fieldOf("input1").forGetter(
                                     AtomicAMRRecipe::getInput1
                             ),
                             Codec.LONG.fieldOf("input1_amount").forGetter(
                                     AtomicAMRRecipe::getInput1Amount
                             ),
-                            Chemical.CODEC.fieldOf("input2").forGetter(
+                            CHEMICAL_CODEC.fieldOf("input2").forGetter(
                                     AtomicAMRRecipe::getInput2
                             ),
                             Codec.LONG.fieldOf("input2_amount").forGetter(
                                     AtomicAMRRecipe::getInput2Amount
                             ),
-                            Chemical.CODEC.fieldOf("output").forGetter(
+                            CHEMICAL_CODEC.fieldOf("output").forGetter(
                                     AtomicAMRRecipe::getOutput
                             ),
                             Codec.LONG.fieldOf("output_amount").forGetter(
@@ -45,12 +55,20 @@ public class AtomicAMRRecipe {
         return ResourceLocation.fromNamespaceAndPath(
                 AtomicAdditions.MODID,
                 "amr/"
-                        + output.getRegistryName().getPath()
+                        + getChemicalPath(output)
                         + "/"
-                        + input1.getRegistryName().getPath()
+                        + getChemicalPath(input1)
                         + "_"
-                        + input2.getRegistryName().getPath()
+                        + getChemicalPath(input2)
         );
+    }
+
+    private static String getChemicalPath(
+            Chemical chemical
+    ) {
+        return MekanismAPI.CHEMICAL_REGISTRY
+                .getKey(chemical)
+                .getPath();
     }
 
     private final Chemical input1;
@@ -131,16 +149,16 @@ public class AtomicAMRRecipe {
         }
 
         boolean normalOrder =
-                gas1 == input1 &&
-                        amount1 >= input1Amount &&
-                        gas2 == input2 &&
-                        amount2 >= input2Amount;
+                gas1 == input1
+                        && amount1 >= input1Amount
+                        && gas2 == input2
+                        && amount2 >= input2Amount;
 
         boolean reversedOrder =
-                gas1 == input2 &&
-                        amount1 >= input2Amount &&
-                        gas2 == input1 &&
-                        amount2 >= input1Amount;
+                gas1 == input2
+                        && amount1 >= input2Amount
+                        && gas2 == input1
+                        && amount2 >= input1Amount;
 
         return normalOrder || reversedOrder;
     }
