@@ -9,7 +9,8 @@ import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.helpers.IGuiHelper;
-import mezz.jei.api.ingredients.subtypes.IIngredientSubtypeInterpreter;
+import mezz.jei.api.ingredients.subtypes.ISubtypeInterpreter;
+import mezz.jei.api.ingredients.subtypes.UidContext;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
@@ -45,32 +46,62 @@ public class AtomicAdditionsJEIPlugin implements IModPlugin {
             ISubtypeRegistration registration
     ) {
         registration.registerSubtypeInterpreter(
-                VanillaTypes.ITEM_STACK,
                 AtomicAdditions.ACTIVATED_CRYSTAL.get(),
-                (ingredient, context) -> {
-                    CustomData customData =
-                            ingredient.get(
-                                    DataComponents.CUSTOM_DATA
-                            );
+                new ISubtypeInterpreter<ItemStack>() {
 
-                    CompoundTag tag =
-                            customData == null
-                                    ? null
-                                    : customData.copyTag();
-
-                    if (tag != null &&
-                            tag.contains(
-                                    ActivatedCrystalItem
-                                            .SOURCE_CRYSTAL_TAG
-                            )) {
-                        return tag.getString(
-                                ActivatedCrystalItem
-                                        .SOURCE_CRYSTAL_TAG
+                    @Override
+                    public Object getSubtypeData(
+                            ItemStack ingredient,
+                            UidContext context
+                    ) {
+                        return getSourceCrystal(
+                                ingredient
                         );
                     }
 
-                    return IIngredientSubtypeInterpreter.NONE;
+                    @Override
+                    public String getLegacyStringSubtypeInfo(
+                            ItemStack ingredient,
+                            UidContext context
+                    ) {
+                        String sourceCrystal =
+                                getSourceCrystal(
+                                        ingredient
+                                );
+
+                        return sourceCrystal == null
+                                ? ""
+                                : sourceCrystal;
+                    }
                 }
+        );
+    }
+
+    private static String getSourceCrystal(
+            ItemStack stack
+    ) {
+        CustomData customData =
+                stack.get(
+                        DataComponents.CUSTOM_DATA
+                );
+
+        if (customData == null) {
+            return null;
+        }
+
+        CompoundTag tag =
+                customData.copyTag();
+
+        if (!tag.contains(
+                ActivatedCrystalItem
+                        .SOURCE_CRYSTAL_TAG
+        )) {
+            return null;
+        }
+
+        return tag.getString(
+                ActivatedCrystalItem
+                        .SOURCE_CRYSTAL_TAG
         );
     }
 
@@ -86,9 +117,6 @@ public class AtomicAdditionsJEIPlugin implements IModPlugin {
         registration.addRecipeCategories(
                 new AtomicAMRRecipeCategory(
                         guiHelper
-                ),
-                new AtomicActivatedCrystalRecipeCategory(
-                        guiHelper
                 )
         );
     }
@@ -101,12 +129,6 @@ public class AtomicAdditionsJEIPlugin implements IModPlugin {
                 AtomicAMRRecipeCategory.TYPE,
                 AtomicRecipes.AMR_RECIPES
                         .getRecipesForJEI()
-        );
-
-        registration.addRecipes(
-                AtomicActivatedCrystalRecipeCategory.TYPE,
-                AtomicActivatedCrystalRecipe
-                        .getGeneratedRecipes()
         );
     }
 
