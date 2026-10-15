@@ -8,6 +8,7 @@ import com.lucas.atomicadditions.recipes.AtomicActivatedCrystalRecipeInjector;
 import com.lucas.atomicadditions.recipes.AtomicRecipeSerializers;
 import com.lucas.atomicadditions.recipes.AtomicRecipes;
 import com.mojang.logging.LogUtils;
+import mekanism.common.capabilities.Capabilities;
 import mekanism.common.lib.multiblock.MultiblockCache;
 import mekanism.common.lib.multiblock.MultiblockManager;
 import mekanism.common.registration.impl.SoundEventDeferredRegister;
@@ -118,6 +119,8 @@ public class AtomicAdditions {
             BLOCK_ENTITIES.mekBuilder(
                     CASING_PORT,
                     AtomicPortBlockEntity::new
+            ).withSimple(
+                    Capabilities.CONFIGURABLE
             ).build();
 
     public static final DeferredHolder<Item, Item> CASING_ITEM =
