@@ -1,0 +1,7 @@
+{
+  "name": "book.atomicadditions.manual.name",
+  "landing_text": "book.atomicadditions.manual.landing",
+  "version": 1,
+  "show_progress": true,
+  "i18n": false
+}

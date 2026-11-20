@@ -1,0 +1,17 @@
+{
+  "name": "Dois Caminhos até os Fragmentos",
+  "category": "atomicadditions:crystals",
+  "icon": "minecraft:nether_star",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Cristais Ativados viram fragmentos de duas formas.$(br2)$(thing)Cloreto de hidrogênio$(): 1 Cristal Ativado produz 1 fragmento. É o caminho fácil."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Rênio$(): 8 Cristais Ativados produzem 16 fragmentos, ou seja, 2 por cristal.$(br2)Contando a etapa de ativação, 5 cristais rendem 8 fragmentos com HCl, ou 16 com Rênio. É $(thing)3,2x$() a quantidade normal."
+    }
+  ],
+  "advancement": "atomicadditions:activated_crystal"
+}

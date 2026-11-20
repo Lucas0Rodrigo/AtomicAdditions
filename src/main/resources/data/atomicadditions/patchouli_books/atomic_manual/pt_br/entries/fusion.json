@@ -1,0 +1,13 @@
+{
+  "name": "Fusão",
+  "category": "atomicadditions:gases",
+  "icon": "minecraft:emerald",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "É isto que o RMA faz.$(br2)$(thing)Tântalo$(): 1.000 mB de Nióbio + 1.000 mB de Germânio produzem 1.000 mB. Leva 200 ticks a 500.000 FE/t.$(br2)$(thing)Rênio$(): 2.000 mB de Paládio + 2.000 mB de Cobre produzem 1.000 mB. Leva 400 ticks a 500.000 FE/t."
+    }
+  ],
+  "advancement": "atomicadditions:formed"
+}

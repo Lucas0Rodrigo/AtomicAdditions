@@ -1,0 +1,13 @@
+{
+  "name": "Ativação",
+  "category": "atomicadditions:crystals",
+  "icon": "atomicadditions:activated_crystal",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Os $(thing)Cristais Ativados$() são feitos na $(item)Câmara de Injeção Química$().$(br2)5 cristais + Tântalo produzem 8 Cristais Ativados.$(br2)Funciona com qualquer cristal que o Mekanism conheça, inclusive de outros mods. Um Cristal Ativado lembra de qual cristal veio."
+    }
+  ],
+  "advancement": "atomicadditions:tantalum"
+}

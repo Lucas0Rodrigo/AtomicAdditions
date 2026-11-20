@@ -1,0 +1,22 @@
+{
+  "name": "AMR Blocks",
+  "category": "atomicadditions:basics",
+  "icon": "atomicadditions:casing_port",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "The AMR is built from two blocks.$(br2)$(item)AMR Casing$() forms the walls and the frame.$(br2)$(item)AMR Port$() connects the machine to the world: it takes gas and energy in, and sends gas out."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "atomicadditions:casing",
+      "title": "AMR Casing"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "atomicadditions:casing_port",
+      "title": "AMR Port"
+    }
+  ]
+}

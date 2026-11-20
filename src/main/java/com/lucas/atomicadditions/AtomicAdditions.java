@@ -1,5 +1,6 @@
 package com.lucas.atomicadditions;
 
+import com.lucas.atomicadditions.advancement.AtomicAdvancements;
 import com.lucas.atomicadditions.chemical.*;
 import com.lucas.atomicadditions.item.ActivatedCrystalBakedModel;
 import com.lucas.atomicadditions.item.ActivatedCrystalItem;
@@ -244,6 +245,10 @@ public class AtomicAdditions {
     private void commonSetup(
             final FMLCommonSetupEvent event
     ) {
+        event.enqueueWork(
+                AtomicAdvancements::register
+        );
+
         LOGGER.info(
                 "Atomic Additions carregado com sucesso!"
         );

@@ -1,0 +1,26 @@
+{
+  "display": {
+    "icon": {
+      "item": "minecraft:glowstone"
+    },
+    "title": {
+      "translate": "advancements.atomicadditions.operating.title"
+    },
+    "description": {
+      "translate": "advancements.atomicadditions.operating.desc"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "atomicadditions:formed",
+  "criteria": {
+    "operating": {
+      "trigger": "atomicadditions:milestone",
+      "conditions": {
+        "milestone": "operating"
+      }
+    }
+  }
+}

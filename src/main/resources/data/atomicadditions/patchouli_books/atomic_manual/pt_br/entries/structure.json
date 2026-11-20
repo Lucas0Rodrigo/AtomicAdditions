@@ -1,0 +1,17 @@
+{
+  "name": "A Estrutura",
+  "category": "atomicadditions:basics",
+  "icon": "atomicadditions:casing",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "O RMA é um cubo oco de 7x7x7.$(br2)Cada face tem formato arredondado: os cantos podem ficar vazios, a borda externa precisa ser $(item)Revestimento do RMA$(), e a área interna pode ser Revestimento ou $(item)Portas do RMA$()."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "O interior deve ficar vazio, exceto por $(item)Bobinas Supercarregadas$() do Mekanism.$(br2)Toda bobina precisa estar logo atrás de uma Porta. Uma bobina sem Porta atrás impede a estrutura de se formar."
+    }
+  ],
+  "advancement": "atomicadditions:engineering"
+}

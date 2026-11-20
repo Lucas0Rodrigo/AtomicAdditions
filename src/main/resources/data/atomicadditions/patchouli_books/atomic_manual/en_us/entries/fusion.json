@@ -1,0 +1,13 @@
+{
+  "name": "Fusion",
+  "category": "atomicadditions:gases",
+  "icon": "minecraft:emerald",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "This is what the AMR does.$(br2)$(thing)Tantalum$(): 1,000 mB Niobium + 1,000 mB Germanium make 1,000 mB. Takes 200 ticks at 500,000 FE/t.$(br2)$(thing)Rhenium$(): 2,000 mB Palladium + 2,000 mB Copper make 1,000 mB. Takes 400 ticks at 500,000 FE/t."
+    }
+  ],
+  "advancement": "atomicadditions:formed"
+}

@@ -1,0 +1,26 @@
+{
+  "display": {
+    "icon": {
+      "item": "atomicadditions:casing"
+    },
+    "title": {
+      "translate": "advancements.atomicadditions.formed.title"
+    },
+    "description": {
+      "translate": "advancements.atomicadditions.formed.desc"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "atomicadditions:engineering",
+  "criteria": {
+    "formed": {
+      "trigger": "atomicadditions:milestone",
+      "conditions": {
+        "milestone": "formed"
+      }
+    }
+  }
+}

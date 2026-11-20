@@ -1,0 +1,16 @@
+{
+  "name": "Welcome",
+  "category": "atomicadditions:basics",
+  "icon": "atomicadditions:casing",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Welcome to $(thing)Atomic Additions$(). This mod adds the $(thing)Atomic Material Reprocessor$() (AMR), a multiblock that fuses two atomic gases into a third one.$(br2)The goal is to produce $(thing)Tantalum$() and $(thing)Rhenium$(), then use them to multiply the shards you get from crystals in Mekanism's ore processing."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "New entries unlock as you make progress. Check your advancements to see what comes next."
+    }
+  ]
+}

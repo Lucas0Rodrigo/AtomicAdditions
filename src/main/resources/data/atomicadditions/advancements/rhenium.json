@@ -1,0 +1,26 @@
+{
+  "display": {
+    "icon": {
+      "item": "minecraft:orange_dye"
+    },
+    "title": {
+      "translate": "advancements.atomicadditions.rhenium.title"
+    },
+    "description": {
+      "translate": "advancements.atomicadditions.rhenium.desc"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "atomicadditions:gas_palladium",
+  "criteria": {
+    "rhenium": {
+      "trigger": "atomicadditions:milestone",
+      "conditions": {
+        "milestone": "rhenium"
+      }
+    }
+  }
+}

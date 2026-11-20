@@ -1,0 +1,17 @@
+{
+  "name": "Running the AMR",
+  "category": "atomicadditions:basics",
+  "icon": "minecraft:glowstone",
+  "sortnum": 3,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Sneak + right-click$() a Port to switch it between $(thing)Input$() and $(thing)Output$().$(br2)Input Ports take in energy and gas. Output Ports send the product out. Connect pipes and cables to the Ports."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Each tank holds up to 8,000 mB. Niobium or Palladium go to the first input tank, and Germanium or Copper to the second. The machine finds the recipe by itself.$(br2)Recipes use 500,000 FE/t, and the AMR stores up to 80,000,000 FE."
+    }
+  ],
+  "advancement": "atomicadditions:formed"
+}

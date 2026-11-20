@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:advancement_reward",
+  "forge:conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "patchouli"
+    }
+  ],
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "patchouli:guide_book",
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{\"patchouli:book\":\"atomicadditions:atomic_manual\"}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

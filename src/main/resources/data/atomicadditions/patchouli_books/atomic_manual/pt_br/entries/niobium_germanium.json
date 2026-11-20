@@ -1,0 +1,12 @@
+{
+  "name": "Nióbio e Germânio",
+  "category": "atomicadditions:gases",
+  "icon": "minecraft:gold_ingot",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Os dois gases são feitos na $(item)Câmara de Reação Pressurizada$().$(br2)$(thing)Nióbio$(): 10 barras de ferro + 1.000 mB de água + 1.000 mB de cloro.$(br2)$(thing)Germânio$(): 10 barras de ferro + 1.000 mB de água + 1.000 mB de oxigênio.$(br2)Cada receita produz 1.000 mB de gás."
+    }
+  ]
+}
