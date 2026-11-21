@@ -1,7 +1,8 @@
 {
   "display": {
     "icon": {
-      "item": "minecraft:glowstone"
+      "item": "atomicadditions:advancement_icon",
+      "nbt": "{CustomModelData:9}"
     },
     "title": {
       "translate": "advancements.atomicadditions.operating.title"

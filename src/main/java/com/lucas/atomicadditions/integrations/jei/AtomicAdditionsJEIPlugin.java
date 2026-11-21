@@ -111,7 +111,7 @@ public class AtomicAdditionsJEIPlugin implements IModPlugin {
     ) {
         runtime.getIngredientManager().removeIngredientsAtRuntime(
                 VanillaTypes.ITEM_STACK,
-                List.of(new ItemStack(AtomicAdditions.GAS_ICON.get()))
+                List.of(new ItemStack(AtomicAdditions.ADVANCEMENT_ICON.get()))
         );
 
         runtime.getRecipeManager().hideRecipeCategory(

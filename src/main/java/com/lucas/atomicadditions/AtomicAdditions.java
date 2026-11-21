@@ -157,11 +157,12 @@ public class AtomicAdditions {
 
     /**
      * Item usado apenas como ícone das conquistas (não aparece no
-     * creative nem no JEI). O símbolo do gás vem do CustomModelData.
+     * creative nem no JEI). A imagem vem do CustomModelData (1 a 12),
+     * definido em models/item/advancement_icon.json.
      */
-    public static final RegistryObject<Item> GAS_ICON =
+    public static final RegistryObject<Item> ADVANCEMENT_ICON =
             ITEMS.register(
-                    "gas_icon",
+                    "advancement_icon",
                     () -> new Item(
                             new Item.Properties()
                     )

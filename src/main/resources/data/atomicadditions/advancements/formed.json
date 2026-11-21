@@ -1,7 +1,8 @@
 {
   "display": {
     "icon": {
-      "item": "atomicadditions:casing"
+      "item": "atomicadditions:advancement_icon",
+      "nbt": "{CustomModelData:8}"
     },
     "title": {
       "translate": "advancements.atomicadditions.formed.title"

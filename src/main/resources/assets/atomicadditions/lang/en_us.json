@@ -51,5 +51,5 @@
   "advancements.atomicadditions.great_multiplication.desc": "Join Rhenium with Activated Crystals and get twice the shards of the HCl path.",
   "book.atomicadditions.manual.name": "Atomic Manual",
   "book.atomicadditions.manual.landing": "Everything you need to know about atomic fusion, from the first gas to the great multiplication.",
-  "item.atomicadditions.gas_icon": "Gas Icon"
+  "item.atomicadditions.advancement_icon": "Advancement Icon"
 }

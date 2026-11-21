@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "atomicadditions:item/gas_icon_palladium"
+    "layer0": "atomicadditions:item/icon_palladium"
   }
 }

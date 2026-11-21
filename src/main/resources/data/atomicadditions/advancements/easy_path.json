@@ -1,7 +1,8 @@
 {
   "display": {
     "icon": {
-      "item": "minecraft:feather"
+      "item": "atomicadditions:advancement_icon",
+      "nbt": "{CustomModelData:10}"
     },
     "title": {
       "translate": "advancements.atomicadditions.easy_path.title"

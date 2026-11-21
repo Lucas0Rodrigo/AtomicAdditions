@@ -1,7 +1,7 @@
 {
   "display": {
     "icon": {
-      "item": "atomicadditions:gas_icon",
+      "item": "atomicadditions:advancement_icon",
       "nbt": "{CustomModelData:2}"
     },
     "title": {
