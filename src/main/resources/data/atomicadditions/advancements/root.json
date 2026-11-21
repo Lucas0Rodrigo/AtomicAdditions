@@ -13,7 +13,7 @@
     "show_toast": true,
     "announce_to_chat": false,
     "hidden": false,
-    "background": "minecraft:textures/gui/advancements/backgrounds/end.png"
+    "background": "atomicadditions:textures/gui/advancements/background.png"
   },
   "criteria": {
     "casing": {

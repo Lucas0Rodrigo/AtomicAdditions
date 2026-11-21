@@ -1,7 +1,8 @@
 {
   "display": {
     "icon": {
-      "item": "minecraft:orange_dye"
+      "item": "atomicadditions:gas_icon",
+      "nbt": "{CustomModelData:6}"
     },
     "title": {
       "translate": "advancements.atomicadditions.rhenium.title"

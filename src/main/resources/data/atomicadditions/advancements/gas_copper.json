@@ -1,7 +1,8 @@
 {
   "display": {
     "icon": {
-      "item": "minecraft:copper_ingot"
+      "item": "atomicadditions:gas_icon",
+      "nbt": "{CustomModelData:4}"
     },
     "title": {
       "translate": "advancements.atomicadditions.gas_copper.title"

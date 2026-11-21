@@ -1,7 +1,8 @@
 {
   "display": {
     "icon": {
-      "item": "minecraft:lapis_lazuli"
+      "item": "atomicadditions:gas_icon",
+      "nbt": "{CustomModelData:5}"
     },
     "title": {
       "translate": "advancements.atomicadditions.gas_palladium.title"

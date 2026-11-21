@@ -1,0 +1,44 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "atomicadditions:item/gas_icon_niobium"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "custom_model_data": 1
+      },
+      "model": "atomicadditions:item/gas_icon_niobium"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 2
+      },
+      "model": "atomicadditions:item/gas_icon_germanium"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 3
+      },
+      "model": "atomicadditions:item/gas_icon_tantalum"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 4
+      },
+      "model": "atomicadditions:item/gas_icon_copper"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 5
+      },
+      "model": "atomicadditions:item/gas_icon_palladium"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 6
+      },
+      "model": "atomicadditions:item/gas_icon_rhenium"
+    }
+  ]
+}

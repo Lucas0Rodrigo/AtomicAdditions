@@ -109,6 +109,11 @@ public class AtomicAdditionsJEIPlugin implements IModPlugin {
     public void onRuntimeAvailable(
             IJeiRuntime runtime
     ) {
+        runtime.getIngredientManager().removeIngredientsAtRuntime(
+                VanillaTypes.ITEM_STACK,
+                List.of(new ItemStack(AtomicAdditions.GAS_ICON.get()))
+        );
+
         runtime.getRecipeManager().hideRecipeCategory(
                 MekanismJEI.recipeType(
                         AtomicActivatedCrystalRecipeCategory.TYPE

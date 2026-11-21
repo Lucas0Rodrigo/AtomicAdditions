@@ -1,7 +1,8 @@
 {
   "display": {
     "icon": {
-      "item": "minecraft:redstone"
+      "item": "atomicadditions:gas_icon",
+      "nbt": "{CustomModelData:2}"
     },
     "title": {
       "translate": "advancements.atomicadditions.gas_germanium.title"

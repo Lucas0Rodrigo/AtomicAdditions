@@ -155,6 +155,18 @@ public class AtomicAdditions {
                     )
             );
 
+    /**
+     * Item usado apenas como ícone das conquistas (não aparece no
+     * creative nem no JEI). O símbolo do gás vem do CustomModelData.
+     */
+    public static final RegistryObject<Item> GAS_ICON =
+            ITEMS.register(
+                    "gas_icon",
+                    () -> new Item(
+                            new Item.Properties()
+                    )
+            );
+
     private static AtomicCasingBlock<AtomicCasingBlockEntity>
     createCasing() {
         return new AtomicCasingBlock<>(

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "atomicadditions:item/gas_icon_rhenium"
+  }
+}

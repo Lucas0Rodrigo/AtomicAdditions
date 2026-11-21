@@ -1,7 +1,8 @@
 {
   "display": {
     "icon": {
-      "item": "minecraft:emerald"
+      "item": "atomicadditions:gas_icon",
+      "nbt": "{CustomModelData:3}"
     },
     "title": {
       "translate": "advancements.atomicadditions.tantalum.title"

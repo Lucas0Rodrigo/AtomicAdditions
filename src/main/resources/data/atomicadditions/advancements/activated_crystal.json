@@ -1,7 +1,8 @@
 {
   "display": {
     "icon": {
-      "item": "atomicadditions:activated_crystal"
+      "item": "atomicadditions:activated_crystal",
+      "nbt": "{\"atomicadditions:source_crystal\":\"mekanism:crystal_iron\",\"atomicadditions:source_crystal_stack\":{id:\"mekanism:crystal_iron\",Count:1b}}"
     },
     "title": {
       "translate": "advancements.atomicadditions.activated_crystal.title"
