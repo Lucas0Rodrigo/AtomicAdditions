@@ -1,7 +1,7 @@
 {
   "name": "Welcome",
   "category": "atomicadditions:basics",
-  "icon": "atomicadditions:casing",
+  "icon": "atomicadditions:advancement_icon{CustomModelData:7}",
   "sortnum": 0,
   "pages": [
     {

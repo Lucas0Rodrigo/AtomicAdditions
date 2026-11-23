@@ -25,6 +25,9 @@ authors="${mod_authors}"
 # Descrição exibida na tela de mods.
 description='''${mod_description}'''
 
+# Logo exibido na tela de mods do Minecraft (arquivo na raiz do jar).
+logoFile="logo.png"
+
 # Dependência obrigatória: Forge.
 [[dependencies.${mod_id}]]
 modId="forge"

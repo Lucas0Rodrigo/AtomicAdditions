@@ -1,7 +1,7 @@
 {
   "name": "Copper and Palladium",
   "category": "atomicadditions:gases",
-  "icon": "minecraft:copper_ingot",
+  "icon": "atomicadditions:advancement_icon{CustomModelData:4}",
   "sortnum": 1,
   "pages": [
     {

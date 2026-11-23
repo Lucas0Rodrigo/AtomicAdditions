@@ -1,7 +1,7 @@
 {
   "name": "Running the AMR",
   "category": "atomicadditions:basics",
-  "icon": "minecraft:glowstone",
+  "icon": "atomicadditions:advancement_icon{CustomModelData:9}",
   "sortnum": 3,
   "pages": [
     {

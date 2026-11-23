@@ -1,7 +1,7 @@
 {
   "name": "Ativação",
   "category": "atomicadditions:crystals",
-  "icon": "atomicadditions:activated_crystal",
+  "icon": "atomicadditions:advancement_icon{CustomModelData:12}",
   "sortnum": 0,
   "pages": [
     {

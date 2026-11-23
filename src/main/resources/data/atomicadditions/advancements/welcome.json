@@ -1,0 +1,12 @@
+{
+  "criteria": {
+    "join": {
+      "trigger": "minecraft:tick"
+    }
+  },
+  "rewards": {
+    "loot": [
+      "atomicadditions:manual"
+    ]
+  }
+}

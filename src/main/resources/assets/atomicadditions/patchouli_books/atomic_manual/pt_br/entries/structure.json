@@ -1,7 +1,7 @@
 {
   "name": "A Estrutura",
   "category": "atomicadditions:basics",
-  "icon": "atomicadditions:casing",
+  "icon": "atomicadditions:advancement_icon{CustomModelData:8}",
   "sortnum": 2,
   "pages": [
     {

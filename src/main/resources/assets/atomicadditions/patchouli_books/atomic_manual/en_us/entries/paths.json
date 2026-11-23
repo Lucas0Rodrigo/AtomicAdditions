@@ -1,7 +1,7 @@
 {
   "name": "Two Paths to Shards",
   "category": "atomicadditions:crystals",
-  "icon": "minecraft:nether_star",
+  "icon": "atomicadditions:advancement_icon{CustomModelData:11}",
   "sortnum": 1,
   "pages": [
     {

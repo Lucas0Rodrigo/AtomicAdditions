@@ -1,7 +1,7 @@
 {
   "name": "Operando o RMA",
   "category": "atomicadditions:basics",
-  "icon": "minecraft:glowstone",
+  "icon": "atomicadditions:advancement_icon{CustomModelData:9}",
   "sortnum": 3,
   "pages": [
     {

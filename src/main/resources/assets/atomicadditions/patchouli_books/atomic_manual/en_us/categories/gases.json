@@ -1,6 +1,6 @@
 {
   "name": "Atomic Gases",
   "description": "Where each gas comes from and what it becomes.",
-  "icon": "minecraft:glass_bottle",
+  "icon": "atomicadditions:advancement_icon{CustomModelData:10}",
   "sortnum": 1
 }

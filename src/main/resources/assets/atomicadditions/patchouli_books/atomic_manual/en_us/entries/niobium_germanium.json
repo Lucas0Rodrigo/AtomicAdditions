@@ -1,7 +1,7 @@
 {
   "name": "Niobium and Germanium",
   "category": "atomicadditions:gases",
-  "icon": "minecraft:gold_ingot",
+  "icon": "atomicadditions:advancement_icon{CustomModelData:1}",
   "sortnum": 0,
   "pages": [
     {

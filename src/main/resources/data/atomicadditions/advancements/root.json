@@ -60,10 +60,5 @@
       "port",
       "crystal"
     ]
-  ],
-  "rewards": {
-    "loot": [
-      "atomicadditions:manual"
-    ]
-  }
+  ]
 }

@@ -1,6 +1,6 @@
 {
   "name": "Gases Atômicos",
   "description": "De onde vem cada gás e no que ele se transforma.",
-  "icon": "minecraft:glass_bottle",
+  "icon": "atomicadditions:advancement_icon{CustomModelData:10}",
   "sortnum": 1
 }

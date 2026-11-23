@@ -1,7 +1,7 @@
 {
   "name": "Fusão",
   "category": "atomicadditions:gases",
-  "icon": "minecraft:emerald",
+  "icon": "atomicadditions:advancement_icon{CustomModelData:3}",
   "sortnum": 2,
   "pages": [
     {
