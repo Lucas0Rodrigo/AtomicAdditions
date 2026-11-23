@@ -23,7 +23,7 @@
   "item.atomicadditions.activated_crystal": "%s Activated",
   "item.atomicadditions.activated_crystal_fallback": "Activated Crystal",
 
-  "advancements.atomicadditions.root.title": "Initial Atom",
+  "advancements.atomicadditions.root.title": "Atomic Additions",
   "advancements.atomicadditions.root.desc": "Get your first Atomic Additions item.",
   "advancements.atomicadditions.engineering.title": "Atomic Engineering",
   "advancements.atomicadditions.engineering.desc": "Obtain both AMR blocks: the Casing and the Port.",

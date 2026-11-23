@@ -23,7 +23,7 @@
   "item.atomicadditions.activated_crystal": "%s Ativado",
   "item.atomicadditions.activated_crystal_fallback": "Cristal Ativado",
 
-  "advancements.atomicadditions.root.title": "Átomo Inicial",
+  "advancements.atomicadditions.root.title": "Atomic Additions",
   "advancements.atomicadditions.root.desc": "Obtenha seu primeiro item do Atomic Additions.",
   "advancements.atomicadditions.engineering.title": "Engenharia Atômica",
   "advancements.atomicadditions.engineering.desc": "Obtenha os dois blocos do RMA: o Revestimento e a Porta.",
