@@ -1,0 +1,29 @@
+{
+  "display": {
+    "icon": {
+      "id": "atomicadditions:advancement_icon",
+      "components": {
+        "minecraft:custom_model_data": 9
+      }
+    },
+    "title": {
+      "translate": "advancements.atomicadditions.operating.title"
+    },
+    "description": {
+      "translate": "advancements.atomicadditions.operating.desc"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "atomicadditions:formed",
+  "criteria": {
+    "operating": {
+      "trigger": "atomicadditions:milestone",
+      "conditions": {
+        "milestone": "operating"
+      }
+    }
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "atomicadditions:item/icon_niobium"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "custom_model_data": 1
+      },
+      "model": "atomicadditions:item/icon_niobium"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 2
+      },
+      "model": "atomicadditions:item/icon_germanium"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 3
+      },
+      "model": "atomicadditions:item/icon_tantalum"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 4
+      },
+      "model": "atomicadditions:item/icon_copper"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 5
+      },
+      "model": "atomicadditions:item/icon_palladium"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 6
+      },
+      "model": "atomicadditions:item/icon_rhenium"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 7
+      },
+      "model": "atomicadditions:item/icon_atom"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 8
+      },
+      "model": "atomicadditions:item/icon_cube"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 9
+      },
+      "model": "atomicadditions:item/icon_fusion"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 10
+      },
+      "model": "atomicadditions:item/icon_flask"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 11
+      },
+      "model": "atomicadditions:item/icon_mult"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 12
+      },
+      "model": "atomicadditions:item/icon_crystal"
+    }
+  ]
+}

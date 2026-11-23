@@ -1,0 +1,52 @@
+{
+  "display": {
+    "icon": {
+      "id": "atomicadditions:casing_port"
+    },
+    "title": {
+      "translate": "advancements.atomicadditions.engineering.title"
+    },
+    "description": {
+      "translate": "advancements.atomicadditions.engineering.desc"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "parent": "atomicadditions:root",
+  "criteria": {
+    "casing": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "atomicadditions:casing"
+            ]
+          }
+        ]
+      }
+    },
+    "port": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "atomicadditions:casing_port"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "casing"
+    ],
+    [
+      "port"
+    ]
+  ]
+}

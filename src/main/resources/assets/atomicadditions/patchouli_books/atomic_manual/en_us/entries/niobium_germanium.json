@@ -1,0 +1,12 @@
+{
+  "name": "Niobium and Germanium",
+  "category": "atomicadditions:gases",
+  "icon": "atomicadditions:advancement_icon[custom_model_data=1]",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Both gases are made in the $(item)Pressurized Reaction Chamber$().$(br2)$(thing)Niobium$(): 10 iron ingots + 1,000 mB water + 1,000 mB chlorine.$(br2)$(thing)Germanium$(): 10 iron ingots + 1,000 mB water + 1,000 mB oxygen.$(br2)Each recipe makes 1,000 mB of gas."
+    }
+  ]
+}

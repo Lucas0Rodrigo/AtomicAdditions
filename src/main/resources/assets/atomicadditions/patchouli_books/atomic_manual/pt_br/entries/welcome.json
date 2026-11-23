@@ -1,0 +1,16 @@
+{
+  "name": "Bem-vindo",
+  "category": "atomicadditions:basics",
+  "icon": "atomicadditions:advancement_icon[custom_model_data=7]",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Bem-vindo ao $(thing)Atomic Additions$(). Este mod adiciona o $(thing)Reprocessador Material Atômico$() (RMA), um multiblock que funde dois gases atômicos em um terceiro.$(br2)O objetivo é produzir $(thing)Tântalo$() e $(thing)Rênio$(), e usá-los para multiplicar os fragmentos que você obtém dos cristais no processamento de minérios do Mekanism."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Novas entradas são liberadas conforme você avança. Veja suas conquistas para saber o que vem a seguir."
+    }
+  ]
+}

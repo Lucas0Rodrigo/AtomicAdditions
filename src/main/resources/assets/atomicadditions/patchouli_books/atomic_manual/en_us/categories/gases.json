@@ -1,0 +1,6 @@
+{
+  "name": "Atomic Gases",
+  "description": "Where each gas comes from and what it becomes.",
+  "icon": "atomicadditions:advancement_icon[custom_model_data=10]",
+  "sortnum": 1
+}

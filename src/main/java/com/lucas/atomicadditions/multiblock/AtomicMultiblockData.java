@@ -1,5 +1,6 @@
 package com.lucas.atomicadditions.multiblock;
 
+import com.lucas.atomicadditions.advancement.AtomicAdvancements;
 import com.lucas.atomicadditions.chemical.AtomicGases;
 import com.lucas.atomicadditions.recipes.AtomicAMRRecipe;
 import com.lucas.atomicadditions.recipes.AtomicRecipes;
@@ -73,6 +74,11 @@ public class AtomicMultiblockData
 
     @ContainerSync
     public double lastProcessed = 0;
+
+    // Controle das conquistas (não é salvo; ao recarregar o mundo
+    // os jogadores por perto simplesmente recebem de novo, sem efeito).
+    private boolean formedAdvancementSent = false;
+    private boolean operatingAdvancementSent = false;
 
     @ContainerSync
     public long lastReceivedEnergy = 0L;
@@ -200,9 +206,22 @@ public class AtomicMultiblockData
         if (!isFormed()) {
             processProgress = 0;
 
+            formedAdvancementSent = false;
+            operatingAdvancementSent = false;
+
             updateRenderData();
 
             return true;
+        }
+
+        if (!formedAdvancementSent) {
+            formedAdvancementSent = true;
+
+            AtomicAdvancements.grantNear(
+                    world,
+                    getBounds().getCenter(),
+                    AtomicAdvancements.FORMED
+            );
         }
 
         if (!outputTank.isEmpty()) {
@@ -355,6 +374,16 @@ public class AtomicMultiblockData
         lastProcessed =
                 actualProcessable;
 
+        if (!operatingAdvancementSent) {
+            operatingAdvancementSent = true;
+
+            AtomicAdvancements.grantNear(
+                    world,
+                    getBounds().getCenter(),
+                    AtomicAdvancements.OPERATING
+            );
+        }
+
         while (
                 processProgress >= 1.0
         ) {
@@ -427,6 +456,12 @@ public class AtomicMultiblockData
                     ),
                     Action.EXECUTE,
                     AutomationType.INTERNAL
+            );
+
+            AtomicAdvancements.onAmrOutput(
+                    world,
+                    getBounds().getCenter(),
+                    recipe.getOutput()
             );
 
             processProgress -=

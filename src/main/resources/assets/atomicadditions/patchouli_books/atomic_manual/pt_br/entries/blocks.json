@@ -1,0 +1,22 @@
+{
+  "name": "Blocos do RMA",
+  "category": "atomicadditions:basics",
+  "icon": "atomicadditions:casing_port",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "O RMA é feito com dois blocos.$(br2)O $(item)Revestimento do RMA$() forma as paredes e a moldura.$(br2)A $(item)Porta do RMA$() liga a máquina ao mundo: recebe gás e energia e envia gás para fora."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "atomicadditions:casing",
+      "title": "Revestimento do RMA"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "atomicadditions:casing_port",
+      "title": "Porta do RMA"
+    }
+  ]
+}

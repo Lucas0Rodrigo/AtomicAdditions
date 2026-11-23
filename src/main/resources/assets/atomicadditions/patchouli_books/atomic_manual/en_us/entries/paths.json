@@ -1,0 +1,17 @@
+{
+  "name": "Two Paths to Shards",
+  "category": "atomicadditions:crystals",
+  "icon": "atomicadditions:advancement_icon[custom_model_data=11]",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Activated Crystals can be turned into shards in two ways.$(br2)$(thing)Hydrogen chloride$(): 1 Activated Crystal makes 1 shard. This is the easy path."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Rhenium$(): 8 Activated Crystals make 16 shards, so 2 shards per crystal.$(br2)Counting the activation step, 5 crystals give 8 shards with HCl, or 16 with Rhenium. That is $(thing)3.2x$() the normal amount."
+    }
+  ],
+  "advancement": "atomicadditions:activated_crystal"
+}

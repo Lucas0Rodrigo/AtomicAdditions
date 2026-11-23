@@ -1,0 +1,32 @@
+{
+  "display": {
+    "icon": {
+      "id": "atomicadditions:advancement_icon",
+      "components": {
+        "minecraft:custom_model_data": 11
+      }
+    },
+    "title": {
+      "translate": "advancements.atomicadditions.great_multiplication.title"
+    },
+    "description": {
+      "translate": "advancements.atomicadditions.great_multiplication.desc"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "atomicadditions:rhenium",
+  "criteria": {
+    "great": {
+      "trigger": "atomicadditions:milestone",
+      "conditions": {
+        "milestone": "great_multiplication"
+      }
+    }
+  },
+  "rewards": {
+    "experience": 100
+  }
+}

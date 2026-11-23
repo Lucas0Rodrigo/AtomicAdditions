@@ -1,0 +1,35 @@
+{
+  "display": {
+    "icon": {
+      "id": "atomicadditions:advancement_icon",
+      "components": {
+        "minecraft:custom_model_data": 12
+      }
+    },
+    "title": {
+      "translate": "advancements.atomicadditions.activated_crystal.title"
+    },
+    "description": {
+      "translate": "advancements.atomicadditions.activated_crystal.desc"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "atomicadditions:tantalum",
+  "criteria": {
+    "crystal": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "atomicadditions:activated_crystal"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

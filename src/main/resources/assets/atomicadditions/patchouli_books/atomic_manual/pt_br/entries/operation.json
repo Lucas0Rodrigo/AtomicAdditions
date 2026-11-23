@@ -1,0 +1,17 @@
+{
+  "name": "Operando o RMA",
+  "category": "atomicadditions:basics",
+  "icon": "atomicadditions:advancement_icon[custom_model_data=9]",
+  "sortnum": 3,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Agache + clique com o botão direito$() em uma Porta para alternar entre $(thing)Entrada$() e $(thing)Saída$().$(br2)Portas de entrada recebem energia e gás. Portas de saída enviam o produto para fora. Ligue tubos e cabos nas Portas."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Cada tanque guarda até 8.000 mB. Nióbio ou Paládio vão para o primeiro tanque de entrada, e Germânio ou Cobre para o segundo. A máquina encontra a receita sozinha.$(br2)As receitas usam 500.000 FE/t, e o RMA armazena até 80.000.000 FE."
+    }
+  ],
+  "advancement": "atomicadditions:formed"
+}

@@ -1,0 +1,13 @@
+{
+  "name": "Activation",
+  "category": "atomicadditions:crystals",
+  "icon": "atomicadditions:advancement_icon[custom_model_data=12]",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Activated Crystals$() are made in the $(item)Chemical Injection Chamber$().$(br2)5 crystals + Tantalum make 8 Activated Crystals.$(br2)It works with any crystal Mekanism knows about, including crystals from other mods. An Activated Crystal remembers which crystal it came from."
+    }
+  ],
+  "advancement": "atomicadditions:tantalum"
+}

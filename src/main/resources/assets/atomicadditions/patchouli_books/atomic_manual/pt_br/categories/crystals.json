@@ -1,0 +1,6 @@
+{
+  "name": "Cristais Ativados",
+  "description": "Multiplique os fragmentos do processamento de minérios do Mekanism.",
+  "icon": "atomicadditions:advancement_icon[custom_model_data=12]",
+  "sortnum": 2
+}

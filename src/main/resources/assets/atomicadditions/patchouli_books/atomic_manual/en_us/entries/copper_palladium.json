@@ -1,0 +1,12 @@
+{
+  "name": "Copper and Palladium",
+  "category": "atomicadditions:gases",
+  "icon": "atomicadditions:advancement_icon[custom_model_data=4]",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Copper$(): 10 copper ingots + 2,000 mB water + 2,000 mB uranium hexafluoride, making 1,000 mB of gas.$(br2)$(thing)Palladium$(): 10 sulfur dust + 2,000 mB water + 1,000 mB Copper gas, making 1,000 mB of gas.$(br2)Palladium needs Copper gas, so make Copper first."
+    }
+  ]
+}

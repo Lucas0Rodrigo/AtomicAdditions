@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:advancement_reward",
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "patchouli"
+    }
+  ],
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "patchouli:guide_book",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "patchouli:book": "atomicadditions:atomic_manual"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

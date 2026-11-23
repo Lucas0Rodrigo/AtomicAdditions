@@ -1,0 +1,29 @@
+{
+  "display": {
+    "icon": {
+      "id": "atomicadditions:advancement_icon",
+      "components": {
+        "minecraft:custom_model_data": 3
+      }
+    },
+    "title": {
+      "translate": "advancements.atomicadditions.tantalum.title"
+    },
+    "description": {
+      "translate": "advancements.atomicadditions.tantalum.desc"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "atomicadditions:gas_germanium",
+  "criteria": {
+    "tantalum": {
+      "trigger": "atomicadditions:milestone",
+      "conditions": {
+        "milestone": "tantalum"
+      }
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Activated Crystals",
+  "description": "Multiply the shards from Mekanism's ore processing.",
+  "icon": "atomicadditions:advancement_icon[custom_model_data=12]",
+  "sortnum": 2
+}

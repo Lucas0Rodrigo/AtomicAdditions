@@ -1,5 +1,6 @@
 package com.lucas.atomicadditions;
 
+import com.lucas.atomicadditions.advancement.AtomicAdvancements;
 import com.lucas.atomicadditions.chemical.*;
 import com.lucas.atomicadditions.item.ActivatedCrystalBakedModel;
 import com.lucas.atomicadditions.item.ActivatedCrystalItem;
@@ -149,6 +150,19 @@ public class AtomicAdditions {
                     )
             );
 
+    /**
+     * Item usado apenas como ícone das conquistas e do manual (não aparece
+     * no creative nem no JEI). A imagem vem do CustomModelData (1 a 12),
+     * definido em models/item/advancement_icon.json.
+     */
+    public static final DeferredHolder<Item, Item> ADVANCEMENT_ICON =
+            ITEMS.register(
+                    "advancement_icon",
+                    () -> new Item(
+                            new Item.Properties()
+                    )
+            );
+
     private static AtomicCasingBlock<AtomicCasingBlockEntity>
     createCasing() {
         return new AtomicCasingBlock<>(
@@ -192,6 +206,10 @@ public class AtomicAdditions {
         );
 
         ITEMS.register(
+                modEventBus
+        );
+
+        AtomicAdvancements.TRIGGERS.register(
                 modEventBus
         );
 

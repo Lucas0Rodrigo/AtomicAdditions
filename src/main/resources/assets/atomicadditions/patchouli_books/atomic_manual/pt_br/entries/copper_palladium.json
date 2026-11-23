@@ -1,0 +1,12 @@
+{
+  "name": "Cobre e Paládio",
+  "category": "atomicadditions:gases",
+  "icon": "atomicadditions:advancement_icon[custom_model_data=4]",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Cobre$(): 10 barras de cobre + 2.000 mB de água + 2.000 mB de hexafluoreto de urânio, produzindo 1.000 mB de gás.$(br2)$(thing)Paládio$(): 10 pós de enxofre + 2.000 mB de água + 1.000 mB de gás de Cobre, produzindo 1.000 mB de gás.$(br2)O Paládio precisa do gás de Cobre, então faça o Cobre primeiro."
+    }
+  ]
+}

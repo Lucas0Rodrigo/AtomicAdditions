@@ -1,0 +1,6 @@
+{
+  "name": "Gases Atômicos",
+  "description": "De onde vem cada gás e no que ele se transforma.",
+  "icon": "atomicadditions:advancement_icon[custom_model_data=10]",
+  "sortnum": 1
+}

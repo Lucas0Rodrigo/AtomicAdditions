@@ -136,6 +136,11 @@ public class AtomicAdditionsJEIPlugin implements IModPlugin {
     public void onRuntimeAvailable(
             IJeiRuntime runtime
     ) {
+        runtime.getIngredientManager().removeIngredientsAtRuntime(
+                VanillaTypes.ITEM_STACK,
+                List.of(new ItemStack(AtomicAdditions.ADVANCEMENT_ICON.get()))
+        );
+
         List<ItemStack> activatedCrystals =
                 new ArrayList<>();
 

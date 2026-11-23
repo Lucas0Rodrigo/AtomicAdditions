@@ -1,0 +1,17 @@
+{
+  "name": "The Structure",
+  "category": "atomicadditions:basics",
+  "icon": "atomicadditions:advancement_icon[custom_model_data=8]",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "The AMR is a hollow 7x7x7 cube.$(br2)Each face is a rounded shape: the corners may stay empty, the outer rim must be $(item)AMR Casing$(), and the inner area can be Casing or $(item)AMR Ports$()."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The inside must be empty, except for Mekanism $(item)Supercharged Coils$().$(br2)Every coil must sit directly behind a Port. A coil with no Port behind it stops the structure from forming."
+    }
+  ],
+  "advancement": "atomicadditions:engineering"
+}
