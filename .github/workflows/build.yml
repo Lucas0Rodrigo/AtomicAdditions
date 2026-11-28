@@ -29,9 +29,17 @@ jobs:
           chmod +x ./gradlew
           ./gradlew build --no-daemon --stacktrace
 
+      - name: Renomear jar
+        run: |
+          mkdir -p dist
+          JAR=$(ls build/libs/*.jar | grep -vE -- '-(sources|javadoc)\.jar$' | head -n1)
+          echo "Jar gerado pelo Gradle: $JAR"
+          cp "$JAR" "dist/AtomicAdditions-${{ github.ref_name }}.jar"
+          ls -la dist
+
       - name: Upload jar
         uses: actions/upload-artifact@v4
         with:
-          name: atomicadditions-${{ github.ref_name }}
-          path: build/libs/*.jar
+          name: AtomicAdditions-${{ github.ref_name }}
+          path: dist/*.jar
           if-no-files-found: error
