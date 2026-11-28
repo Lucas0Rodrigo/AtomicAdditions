@@ -17,7 +17,9 @@ import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public final class AtomicActivatedCrystalRecipeInjector {
@@ -36,7 +38,16 @@ public final class AtomicActivatedCrystalRecipeInjector {
                         .getServer()
                         .getRecipeManager();
 
-        injectRecipes(recipeManager);
+        try {
+            injectRecipes(recipeManager);
+        } catch (RuntimeException exception) {
+            AtomicAdditions.LOGGER.error(
+                    "Atomic Additions: falha ao gerar as receitas do "
+                            + "cristal ativado. O jogador não será "
+                            + "impedido de entrar no mundo.",
+                    exception
+            );
+        }
     }
 
     public static void injectRecipes(
@@ -97,6 +108,9 @@ public final class AtomicActivatedCrystalRecipeInjector {
 
         AtomicActivatedCrystalRecipe
                 .clearGeneratedRecipes();
+
+        Set<ResourceLocation> generatedCrystalIds =
+                new HashSet<>();
 
         ChemicalStack hcl =
                 MekanismChemicals
@@ -185,6 +199,10 @@ public final class AtomicActivatedCrystalRecipeInjector {
                     continue;
                 }
 
+                if (!generatedCrystalIds.add(crystalId)) {
+                    continue;
+                }
+
                 ResourceLocation activationId =
                         createGeneratedId(
                                 crystalId
@@ -206,6 +224,8 @@ public final class AtomicActivatedCrystalRecipeInjector {
                         activationInput,
                         tantalum
                 )) {
+                    generatedCrystalIds.remove(crystalId);
+
                     continue;
                 }
 
@@ -301,8 +321,20 @@ public final class AtomicActivatedCrystalRecipeInjector {
             }
         }
 
+        Map<ResourceLocation, RecipeHolder<?>> uniqueRecipes =
+                new LinkedHashMap<>();
+
+        for (RecipeHolder<?> holder : finalRecipes) {
+            if (uniqueRecipes.putIfAbsent(holder.id(), holder) != null) {
+                AtomicAdditions.LOGGER.warn(
+                        "Atomic Additions: receita duplicada ignorada: {}",
+                        holder.id()
+                );
+            }
+        }
+
         recipeManager.replaceRecipes(
-                finalRecipes
+                uniqueRecipes.values()
         );
 
         MekanismRecipeType.clearCache();
